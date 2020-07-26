@@ -4,6 +4,7 @@ const axios = require("axios");
 const Artist = require("./Artist").Artist;
 const User = require("./Artist").User;
 var path = require("path");
+const nodemailer = require("nodemailer");
 // google vision api
 // const vision = require("@google-cloud/vision");
 // const client = new vision.ImageAnnotatorClient({
@@ -96,6 +97,53 @@ app.post("/ic_ocr", async (req, res) => {
 // 		res.status(400).json(error);
 // 	}
 // });
+
+app.get("/sendTacCode", (req, res) => {
+	const phone_number = req.query.phone_number;
+	const tac_code = req.query.tac_code;
+	var message_content = tac_code + " is your TAC code for COVID-19 Contact Tracing App";
+
+	// const querystr = `http://192.168.0.130:8090/SendSMS?username=yuanshen&password=12341234&phone=${phone_number}&message=${tac_code}`;
+	const querystr = `http://192.168.0.103:8090/SendSMS?username=yuanshen&password=12341234&phone=${phone_number}&message=${message_content}`;
+
+	axios
+		.get(querystr)
+		.then((response) => {
+			// console.log("tac code sent");
+			res.send(true);
+		})
+		.catch((error) => {
+			res.status(400).json(error);
+		});
+});
+
+app.get("/sendVerificationEmail", async (req, res) => {
+	const email = req.query.email;
+	const verification_code = req.query.verification_code;
+
+	var transporter = nodemailer.createTransport({
+		service: 'gmail',
+		auth: {
+		  user: 'wayne.ng6010@gmail.com',
+		  pass: 'pass'
+		}
+	  });
+	  
+	  var mailOptions = {
+		from: 'wayne.ng6010@gmail.com',
+		to: email,
+		subject: 'Verification email for COVID-19 Contact Tracing App',
+		text: verification_code + ' is your verification code'
+	  };
+	  
+	  transporter.sendMail(mailOptions, function(error, info){
+		if (error) {
+		  console.log(error);
+		} else {
+		  console.log('Email sent: ' + info.response);
+		}
+	  });
+});
 
 // app.get("/getArtistRelatedNews", (req, res) => {
 // 	const artist_name = req.query.artist_name;

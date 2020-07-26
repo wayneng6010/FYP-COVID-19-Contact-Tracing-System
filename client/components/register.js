@@ -10,7 +10,7 @@ import {
 	View,
 } from "react-native";
 
-export default class Login extends React.Component {
+export default class register extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
@@ -25,6 +25,14 @@ export default class Login extends React.Component {
 				<Button
 					title="Capture IC"
 					onPress={() => this.props.navigation.navigate("ic_capture", {name: "test"})}
+				></Button>
+				<Button
+					title="Verify phone number"
+					onPress={() => this.props.navigation.navigate("phoneNo_verify")}
+				></Button>
+				<Button
+					title="Verify email"
+					onPress={() => this.props.navigation.navigate("email_verify")}
 				></Button>
 			</SafeAreaView>
 

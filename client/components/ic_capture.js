@@ -61,13 +61,15 @@ export default class ic_capture extends React.Component {
 			const options = {
 				quality: 0.1,
                 uri: true,
+                width: true,
+                height: true,
                 base64: true,
                 skipProcessing: true,
             };
             let photo = await this.camera.takePictureAsync(options);
 			// alert(JSON.stringify(photo));
 			// console.log(photo.uri);
-			this.props.navigation.navigate("ic_extract", {ic_uri: photo.uri, ic_base64: photo.base64});
+			this.props.navigation.navigate("ic_extract", {ic_uri: photo.uri, ic_base64: photo.base64, ic_width: photo.width, ic_height: photo.height});
 		}
 	};
 
