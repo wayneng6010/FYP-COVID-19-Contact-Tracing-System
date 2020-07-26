@@ -60,7 +60,7 @@ export default class ic_extract extends React.Component {
 			],
 		});
 		let response = await fetch(
-			"https://vision.googleapis.com/v1/images:annotate?key=AIzaSyDV2M6vNxqRZbKeWuJJ4kMyt9K1hOgSvlo",
+			"https://vision.googleapis.com/v1/images:annotate?key=",
 			{
 				headers: {
 					Accept: "application/json",
