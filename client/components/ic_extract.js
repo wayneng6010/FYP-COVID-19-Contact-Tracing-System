@@ -9,25 +9,12 @@ import {
 	ScrollView,
 	View,
 	Image,
+	Dimensions,
 } from "react-native";
+import * as ImageManipulator from "expo-image-manipulator";
 
 export default class ic_extract extends React.Component {
 	_isMounted = false;
-	
-	// set an initial state
-	// const [hasPermission, setHasPermission] = useState(null);
-
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
-	// constructor => () => {
-	// 	(async () => {
-	// 		const { status } = await Permissions.askAsync(Permissions.CAMERA);
-	// 		setHasPermission(status === "granted");
-	// 	})();
-
-	// 	if (hasPermission === false) {
-	// 		alert("No access to camera");
-	// 	}
-	// }, []);
 
 	constructor() {
 		super();
@@ -36,18 +23,28 @@ export default class ic_extract extends React.Component {
 			full_name: null,
 			ic_number: null,
 			home_address: null,
+			ic_width: null,
+			ic_height: null,
 		};
-
-		// const { status } = await Permissions.askAsync(Permissions.CAMERA);
-		//     // setHasPermission(status === "granted");
-		//     this.setState({ hasPermission: status === "granted" });
-		//     if (hasPermission === false) {
-		//         alert("No access to camera");
-		//     }
 	}
+
+	onImageLoad = async () => {};
 
 	componentDidMount = async () => {
 		this._isMounted = true;
+
+		// calculate ic image width and height
+		const screenWidth = Dimensions.get("window").width;
+		const scaleFactor =
+			this.props.navigation.state.params.ic_width / screenWidth;
+		const imageHeight =
+			this.props.navigation.state.params.ic_height / scaleFactor;
+		this.setState({
+			ic_width: screenWidth,
+			ic_height: imageHeight,
+		});
+
+		// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<VISION<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		// alert(this.props.navigation.state.params.ic_width + " " + this.props.navigation.state.params.ic_height);
 		this.setState({ ic_uri: this.props.navigation.state.params.ic_uri });
 		const google_vision_api_key = "google_vision_api_key";
@@ -63,7 +60,8 @@ export default class ic_extract extends React.Component {
 		// 	],
 		// });
 		// let response_ocr = await fetch(
-		// 	"https://vision.googleapis.com/v1/images:annotate?key=" + google_vision_api_key,
+		// 	"https://vision.googleapis.com/v1/images:annotate?key=" +
+		// 		google_vision_api_key,
 		// 	{
 		// 		headers: {
 		// 			Accept: "application/json",
@@ -141,6 +139,7 @@ export default class ic_extract extends React.Component {
 		// // console.log("home address: " + home_address);
 
 		// var ic_number_x_position = null,
+		// 	ic_number_x_position_right = null,
 		// 	ic_number_y_position = null,
 		// 	home_address_x_position = null,
 		// 	home_address_y_position = null;
@@ -149,9 +148,10 @@ export default class ic_extract extends React.Component {
 		// 	if (ic_number_x_position === null || home_address_x_position === null) {
 		// 		if (item.description === ic_number) {
 		// 			ic_number_x_position = item.boundingPoly.vertices[0].x;
+		// 			ic_number_x_position_right = item.boundingPoly.vertices[1].x;
 		// 			ic_number_y_position = item.boundingPoly.vertices[0].y;
-		// 			console.log("ic x: " + ic_number_x_position);
-		// 			console.log("ic y: " + ic_number_y_position);
+		// 			// console.log("ic x: " + ic_number_x_position);
+		// 			// console.log("ic y: " + ic_number_y_position);
 		// 		}
 		// 		// else if (item.description === full_name.split(" ")[0]) {
 		// 		// 	full_name_x_position = item.boundingPoly.vertices[0].x;
@@ -162,8 +162,8 @@ export default class ic_extract extends React.Component {
 		// 		else if (home_address.split(", ")[0].includes(item.description)) {
 		// 			home_address_x_position = item.boundingPoly.vertices[0].x;
 		// 			home_address_y_position = item.boundingPoly.vertices[0].y;
-		// 			console.log("address x: " + home_address_x_position);
-		// 			console.log("address y: " + home_address_y_position);
+		// 			// console.log("address x: " + home_address_x_position);
+		// 			// console.log("address y: " + home_address_y_position);
 		// 		}
 		// 	}
 		// });
@@ -217,6 +217,7 @@ export default class ic_extract extends React.Component {
 		// // console.log(JSON.stringify(responseJson_ocr.responses[0].textAnnotations[0].description));
 		// here end --------------------------------------------------------------------------------------------------
 
+		// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 		// start here -----------------------------------------------------------------------------------------------
 		// let body_object = JSON.stringify({
 		// 	requests: [
@@ -241,17 +242,82 @@ export default class ic_extract extends React.Component {
 		// );
 		// let responseJson_object = await response_object.json();
 		// // console.log(JSON.stringify(responseJson));
-		// // console.log("nor px: " + JSON.stringify(responseJson.responses[0].localizedObjectAnnotations[0].boundingPoly.normalizedVertices[0].x));
+		// console.log("nor px: " + JSON.stringify(responseJson_object));
 		// var normalized_x = responseJson_object.responses[0].localizedObjectAnnotations[0].boundingPoly.normalizedVertices[0].x;
 		// // var nor_y= responseJson.responses[0].localizedObjectAnnotations[0].boundingPoly.normalizedVertices[0].y;
-		// var actual_x = normalized_x * this.props.navigation.state.params.ic_width;
+		// // var actual_x = normalized_x * this.props.navigation.state.params.ic_width;
+		// console.log("width: " + this.props.navigation.state.params.ic_width + "normalized x: " + normalized_x);
+		// //1398
+		// // alert("vision: " + this.props.navigation.state.params.ic_width + " " + this.props.navigation.state.params.ic_height);
+		// // alert("actual x: " + actual_x);
+		// //786
 		// // var act_y = nor_y * this.props.navigation.state.params.ic_height;
 		// // console.log("actual px:" + normalized_x + " " + actual_x);
-		// if(actual_x > ic_number_x_position){
-		// 	console.log("IC position correct");
-		// }
+		// // console.log("actual x: " + actual_x + " ic_number_x_position_right: " + ic_number_x_position_right);
+
+		// // var face_position = false;
+		// // if(actual_x > ic_number_x_position_right){
+		// // 	face_position = true;
+		// // } else {
+		// // 	face_position = false;
+		// // }
+		// // console.log("face position: " + face_position);
 		// end here -----------------------------------------------------------------------------------------------
-		
+		// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+		// start here -----------------------------------------------------------------------------------------------
+		// let body_face = JSON.stringify({
+		// 	requests: [
+		// 		{
+		// 			features: [{ type: "FACE_DETECTION", maxResults: 5 }],
+		// 			image: {
+		// 				content: this.props.navigation.state.params.ic_base64,
+		// 			},
+		// 		},
+		// 	],
+		// });
+		// let response_face = await fetch(
+		// 	"https://vision.googleapis.com/v1/images:annotate?key=" +
+		// 		google_vision_api_key,
+		// 	{
+		// 		headers: {
+		// 			Accept: "application/json",
+		// 			"Content-Type": "application/json",
+		// 		},
+		// 		method: "POST",
+		// 		body: body_face,
+		// 	}
+		// );
+		// let responseJson_face = await response_face.json();
+		// // console.log(JSON.stringify(responseJson));
+		// // console.log("nor px: " + JSON.stringify(responseJson_face));
+		// var number_of_faces =
+		// 	responseJson_face.responses[0].faceAnnotations.length - 1;
+		// var actual_x =
+		// 	responseJson_face.responses[0].faceAnnotations[number_of_faces]
+		// 		.boundingPoly.vertices[0].x;
+		// // var nor_y= responseJson.responses[0].localizedObjectAnnotations[0].boundingPoly.normalizedVertices[0].y;
+		// // var actual_x = normalized_x * this.props.navigation.state.params.ic_width;
+		// // console.log("number of faces: " + number_of_faces);
+		// // console.log("width: " + this.props.navigation.state.params.ic_width + "normalized x: " + normalized_x);
+		// //1398
+		// // alert("vision: " + this.props.navigation.state.params.ic_width + " " + this.props.navigation.state.params.ic_height);
+		// // alert("actual x: " + actual_x);
+		// //786
+		// // var act_y = nor_y * this.props.navigation.state.params.ic_height;
+		// // console.log("actual px:" + normalized_x + " " + actual_x);
+		// // console.log("actual x: " + actual_x + " ic_number_x_position_right: " + ic_number_x_position_right);
+		// // console.log("ic x position right: " + ic_number_x_position_right);
+		// // console.log("actual_x face:  " + actual_x);
+		// var face_position = false;
+		// if (actual_x > ic_number_x_position_right) {
+		// 	face_position = true;
+		// } else {
+		// 	face_position = false;
+		// }
+		// console.log("face position: " + face_position);
+		// end here -----------------------------------------------------------------------------------------------
+
 		// start here -----------------------------------------------------------------------------------------------
 		// let body_label = JSON.stringify({
 		// 	requests: [
@@ -275,14 +341,14 @@ export default class ic_extract extends React.Component {
 		// 	}
 		// );
 		// let responseJson_label = await response_label.json();
-		// console.log(JSON.stringify(responseJson_label));
+		// // console.log(JSON.stringify(responseJson_label));
 		// var label_verify = false;
 		// responseJson_label.responses[0].labelAnnotations.forEach(function (item) {
 		// 	if(item != ""){
 		// 		if (item.description === "Identity document") {
 		// 			label_verify = true;
 		// 		}
-		// 	} 
+		// 	}
 		// });
 		// console.log("label verify: " + label_verify);
 		// end here -----------------------------------------------------------------------------------------------
@@ -310,34 +376,70 @@ export default class ic_extract extends React.Component {
 		// 	}
 		// );
 		// let responseJson_color = await response_color.json();
-		// console.log(JSON.stringify(responseJson_color));
+		// // console.log(JSON.stringify(responseJson_color));
 		// var color_verify = false;
 		// var red = responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors.colors[0].color.red;
 		// var green = responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors.colors[0].color.green;
 		// var blue = responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors.colors[0].color.blue;
 		// console.log("color: " + red + " " + green + " " + blue);
 		// end here -----------------------------------------------------------------------------------------------
-
 	};
 
 	componentWillUnmount() {
 		this._isMounted = false;
 	}
 
-	// const captureIC = () => {};
 	render() {
 		return (
-			<View style={styles.container}>
+			<ScrollView style={styles.container}>
+				<Text style={[styles.content, styles.title]}>Preview IC</Text>
 				<Image
-					style={{ width: 400, height: 280 }}
+					style={{
+						width: this.state.ic_width,
+						height: this.state.ic_height,
+						// resizeMode: "contain",
+						// marginHorizontal: 20,
+					}}
 					source={{
 						uri: this.state.ic_uri,
 					}}
 				/>
-				<Text>IC number: {this.state.ic_number}</Text>
-				<Text>Full name: {this.state.full_name}</Text>
-				<Text>Home address: {this.state.home_address}</Text>
-			</View>
+
+				<View style={styles.content}>
+					{/* <View style={styles.flexRow}>
+						<View style={styles.flexCol}>
+							<Text style={styles.label}>IC number</Text>
+						</View>
+						<View style={styles.flexCol}>
+							<Text style={styles.input}>991004-07-5721{this.state.ic_number}</Text>
+						</View>
+					</View>
+
+					<View style={styles.flexRow}>
+						<View style={styles.flexCol}>
+							<Text style={styles.label}>Full name</Text>
+						</View>
+						<View style={styles.flexCol}>
+							<Text style={styles.input}>Sinar buer aasdaasdasda{this.state.full_name}</Text>
+						</View>
+					</View>
+					
+					<View style={styles.flexRow}>
+						<View style={styles.flexCol}>
+							<Text style={styles.label}>Home address</Text>
+						</View>
+						<View style={styles.flexCol}>
+							<Text style={styles.input}>Sinar buer adasd, asdasd,dasda{this.state.home_address}</Text>
+						</View>
+					</View> */}
+					<Text style={styles.label}>IC number</Text>
+					<Text style={styles.input}>{this.state.ic_number}</Text>
+					<Text style={styles.label}>Full name</Text>
+					<Text style={styles.input}>{this.state.full_name}</Text>
+					<Text style={styles.label}>Home address</Text>
+					<Text style={styles.input}>{this.state.home_address}</Text>
+				</View>
+			</ScrollView>
 		);
 	}
 }
@@ -346,8 +448,36 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: "white",
-		alignItems: "center",
-		justifyContent: "center",
+		// alignItems: "center",
+		// marginHorizontal: 20,
+	},
+	content: {
+		marginVertical: 20,
 		marginHorizontal: 20,
+	},
+	title: {
+		fontSize: 20,
+		textAlign: "center",
+	},
+	flexRow: {
+		flex: 0.2,
+		flexDirection: "row",
+	},
+	flexCol: {
+		width: 170,
+		height: 40,
+	},
+	label: {
+		fontSize: 18,
+		padding: 10,
+	},
+	input: {
+		fontSize: 18,
+		color: "white",
+		backgroundColor: "grey",
+		paddingVertical: 10,
+		paddingHorizontal: 10,
+		flex: 1,
+		flexWrap: "wrap",
 	},
 });

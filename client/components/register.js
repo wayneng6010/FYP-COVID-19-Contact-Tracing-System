@@ -34,6 +34,10 @@ export default class register extends React.Component {
 					title="Verify email"
 					onPress={() => this.props.navigation.navigate("email_verify")}
 				></Button>
+				<Button
+					title="Map Find Home"
+					onPress={() => this.props.navigation.navigate("map_findHomeLocation")}
+				></Button>
 			</SafeAreaView>
 
 			// 	{/* {news.map((data) => {

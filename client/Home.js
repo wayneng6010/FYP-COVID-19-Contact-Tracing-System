@@ -6,6 +6,7 @@ import ic_capture from "./components/ic_capture";
 import ic_extract from "./components/ic_extract";
 import phoneNo_verify from "./components/phoneNo_verify";
 import email_verify from "./components/email_verify";
+import map_findHomeLocation from "./components/map_findHomeLocation";
 
 const Home = createStackNavigator(
     {
@@ -14,6 +15,7 @@ const Home = createStackNavigator(
         ic_extract: ic_extract,
         phoneNo_verify: phoneNo_verify,
         email_verify: email_verify,
+        map_findHomeLocation: map_findHomeLocation,
     },
     {
         navigationOptions: {

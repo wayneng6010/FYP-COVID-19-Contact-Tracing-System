@@ -13,6 +13,7 @@ import {
 import { Camera } from "expo-camera";
 import * as Permissions from "expo-permissions";
 import { FontAwesome } from "@expo/vector-icons";
+import * as ImageManipulator from "expo-image-manipulator";
 
 export default class ic_capture extends React.Component {
 	// set an initial state
@@ -60,16 +61,49 @@ export default class ic_capture extends React.Component {
 		if (this.camera) {
 			const options = {
 				quality: 0.1,
-                uri: true,
-                width: true,
-                height: true,
-                base64: true,
-                skipProcessing: true,
-            };
-            let photo = await this.camera.takePictureAsync(options);
+				uri: true,
+				width: true,
+				height: true,
+				base64: true,
+				skipProcessing: true,
+			};
+			let photo = await this.camera.takePictureAsync(options);
 			// alert(JSON.stringify(photo));
 			// console.log(photo.uri);
-			this.props.navigation.navigate("ic_extract", {ic_uri: photo.uri, ic_base64: photo.base64, ic_width: photo.width, ic_height: photo.height});
+			
+			var crop_originy = photo.width * 0.3;
+			var crop_height = photo.width * 0.4;
+
+			// image manipulator
+			// const image = Asset.fromModule(require(this.props.navigation.state.params.ic_uri));
+			// await image.downloadAsync();
+
+			const manipResult = await ImageManipulator.manipulateAsync(
+				photo.uri,
+				[
+					{
+						crop: {
+							originX: 0,
+							originY: crop_originy,
+							width: photo.height,
+							height: crop_height,
+						},
+					},
+				]
+				,{ base64: true }
+			);
+
+			// console.log(manipResult);
+			// setImage(manipResult);
+			// console.log("width: " + manipResult.width);
+			// console.log("height: " + manipResult.height);
+
+			this.props.navigation.navigate("ic_extract", {
+				ic_uri: manipResult.uri,
+				ic_base64: manipResult.base64,
+				ic_width: manipResult.width,
+				ic_height: manipResult.height,
+			});
 		}
 	};
 

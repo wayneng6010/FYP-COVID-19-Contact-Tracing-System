@@ -36,11 +36,9 @@ export default class email_verify extends React.Component {
 		const query_send_tac = `http://192.168.0.131:5000/sendVerificationEmail?email=${this.state.email}&verification_code=${verification_code}`;
 		console.log(query_send_tac);
 		axios
-			.get(query_send_tac)
+			.post(query_send_tac)
 			.then((result) => {
-				if (result) {
-					alert("Verification email sent");
-				}
+				alert("Verification email sent");
 			})
 			.catch((error) => {
 				alert(error);
@@ -90,7 +88,10 @@ export default class email_verify extends React.Component {
 						width: 300,
 					}}
 				/>
-				<Button title="Submit" onPress={() => this.checkVerificationCode()}></Button>
+				<Button
+					title="Submit"
+					onPress={() => this.checkVerificationCode()}
+				></Button>
 			</SafeAreaView>
 
 			// 	{/* {news.map((data) => {
