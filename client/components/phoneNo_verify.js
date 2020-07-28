@@ -22,8 +22,8 @@ export default class phoneNo_verify extends React.Component {
 	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
-	constructor() {
-		super();
+	constructor(props) {
+		super(props);
 		this.state = {
 			phone_no: null,
 			tac_code: null,
@@ -51,21 +51,28 @@ export default class phoneNo_verify extends React.Component {
 
 	checkTacCode = () => {
 		// alert(this.state.tac_code);
+		// if (this.state.tac_code !== null && this.state.tac_code_correct !== null) {
 		if (this.state.tac_code == this.state.tac_code_correct) {
 			alert("Phone number is verified");
+			this.props.navigation.replace("email_verify");
 		} else {
 			alert("Incorrect TAC code");
 		}
+		// } else {
+		// alert("Please insert TAC code")
+		// }
 	};
 
 	render() {
 		return (
 			<SafeAreaView style={styles.container}>
-				<Text>Verify your phone number</Text>
-				<Text>Phone Number</Text>
+				<Text style={[styles.subtitle, styles.subtitle_bg]}>
+					Step 2/4: Verify your Phone Number
+				</Text>
+				<Text style={styles.subtitle}>Phone Number</Text>
 				<TextInput
 					name="phone_no"
-                    keyboardType="numeric"
+					keyboardType="numeric"
 					autoCompleteType="tel"
 					onChangeText={(value) => this.setState({ phone_no: value })}
 					value={this.state.phone_no}
@@ -75,12 +82,14 @@ export default class phoneNo_verify extends React.Component {
 						width: 300,
 					}}
 				/>
+				<Text></Text>
 				<Button
 					title="Send TAC code"
 					onPress={() => this.sendTacCode()}
 				></Button>
 
-				<Text>TAC code</Text>
+				<Text></Text>
+				<Text style={styles.subtitle}>TAC code</Text>
 				<TextInput
 					name="tac_code"
 					keyboardType="numeric"
@@ -92,6 +101,7 @@ export default class phoneNo_verify extends React.Component {
 						width: 300,
 					}}
 				/>
+				<Text></Text>
 				<Button title="Submit" onPress={() => this.checkTacCode()}></Button>
 			</SafeAreaView>
 
@@ -107,7 +117,26 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: "white",
 		alignItems: "center",
-		justifyContent: "center",
+		// justifyContent: "center",
 		marginHorizontal: 20,
+	},
+	title: {
+		fontSize: 20,
+		textAlign: "center",
+		marginVertical: 20,
+		fontWeight: "bold",
+	},
+	subtitle: {
+		fontSize: 16,
+		textAlign: "center",
+		marginVertical: 10,
+	},
+	subtitle_bg: {
+		marginVertical: 20,
+		backgroundColor: "lightgrey",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
 	},
 });

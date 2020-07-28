@@ -1,0 +1,59 @@
+import { StatusBar } from "expo-status-bar";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import {
+	StyleSheet,
+	Text,
+	SafeAreaView,
+	Button,
+	ScrollView,
+	View,
+	ActivityIndicator,
+} from "react-native";
+
+export default class verify_login extends React.Component {
+	// const captureIC = () => {};
+	constructor(props) {
+		super(props);
+		this.state = {
+			isLogin: false,
+		};
+
+		this.verify_login();
+	}
+
+	verify_login = async() => {
+		if (this.state.isLogin) {
+			this.props.navigation.navigate('App');
+		} else {
+			this.props.navigation.navigate('Auth');
+		}
+	}
+
+	render() {
+		return (
+			<SafeAreaView style={styles.container}>
+				<Text>Verify sign in</Text>
+				<ActivityIndicator />
+				{/* <Button
+					title="Go home page"
+					onPress={() => this.props.navigation.navigate("Auth")}
+				></Button> */}
+			</SafeAreaView>
+
+			// 	{/* {news.map((data) => {
+			// 			return <Text>{data.url}</Text>;
+			// 		})} */}
+		);
+	}
+}
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+		backgroundColor: "white",
+		alignItems: "center",
+		justifyContent: "center",
+		marginHorizontal: 20,
+	},
+});

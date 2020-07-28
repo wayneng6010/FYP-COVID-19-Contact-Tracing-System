@@ -70,7 +70,7 @@ export default class ic_capture extends React.Component {
 			let photo = await this.camera.takePictureAsync(options);
 			// alert(JSON.stringify(photo));
 			// console.log(photo.uri);
-			
+
 			var crop_originy = photo.width * 0.3;
 			var crop_height = photo.width * 0.4;
 
@@ -89,8 +89,9 @@ export default class ic_capture extends React.Component {
 							height: crop_height,
 						},
 					},
-				]
-				,{ base64: true }
+				],
+				{ base64: true },
+				{ compress: 0, format: ImageManipulator.SaveFormat.JPEG }
 			);
 
 			// console.log(manipResult);
@@ -98,7 +99,7 @@ export default class ic_capture extends React.Component {
 			// console.log("width: " + manipResult.width);
 			// console.log("height: " + manipResult.height);
 
-			this.props.navigation.navigate("ic_extract", {
+			this.props.navigation.replace("ic_extract", {
 				ic_uri: manipResult.uri,
 				ic_base64: manipResult.base64,
 				ic_width: manipResult.width,

@@ -15,9 +15,7 @@ import * as Permissions from "expo-permissions";
 import { createStackNavigator } from "react-navigation-stack";
 import { createAppContainer } from "react-navigation";
 
-import register from "./components/register";
-import capture_ic from "./components/ic_capture";
-import Home from "./Home";
+import Navigator from "./navigator";
 
 // const RootStack = createStackNavigator(
 // 	{
@@ -63,121 +61,132 @@ import Home from "./Home";
 //   );
 // }
 
-export default function App() {
+export default class App extends React.Component {
 	// set an initial state
-	const [news, setNews] = useState([]);
-	const [hasPermission, setHasPermission] = useState(null);
+	// const [news, setNews] = useState([]);
+	// const [hasPermission, setHasPermission] = useState(null);
 
 	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
-	useEffect(() => {
-		// fetch("http://192.168.0.131:5000/register", {
-		// 	method: "POST",
-		// 	headers: {
-		// 		"Content-Type": "application/json",
-		// 	},
-		// 	body: JSON.stringify({
-		// 		user: {
-		// 			name: "wowwayne",
-		// 			email: "email.com",
-		// 			psw: "12341111",
-		// 		},
-		// 	}),
-		// })
-		// 	.then((res) => {
-		// 		console.log(JSON.stringify(res.headers));
-		// 		return res.json();
-		// 	})
-		// 	.then((jsonData) => {
-		// 		console.log(jsonData);
-		// 		alert("Register successful");
-		// 	})
-		// 	.catch((error) => {
-		// 		alert(error);
-		// 	});
-		// get related news
-		// const query_related_news = `http://192.168.0.131:5000/getArtistRelatedNews?artist_name=jj lin`;
-		// console.log(query_related_news);
-		// axios
-		// 	.get(query_related_news)
-		// 	.then((result) => {
-		// 		console.log(result);
-		// 		setNews(result.data.articles); // store response data in related_news state
-		// 	})
-		// 	.catch((error) => {
-		// 		alert("Error: ", error);
-		// 	});
-		// ----
-		// (async () => {
-		// 	const { status } = await Permissions.askAsync(Permissions.CAMERA);
-		// 	setHasPermission(status === "granted");
-		// })();
-		// if (hasPermission === false) {
-		// 	alert("No access to camera");
-		// }
-	}, []);
+	// useEffect(() => {
+	// fetch("http://192.168.0.131:5000/register", {
+	// 	method: "POST",
+	// 	headers: {
+	// 		"Content-Type": "application/json",
+	// 	},
+	// 	body: JSON.stringify({
+	// 		user: {
+	// 			name: "wowwayne",
+	// 			email: "email.com",
+	// 			psw: "12341111",
+	// 		},
+	// 	}),
+	// })
+	// 	.then((res) => {
+	// 		console.log(JSON.stringify(res.headers));
+	// 		return res.json();
+	// 	})
+	// 	.then((jsonData) => {
+	// 		console.log(jsonData);
+	// 		alert("Register successful");
+	// 	})
+	// 	.catch((error) => {
+	// 		alert(error);
+	// 	});
+	// get related news
+	// const query_related_news = `http://192.168.0.131:5000/getArtistRelatedNews?artist_name=jj lin`;
+	// console.log(query_related_news);
+	// axios
+	// 	.get(query_related_news)
+	// 	.then((result) => {
+	// 		console.log(result);
+	// 		setNews(result.data.articles); // store response data in related_news state
+	// 	})
+	// 	.catch((error) => {
+	// 		alert("Error: ", error);
+	// 	});
+	// ----
+	// (async () => {
+	// 	const { status } = await Permissions.askAsync(Permissions.CAMERA);
+	// 	setHasPermission(status === "granted");
+	// })();
+	// if (hasPermission === false) {
+	// 	alert("No access to camera");
+	// }
+	// }, []);
 
-	const captureIC = () => {
-		// alert("Button tapped!");
-		// (async () => {
-		// 	const { status } = await Permissions.askAsync(Permissions.CAMERA);
-		// 	setHasPermission(status === "granted");
-		// })();
-		// if (hasPermission === null) {
-		// 	return <View />;
-		// }
-		// if (hasPermission === false) {
-		// 	return <Text>No access to camera</Text>;
-		// }
-		// return (
-		// 	<View style={{ flex: 1 }}>
-		// 		<Camera style={{ flex: 1 }} type={Camera.Constants.Type.back}>
-		// 			<View
-		// 				style={{
-		// 					flex: 1,
-		// 					backgroundColor: "transparent",
-		// 					flexDirection: "row",
-		// 				}}
-		// 			>
-		// 			</View>
-		// 		</Camera>
-		// 	</View>
-		// );
-	};
+	// const captureIC = () => {
+	// alert("Button tapped!");
+	// (async () => {
+	// 	const { status } = await Permissions.askAsync(Permissions.CAMERA);
+	// 	setHasPermission(status === "granted");
+	// })();
+	// if (hasPermission === null) {
+	// 	return <View />;
+	// }
+	// if (hasPermission === false) {
+	// 	return <Text>No access to camera</Text>;
+	// }
+	// return (
+	// 	<View style={{ flex: 1 }}>
+	// 		<Camera style={{ flex: 1 }} type={Camera.Constants.Type.back}>
+	// 			<View
+	// 				style={{
+	// 					flex: 1,
+	// 					backgroundColor: "transparent",
+	// 					flexDirection: "row",
+	// 				}}
+	// 			>
+	// 			</View>
+	// 		</Camera>
+	// 	</View>
+	// );
+	// };
 
-	return (
-		<Home/>
-		// <SafeAreaView style={styles.container}>
-		// 	<Button
-		// 		title="Register"
-		// 		onPress={() => this.props.navigation.navigate('register')}
-		// 	/>
-		// </SafeAreaView>
+	constructor() {
+		super();
+		// this.state = {
+		// 	isLogin: false,
+		// };
+	}
 
-		// <SafeAreaView style={styles.container}>
-		// 	<Text>Hello World !</Text>
-		// 	<Button title="Capture IC" onPress={captureIC}></Button>
-		// 	{/* {news.map((data) => {
-		// 			return <Text>{data.url}</Text>;
-		// 		})} */}
-		// </SafeAreaView>
+	render() {
+		return (
+			// <View>{this.state.isLogin ? <Text>Hello</Text> : <Text>Bye</Text>}</View>
+			<Navigator />
 
-		// -----
-		// <View style={{ flex: 1 }}>
-		// 	<Camera
-		// 		style={{ flex: 1 }}
-		// 		type={Camera.Constants.Type.back}
-		// 		ratio={'16:9'}
-		// 	>
-		// 		<View
-		// 			style={{
-		// 				flex: 1,
-		// 				backgroundColor: "transparent",
-		// 				flexDirection: "row",
-		// 			}}
-		// 		></View>
-		// 	</Camera>
-		// </View>
-	);
+			// <SafeAreaView style={styles.container}>
+			// 	<Button
+			// 		title="Register"
+			// 		onPress={() => this.props.navigation.navigate('register')}
+			// 	/>
+			// </SafeAreaView>
+
+			// <SafeAreaView style={styles.container}>
+			// 	<Text>Hello World !</Text>
+			// 	<Button title="Capture IC" onPress={captureIC}></Button>
+			// 	{/* {news.map((data) => {
+			// 			return <Text>{data.url}</Text>;
+			// 		})} */}
+			// </SafeAreaView>
+
+			// -----
+			// <View style={{ flex: 1 }}>
+			// 	<Camera
+			// 		style={{ flex: 1 }}
+			// 		type={Camera.Constants.Type.back}
+			// 		ratio={'16:9'}
+			// 	>
+			// 		<View
+			// 			style={{
+			// 				flex: 1,
+			// 				backgroundColor: "transparent",
+			// 				flexDirection: "row",
+			// 			}}
+			// 		></View>
+			// 	</Camera>
+			// </View>
+		);
+	}
 }
 
 const styles = StyleSheet.create({

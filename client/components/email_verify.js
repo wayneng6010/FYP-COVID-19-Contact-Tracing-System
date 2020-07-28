@@ -47,18 +47,28 @@ export default class email_verify extends React.Component {
 
 	checkVerificationCode = () => {
 		// alert(this.state.tac_code);
+		// if (
+		// 	this.state.verification_code !== null &&
+		// 	this.state.verification_code_correct !== null
+		// ) {
 		if (this.state.verification_code == this.state.verification_code_correct) {
 			alert("Email is verified");
+			this.props.navigation.replace("map_findHomeLocation");
 		} else {
 			alert("Incorrect verification code");
 		}
+		// } else {
+		// 	alert("Please insert verification code");
+		// }
 	};
 
 	render() {
 		return (
 			<SafeAreaView style={styles.container}>
-				<Text>Verify your email address</Text>
-				<Text>Email</Text>
+				<Text style={[styles.subtitle, styles.subtitle_bg]}>
+					Step 3/4: Verify your Email Address
+				</Text>
+				<Text style={styles.subtitle}>Email</Text>
 				<TextInput
 					name="email"
 					keyboardType="email-address"
@@ -71,12 +81,14 @@ export default class email_verify extends React.Component {
 						width: 300,
 					}}
 				/>
+				<Text />
 				<Button
 					title="Send Verification Email"
 					onPress={() => this.sendVerificationEmail()}
 				></Button>
 
-				<Text>Verification code</Text>
+				<Text />
+				<Text style={styles.subtitle}>Verification code</Text>
 				<TextInput
 					name="verification_code"
 					keyboardType="numeric"
@@ -88,6 +100,8 @@ export default class email_verify extends React.Component {
 						width: 300,
 					}}
 				/>
+
+				<Text />
 				<Button
 					title="Submit"
 					onPress={() => this.checkVerificationCode()}
@@ -106,7 +120,26 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: "white",
 		alignItems: "center",
-		justifyContent: "center",
+		// justifyContent: "center",
 		marginHorizontal: 20,
+	},
+	title: {
+		fontSize: 20,
+		textAlign: "center",
+		marginVertical: 20,
+		fontWeight: "bold",
+	},
+	subtitle: {
+		fontSize: 16,
+		textAlign: "center",
+		marginVertical: 10,
+	},
+	subtitle_bg: {
+		marginVertical: 20,
+		backgroundColor: "lightgrey",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
 	},
 });

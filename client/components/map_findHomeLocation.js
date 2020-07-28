@@ -106,7 +106,7 @@ export default class map_findHomeLocation extends React.Component {
 	};
 
 	onChangeQuery = async (value) => {
-		if (value.length > 15) {
+		if (value.length == 15) {
 			// this.setState({ search_query: value });
 			await this.searchHomeAddress(value);
 			// alert(value);
@@ -136,12 +136,16 @@ export default class map_findHomeLocation extends React.Component {
 				"\nplace long: " +
 				this.state.place_lng
 		);
+		this.props.navigation.replace("register");
 	};
 
 	render() {
 		const { latitude, longitude } = this.state;
 		return (
 			<SafeAreaView style={styles.container}>
+				<Text style={styles.subtitle_bg}>
+					Step 4/4: Verify your Home Location
+				</Text>
 				<Text style={styles.title}>Find Your Home Location</Text>
 				<View style={styles.search_outer}>
 					<TextInput
@@ -224,5 +228,15 @@ const styles = StyleSheet.create({
 		width: 300,
 		marginBottom: 20,
 		paddingHorizontal: 10,
+	},
+	subtitle_bg: {
+		fontSize: 16,
+		textAlign: "center",
+		marginTop: 20,
+		backgroundColor: "lightgrey",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
 	},
 });

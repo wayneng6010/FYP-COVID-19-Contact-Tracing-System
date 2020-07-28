@@ -365,7 +365,8 @@ export default class ic_extract extends React.Component {
 		// 	],
 		// });
 		// let response_color = await fetch(
-		// 	"https://vision.googleapis.com/v1/images:annotate?key=" + google_vision_api_key,
+		// 	"https://vision.googleapis.com/v1/images:annotate?key=" +
+		// 		google_vision_api_key,
 		// 	{
 		// 		headers: {
 		// 			Accept: "application/json",
@@ -378,10 +379,28 @@ export default class ic_extract extends React.Component {
 		// let responseJson_color = await response_color.json();
 		// // console.log(JSON.stringify(responseJson_color));
 		// var color_verify = false;
-		// var red = responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors.colors[0].color.red;
-		// var green = responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors.colors[0].color.green;
-		// var blue = responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors.colors[0].color.blue;
-		// console.log("color: " + red + " " + green + " " + blue);
+		// var red =
+		// 	responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors
+		// 		.colors[0].color.red;
+		// var green =
+		// 	responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors
+		// 		.colors[0].color.green;
+		// var blue =
+		// 	responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors
+		// 		.colors[0].color.blue;
+		// // console.log("color: " + red + " " + green + " " + blue);
+		// if (
+		// 	Math.abs(red - green) <= 10 ||
+		// 	Math.abs(green - blue) <= 10 ||
+		// 	Math.abs(red - blue) <= 10
+		// ) {
+		// 	// greyscale
+		// 	color_verify = false;
+		// } else {
+		// 	// colored
+		// 	color_verify = true;
+		// }
+		// console.log("color verify: " + color_verify);
 		// end here -----------------------------------------------------------------------------------------------
 	};
 
@@ -438,6 +457,18 @@ export default class ic_extract extends React.Component {
 					<Text style={styles.input}>{this.state.full_name}</Text>
 					<Text style={styles.label}>Home address</Text>
 					<Text style={styles.input}>{this.state.home_address}</Text>
+
+					<Text></Text>
+					<Button
+						title="Retake Image"
+						onPress={() => this.props.navigation.replace("ic_capture")}
+					></Button>
+
+					<Text></Text>
+					<Button
+						title="Confirm"
+						onPress={() => this.props.navigation.replace("phoneNo_verify")}
+					></Button>
 				</View>
 			</ScrollView>
 		);
@@ -479,5 +510,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 10,
 		flex: 1,
 		flexWrap: "wrap",
+		borderRadius: 5,
 	},
 });
