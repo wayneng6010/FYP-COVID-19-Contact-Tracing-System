@@ -93,7 +93,7 @@ app.post("/ic_ocr", async (req, res) => {
 
 app.get("/searchHomeAddress", (req, res) => {
 	const search_query = req.query.search_query;
-	const api_key = "AIzaSyDV2M6vNxqRZbKeWuJJ4kMyt9K1hOgSvlo";
+	const api_key = "api_key";
 	const querystr = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${search_query}&components=country:my&types=establishment&key=${api_key}`;
 
 	axios
