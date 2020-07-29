@@ -16,7 +16,8 @@ export default class verify_login extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			isLogin: false,
+			isLogin: true,
+			role: "premiseowner",
 		};
 
 		this.verify_login();
@@ -24,7 +25,11 @@ export default class verify_login extends React.Component {
 
 	verify_login = async() => {
 		if (this.state.isLogin) {
-			this.props.navigation.navigate('App');
+			if(this.state.role == "visitor"){
+				this.props.navigation.navigate('visitor_home');
+			} else if (this.state.role == "premiseowner"){
+				this.props.navigation.navigate('premiseOwner_home');
+			}
 		} else {
 			this.props.navigation.navigate('Auth');
 		}

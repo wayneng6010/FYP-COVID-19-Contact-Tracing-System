@@ -21,7 +21,7 @@ export default class sign_in extends React.Component {
 	render() {
 		return (
 			<SafeAreaView style={styles.container}>
-				<Text>Home page</Text>
+				<Text>Visitor Home page</Text>
 			</SafeAreaView>
 
 			// 	{/* {news.map((data) => {
