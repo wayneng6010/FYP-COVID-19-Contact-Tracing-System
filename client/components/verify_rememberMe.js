@@ -11,13 +11,13 @@ import {
 	ActivityIndicator,
 } from "react-native";
 
-export default class verify_login extends React.Component {
+export default class verify_rememberMe extends React.Component {
 	// const captureIC = () => {};
 	constructor(props) {
 		super(props);
 		this.state = {
-			isLogin: true,
-			role: "premiseowner",
+			isLogin: false,
+			role: "visitor",
 		};
 
 		this.verify_login();

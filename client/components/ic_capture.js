@@ -52,6 +52,9 @@ export default class ic_capture extends React.Component {
 		const { status } = await Permissions.askAsync(Permissions.CAMERA);
 		// setHasPermission(status === "granted");
 		this.setState({ hasPermission: status === "granted" });
+		if (this.state.hasPermission === null) {
+			ToastAndroid.show("Requesting for camera permission", ToastAndroid.SHORT);
+		}
 		if (this.state.hasPermission === false) {
 			alert("No access to camera");
 		}

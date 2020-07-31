@@ -22,6 +22,10 @@ export default class sign_in extends React.Component {
 		return (
 			<SafeAreaView style={styles.container}>
 				<Text>Visitor Home page</Text>
+				<Button
+					title="Check In"
+					onPress={() => this.props.navigation.navigate("qrcode_checkIn")}
+				></Button>
 			</SafeAreaView>
 
 			// 	{/* {news.map((data) => {

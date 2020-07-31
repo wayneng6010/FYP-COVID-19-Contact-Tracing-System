@@ -23,8 +23,8 @@ export default class sign_in extends React.Component {
 			<SafeAreaView style={styles.container}>
 				<Text>Premise Owner Home page</Text>
 				<Button
-					title="Capture IC"
-					onPress={() => this.props.navigation.navigate("qrcode_create")}
+					title="View Check In QR code"
+					onPress={() => this.props.navigation.navigate("qrcode_view")}
 				></Button>
 			</SafeAreaView>
 

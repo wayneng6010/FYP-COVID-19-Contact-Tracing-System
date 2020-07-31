@@ -1,7 +1,7 @@
 import { createStackNavigator } from "react-navigation-stack";
 import { createAppContainer, createSwitchNavigator } from "react-navigation";
 
-// visitor
+// registration
 import welcome from "./components/welcome";
 import register from "./components/register";
 import ic_capture from "./components/ic_capture";
@@ -9,14 +9,17 @@ import ic_extract from "./components/ic_extract";
 import phoneNo_verify from "./components/phoneNo_verify";
 import email_verify from "./components/email_verify";
 import map_findHomeLocation from "./components/map_findHomeLocation";
+import verify_rememberMe from "./components/verify_rememberMe";
+
+// visitor
 import visitor_home from "./components/VisitorApp/home";
-import verify_login from "./components/verify_login";
+import qrcode_checkIn from "./components/VisitorApp/qrcode_checkIn";
 
 // premise owner
 import premiseOwner_home from "./components/PremiseOwnerApp/home";
-import qrcode_create from "./components/PremiseOwnerApp/qrcode_create";
+import qrcode_view from "./components/PremiseOwnerApp/qrcode_view";
 
-const AuthLoadingScreen = createStackNavigator({ verify_login: verify_login });
+const AuthLoadingScreen = createStackNavigator({ verify_rememberMe: verify_rememberMe });
 
 const AuthStack = createStackNavigator(
 	{
@@ -89,6 +92,13 @@ const AppStackVisitor = createStackNavigator({
 			headerTitle: "Visitor Home",
 		},
 	},
+	qrcode_checkIn: {
+		screen: qrcode_checkIn,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Check In",
+		},
+	},
 });
 const AppStackPremiseOwner = createStackNavigator({
 	premiseOwner_home: {
@@ -98,11 +108,11 @@ const AppStackPremiseOwner = createStackNavigator({
 			headerTitle: "Premise Owner Home",
 		},
 	},
-	qrcode_create: {
-		screen: qrcode_create,
+	qrcode_view: {
+		screen: qrcode_view,
 		navigationOptions: {
 			headerTitleAlign: "center",
-			headerTitle: "Create QR code",
+			headerTitle: "View QR code",
 		},
 	},
 });
