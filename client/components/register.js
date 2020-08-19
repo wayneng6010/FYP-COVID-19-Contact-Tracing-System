@@ -74,7 +74,7 @@ export default class register extends React.Component {
 				<View style={styles.reg_content}>
 					<Text style={styles.title}>Register as Visitor</Text>
 					<Text style={[styles.subtitle, styles.subtitle_bg]}>
-						Step 1/4: Verify Yourself
+						Step 1/5: Verify Yourself
 					</Text>
 					<Text style={styles.subtitle}>
 						We need you to capture your original Malaysian identity card to
@@ -90,6 +90,7 @@ export default class register extends React.Component {
 					<Button
 						title="Capture IC"
 						onPress={() => this.props.navigation.navigate("ic_capture")}
+						// onPress={() => this.props.navigation.navigate("email_verify")}
 					></Button>
 
 					<Text style={[styles.subtitle, styles.subtitle_1]}>

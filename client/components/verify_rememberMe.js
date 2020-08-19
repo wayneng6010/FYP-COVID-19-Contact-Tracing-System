@@ -38,7 +38,7 @@ export default class verify_rememberMe extends React.Component {
 	render() {
 		return (
 			<SafeAreaView style={styles.container}>
-				<Text>Verify sign in</Text>
+				<Text>Verifying sign in</Text>
 				<ActivityIndicator />
 				{/* <Button
 					title="Go home page"

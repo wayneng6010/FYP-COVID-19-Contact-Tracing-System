@@ -9,6 +9,7 @@ import {
 	ScrollView,
 	View,
 	TouchableOpacity,
+	ToastAndroid,
 } from "react-native";
 import { Camera } from "expo-camera";
 import * as Permissions from "expo-permissions";

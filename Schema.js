@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const app = express();
 const db =
-	"mongodb+srv://dbUser:627233@clustertesting-j5vap.mongodb.net/Artist?retryWrites=true&w=majority";
+	"mongodb+srv://dbUser:627233@clustertesting-j5vap.mongodb.net/COVID19ContactTracing?retryWrites=true&w=majority";
 const path = require("path");
 
 //Connect to MongoDB database
@@ -26,11 +26,19 @@ const artistSchema = new mongoose.Schema({
 });
 
 // user schema
-const userSchema = new mongoose.Schema({
-	name: { type: String },
-	email: { type: String },
-	password: { type: String },
-	date: { type: Date, default: Date.now },
+const userVisitorSchema = new mongoose.Schema({
+	ic_num: { type: String, required: true },
+	ic_fname: { type: String, required: true  },
+	ic_address: { type: String, required: true  },
+	phone_no: { type: String, required: true  },
+	email: { type: String, required: true  },
+	home_lat: { type: Number, required: true  },
+	home_lng: { type: Number, required: true  },
+	home_id: { type: String, required: true  },
+	password: { type: String, required: true  },
+	// date_created: { type: String, required: true },
+	// date_created: { type: Date, default: Date.now },
+	date_created: { type: Date },
 });
 
 if (process.env.NODE_ENV === "production") {
@@ -42,7 +50,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 const Artist = mongoose.model("Data", artistSchema);
-const User = mongoose.model("User", userSchema);
+const userVisitor = mongoose.model("user_visitor", userVisitorSchema);
 
 module.exports.Artist = Artist;
-module.exports.User = User;
+module.exports.userVisitor = userVisitor;

@@ -1,7 +1,7 @@
 import { createStackNavigator } from "react-navigation-stack";
 import { createAppContainer, createSwitchNavigator } from "react-navigation";
 
-// registration
+// visitor registration
 import welcome from "./components/welcome";
 import register from "./components/register";
 import ic_capture from "./components/ic_capture";
@@ -9,6 +9,7 @@ import ic_extract from "./components/ic_extract";
 import phoneNo_verify from "./components/phoneNo_verify";
 import email_verify from "./components/email_verify";
 import map_findHomeLocation from "./components/map_findHomeLocation";
+import password_create from "./components/password_create";
 import verify_rememberMe from "./components/verify_rememberMe";
 
 // visitor
@@ -70,6 +71,13 @@ const AuthStack = createStackNavigator(
 			navigationOptions: {
 				headerTitleAlign: "center",
 				headerTitle: "Verify Home Location",
+			},
+		},
+		password_create: {
+			screen: password_create,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Create Password",
 			},
 		},
 	},

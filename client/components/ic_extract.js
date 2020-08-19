@@ -10,6 +10,7 @@ import {
 	View,
 	Image,
 	Dimensions,
+	ActivityIndicator,
 } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 
@@ -19,7 +20,7 @@ export default class ic_extract extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			ic_uri: null,
+			ic_uri: null, // store uri of ic captured
 			full_name: null,
 			ic_number: null,
 			home_address: null,
@@ -27,6 +28,13 @@ export default class ic_extract extends React.Component {
 			ic_height: null,
 			google_vision_api_key: "google_vision_api_key",
 			ic_number_x_position_right: null,
+			ic_verified: false,
+			ic_verify_progress: "0%",
+			formDataObj: {
+				ic_num: null,
+				ic_fname: null,
+				ic_address: null,
+			},
 		};
 	}
 
@@ -370,24 +378,68 @@ export default class ic_extract extends React.Component {
 		var ocr_result = await this.ocr_validation();
 		// console.log("text position: " + ocr_result);
 		if (ocr_result) {
+			this.setState({ ic_verify_progress: "25%" });
 			var face_result = await this.face_validation();
 			if (face_result) {
+				this.setState({ ic_verify_progress: "50%" });
 				var color_result = await this.color_validation();
 				if (color_result) {
+					this.setState({ ic_verify_progress: "75%" });
 					var label_result = await this.label_validation();
 					if (label_result) {
+						this.setState({ ic_verify_progress: "100%" });
 						return true;
 					} else {
+						alert("Your IC is invalid! Please capture your original IC");
 						return false;
 					}
 				} else {
+					alert("Your IC is invalid! Please do not capture photostated IC");
 					return false;
 				}
 			} else {
+				alert("Your IC is invalid! Please capture your original IC");
 				return false;
 			}
 		} else {
+			alert("Your IC is invalid! Please capture your original IC");
 			return false;
+		}
+	};
+
+	save_formData = async () => {
+		// const query_save_ic_info = `http://192.168.0.131:5000/save_ic_info?ic_num=${this.state.ic_number}&ic_fname=${this.state.full_name}&ic_address=${this.state.home_address}`;
+		// console.log(query_save_ic_info);
+		// await axios
+		// 	.post(query_save_ic_info)
+		// 	.then((response) => {
+		// 		console.log("ic session saved");
+		// 	})
+		// 	.catch((error) => {
+		// 		alert(error);
+		// 		return false;
+		// 	});
+		this.setState({
+			formDataObj: {
+				ic_num: this.state.ic_number,
+				ic_fname: this.state.full_name,
+				ic_address: this.state.home_address,
+			},
+		});
+
+		return true;
+	};
+
+	confirm_ic_info = async () => {
+		if (this.state.ic_verified) {
+			// await this.save_session();
+			let formDataSaved = await this.save_formData();
+			// alert(formDataSaved);
+			if (formDataSaved) {
+				this.props.navigation.replace("phoneNo_verify", {
+					formData: this.state.formDataObj,
+				});
+			}
 		}
 	};
 
@@ -411,9 +463,47 @@ export default class ic_extract extends React.Component {
 		// this.setState({  });
 		var ic_validation_result = await this.process_ic();
 		if (ic_validation_result) {
-			alert("Your IC is valid!");
+			let icNumExisted;
+			(async () => {
+				// used to check if there is same phone number saved in database
+				icNumExisted = await fetch(
+					"http://192.168.0.131:5000/getExistingIcNum",
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							ic_num: this.state.ic_number,
+						}),
+					}
+				)
+					.then((res) => {
+						// console.log(JSON.stringify(res.headers));
+						return res.json();
+					})
+					.then((jsonData) => {
+						// console.log(jsonData);
+						if (jsonData) {
+							return true;
+						} else {
+							return false;
+						}
+					})
+					.catch((error) => {
+						alert(error);
+					});
+
+				if (icNumExisted) {
+					alert("This IC number has been registered before");
+					this.props.navigation.replace("ic_capture");
+				} else {
+					alert("Your IC is valid!");
+					this.setState({ ic_verified: true });
+				}
+			})();
 		} else {
-			alert("Your IC is invalid!");
+			this.props.navigation.replace("ic_capture");
 		}
 		// const google_vision_api_key = "AIzaSyDV2M6vNxqRZbKeWuJJ4kMyt9K1hOgSvlo";
 		// here start --------------------------------------------------------------------------------------------------
@@ -835,23 +925,43 @@ export default class ic_extract extends React.Component {
 						</View>
 					</View> */}
 					<Text style={styles.label}>IC number</Text>
-					<Text style={styles.input}>{this.state.ic_number}</Text>
+					<Text style={styles.input}>
+						{this.state.ic_verified ? this.state.ic_number : ""}
+					</Text>
 					<Text style={styles.label}>Full name</Text>
-					<Text style={styles.input}>{this.state.full_name}</Text>
+					<Text style={styles.input}>
+						{this.state.ic_verified ? this.state.full_name : ""}
+					</Text>
 					<Text style={styles.label}>Home address</Text>
-					<Text style={styles.input}>{this.state.home_address}</Text>
+					<Text style={styles.input}>
+						{this.state.ic_verified ? this.state.home_address : ""}
+					</Text>
 
 					<Text></Text>
 					<Button
 						title="Retake Image"
+						disabled={this.state.ic_verified ? false : true}
 						onPress={() => this.props.navigation.replace("ic_capture")}
 					></Button>
 
 					<Text></Text>
 					<Button
 						title="Confirm"
-						onPress={() => this.props.navigation.replace("phoneNo_verify")}
+						disabled={this.state.ic_verified ? false : true}
+						// onPress={() => this.props.navigation.replace("phoneNo_verify")}
+						onPress={() => this.confirm_ic_info()}
 					></Button>
+
+					{this.state.ic_verified ? (
+						<View />
+					) : (
+						<View style={styles.loading}>
+							<Text style={styles.verify_percent}>
+								Verifying ... {this.state.ic_verify_progress}
+							</Text>
+							<ActivityIndicator size="large" />
+						</View>
+					)}
 				</View>
 			</ScrollView>
 		);
@@ -894,5 +1004,24 @@ const styles = StyleSheet.create({
 		flex: 1,
 		flexWrap: "wrap",
 		borderRadius: 5,
+	},
+	loading: {
+		position: "absolute",
+		left: 70,
+		right: 0,
+		top: -100,
+		bottom: 0,
+		alignItems: "center",
+		justifyContent: "center",
+		backgroundColor: "white",
+		width: 200,
+		height: 100,
+		borderColor: "#c0cbd3",
+		borderWidth: 1,
+	},
+	verify_percent: {
+		marginBottom: 10,
+		fontSize: 16,
+		fontWeight: "bold",
 	},
 });

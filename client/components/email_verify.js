@@ -9,6 +9,7 @@ import {
 	ScrollView,
 	View,
 	TextInput,
+	ToastAndroid,
 } from "react-native";
 
 export default class email_verify extends React.Component {
@@ -26,34 +27,153 @@ export default class email_verify extends React.Component {
 			email: null,
 			verification_code: null,
 			verification_code_correct: null,
+			email_sent: null,
+			formDataObj: {
+				ic_num: null,
+				ic_fname: null,
+				ic_address: null,
+				phone_no_sent: null,
+				email_sent: null,
+			},
 		};
+		// alert(this.state.formDataObj.phone_no_sent);
 	}
 
-	sendVerificationEmail = () => {
+	componentDidMount = () => {
+		// alert(JSON.stringify(this.props.navigation.state.params.formData));
+		// this.setState({
+		// 	formDataObj: {
+		// 		ic_num: this.props.navigation.state.params.formData.ic_num,
+		// 		ic_fname: this.props.navigation.state.params.formData.ic_fname,
+		// 		ic_address: this.props.navigation.state.params.formData.ic_address,
+		// 		phone_no_sent: this.props.navigation.state.params.formData
+		// 			.phone_no_sent,
+		// 		email_sent: null,
+		// 	},
+		// });
+	};
+
+	sendVerificationEmail = (email) => {
+		// alert(JSON.stringify(this.state.formDataObj));
 		// alert(this.state.phone_no);
+
 		const verification_code = Math.floor(100000 + Math.random() * 900000);
 		this.setState({ verification_code_correct: verification_code });
-		const query_send_tac = `http://192.168.0.131:5000/sendVerificationEmail?email=${this.state.email}&verification_code=${verification_code}`;
+		this.setState({ email_sent: email }); // move inside request
+		const query_send_tac = `http://192.168.0.131:5000/sendVerificationEmail?email=${email}&verification_code=${verification_code}`;
 		console.log(query_send_tac);
 		axios
 			.post(query_send_tac)
 			.then((result) => {
-				alert("Verification email sent");
+				// alert("Verification email sent");
+				ToastAndroid.show("Verification email sent", ToastAndroid.SHORT);
 			})
 			.catch((error) => {
 				alert(error);
 			});
 	};
 
-	checkVerificationCode = () => {
+	
+	verifyEmail = async () => {
+		const email = this.state.email.trim().replace(/\s/g, "");
+		if (email == null || email == "") {
+			alert("Please enter your email address");
+			return;
+		} else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) === false) {
+			alert("Invalid email address");
+			return;
+		}
+		let emailExisted;
+		(async () => {
+			// used to check if there is same email saved in database
+			emailExisted = await fetch(
+				"http://192.168.0.131:5000/getExistingEmail",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						email: email,
+					}),
+				}
+			)
+				.then((res) => {
+					// console.log(JSON.stringify(res.headers));
+					return res.json();
+				})
+				.then((jsonData) => {
+					// console.log(jsonData);
+					if (jsonData) {
+						return true;
+					} else {
+						return false;
+					}
+				})
+				.catch((error) => {
+					alert(error);
+				});
+
+			if (emailExisted) {
+				alert("This email has been registered before");
+				return;
+			} else {
+				this.sendVerificationEmail(email);
+			}
+		})();
+	};
+
+	save_formData = async () => {
+		// const query_save_email = `http://192.168.0.131:5000/save_email?email=${this.state.email_sent}`;
+		// console.log(query_save_email);
+		// await axios
+		// 	.post(query_save_email)
+		// 	.then((response) => {
+		// 		console.log("email session saved");
+		// 	})
+		// 	.catch((error) => {
+		// 		alert(error);
+		// 	});
+		const ic_num = this.props.navigation.state.params.formData.ic_num,
+			ic_fname = this.props.navigation.state.params.formData.ic_fname,
+			ic_address = this.props.navigation.state.params.formData.ic_address,
+			phone_no_sent = this.props.navigation.state.params.formData.phone_no_sent;
+		this.setState({
+			formDataObj: {
+				ic_num: ic_num,
+				ic_fname: ic_fname,
+				ic_address: ic_address,
+				phone_no_sent: phone_no_sent,
+				email_sent: this.state.email_sent,
+			},
+		});
+
+		return true;
+	};
+
+	checkVerificationCode = async () => {
 		// alert(this.state.tac_code);
 		// if (
 		// 	this.state.verification_code !== null &&
 		// 	this.state.verification_code_correct !== null
 		// ) {
+		if (
+			this.state.verification_code == null ||
+			this.state.verification_code == ""
+		) {
+			alert("Please enter verification code received");
+			return;
+		}
 		if (this.state.verification_code == this.state.verification_code_correct) {
-			alert("Email is verified");
-			this.props.navigation.replace("map_findHomeLocation");
+			// alert("Email is verified");
+			let formDataSaved = await this.save_formData();
+			ToastAndroid.show("Email is verified", ToastAndroid.SHORT);
+			if (formDataSaved) {
+				// alert(JSON.stringify(this.state.formDataObj));
+				this.props.navigation.replace("map_findHomeLocation", {
+					formData: this.state.formDataObj,
+				});
+			}
 		} else {
 			alert("Incorrect verification code");
 		}
@@ -66,43 +186,39 @@ export default class email_verify extends React.Component {
 		return (
 			<SafeAreaView style={styles.container}>
 				<Text style={[styles.subtitle, styles.subtitle_bg]}>
-					Step 3/4: Verify your Email Address
+					Step 3/5: Verify your Email Address
 				</Text>
-				<Text style={styles.subtitle}>Email</Text>
+				<Text style={styles.subtitle}>Your Email</Text>
 				<TextInput
 					name="email"
 					keyboardType="email-address"
 					autoCompleteType="email"
 					onChangeText={(value) => this.setState({ email: value })}
 					value={this.state.email}
-					style={{
-						borderColor: "#c0cbd3",
-						borderWidth: 2,
-						width: 300,
-					}}
+					style={styles.input}
 				/>
 				<Text />
 				<Button
 					title="Send Verification Email"
-					onPress={() => this.sendVerificationEmail()}
+					onPress={() => this.verifyEmail()}
 				></Button>
 
+				<Text />
 				<Text />
 				<Text style={styles.subtitle}>Verification code</Text>
 				<TextInput
 					name="verification_code"
 					keyboardType="numeric"
+					editable={this.state.email_sent ? true : false}
+					selectTextOnFocus={this.state.email_sent ? true : false}
 					onChangeText={(value) => this.setState({ verification_code: value })}
 					value={this.state.verification_code}
-					style={{
-						borderColor: "#c0cbd3",
-						borderWidth: 2,
-						width: 300,
-					}}
+					style={this.state.email_sent ? styles.input : styles.input_disabled}
 				/>
 
 				<Text />
 				<Button
+					disabled={this.state.email_sent ? false : true}
 					title="Submit"
 					onPress={() => this.checkVerificationCode()}
 				></Button>
@@ -141,5 +257,20 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		borderRadius: 10,
 		fontWeight: "bold",
+	},
+	input: {
+		borderColor: "#c0cbd3",
+		borderWidth: 2,
+		width: 300,
+		paddingVertical: 5,
+		paddingHorizontal: 10,
+	},
+	input_disabled: {
+		borderColor: "#c0cbd3",
+		borderWidth: 2,
+		width: 300,
+		paddingVertical: 5,
+		paddingHorizontal: 10,
+		backgroundColor: "lightgrey",
 	},
 });
