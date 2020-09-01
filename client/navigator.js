@@ -3,24 +3,42 @@ import { createAppContainer, createSwitchNavigator } from "react-navigation";
 
 // visitor registration
 import welcome from "./components/welcome";
-import register from "./components/register";
-import ic_capture from "./components/ic_capture";
-import ic_extract from "./components/ic_extract";
-import phoneNo_verify from "./components/phoneNo_verify";
-import email_verify from "./components/email_verify";
-import map_findHomeLocation from "./components/map_findHomeLocation";
-import password_create from "./components/password_create";
+import login_visitor_phoneNo from "./components/login_visitor_phoneNo";
+import register_visitor from "./components/VisitorRegistration/register_visitor";
+import ic_capture from "./components/VisitorRegistration/ic_capture";
+import ic_extract from "./components/VisitorRegistration/ic_extract";
+import phoneNo_verify from "./components/VisitorRegistration/phoneNo_verify";
+import email_verify from "./components/VisitorRegistration/email_verify";
+import map_findHomeLocation from "./components/VisitorRegistration/map_findHomeLocation";
+import password_create from "./components/VisitorRegistration/password_create";
 import verify_rememberMe from "./components/verify_rememberMe";
+
+// premise owner registration
+import phoneNo_verify_po from "./components/PremiseOwnerRegistration/phoneNo_verify";
+import email_verify_po from "./components/PremiseOwnerRegistration/email_verify";
+import premise_info_po from "./components/PremiseOwnerRegistration/premise_info";
+import map_findPremiseLocation_po from "./components/PremiseOwnerRegistration/map_findPremiseLocation";
+import password_create_po from "./components/PremiseOwnerRegistration/password_create";
+import login_premiseOwner from "./components/login_premiseOwner";
 
 // visitor
 import visitor_home from "./components/VisitorApp/home";
 import qrcode_checkIn from "./components/VisitorApp/qrcode_checkIn";
+import health_risk_assessment from "./components/VisitorApp/health_risk_assessment";
 
 // premise owner
 import premiseOwner_home from "./components/PremiseOwnerApp/home";
 import qrcode_view from "./components/PremiseOwnerApp/qrcode_view";
 
-const AuthLoadingScreen = createStackNavigator({ verify_rememberMe: verify_rememberMe });
+const AuthLoadingScreen = createStackNavigator({
+	verify_rememberMe: {
+		screen: verify_rememberMe,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Please Wait",
+		},
+	},
+});
 
 const AuthStack = createStackNavigator(
 	{
@@ -31,11 +49,18 @@ const AuthStack = createStackNavigator(
 				headerTitle: "Welcome",
 			},
 		},
-		register: {
-			screen: register,
+		login_visitor_phoneNo: {
+			screen: login_visitor_phoneNo,
 			navigationOptions: {
 				headerTitleAlign: "center",
-				headerTitle: "Registration",
+				headerTitle: "Visitor Login",
+			},
+		},
+		register_visitor: {
+			screen: register_visitor,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Visitor Registration",
 			},
 		},
 		ic_capture: {
@@ -70,7 +95,7 @@ const AuthStack = createStackNavigator(
 			screen: map_findHomeLocation,
 			navigationOptions: {
 				headerTitleAlign: "center",
-				headerTitle: "Verify Home Location",
+				headerTitle: "Find Home Location",
 			},
 		},
 		password_create: {
@@ -80,7 +105,50 @@ const AuthStack = createStackNavigator(
 				headerTitle: "Create Password",
 			},
 		},
+		phoneNo_verify_po: {
+			screen: phoneNo_verify_po,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Verify Phone Number",
+			},
+		},
+		email_verify_po: {
+			screen: email_verify_po,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Verify Email",
+			},
+		},
+		premise_info_po: {
+			screen: premise_info_po,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Fill in Premise Profile",
+			},
+		},
+		map_findPremiseLocation_po: {
+			screen: map_findPremiseLocation_po,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Find Premise Location",
+			},
+		},
+		password_create_po: {
+			screen: password_create_po,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Create Password",
+			},
+		},
+		login_premiseOwner: {
+			screen: login_premiseOwner,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Premise Owner Login",
+			},
+		},
 	},
+	// Premise owner registration page
 	{
 		navigationOptions: {
 			headerTintColor: "blue",
@@ -107,7 +175,15 @@ const AppStackVisitor = createStackNavigator({
 			headerTitle: "Check In",
 		},
 	},
+	health_risk_assessment: {
+		screen: health_risk_assessment,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Health Risk Assessment",
+		},
+	},
 });
+
 const AppStackPremiseOwner = createStackNavigator({
 	premiseOwner_home: {
 		screen: premiseOwner_home,

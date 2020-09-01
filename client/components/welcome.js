@@ -44,13 +44,13 @@ export default class welcome extends React.Component {
 					<View style={styles.flexCol}>
 						<Button
 							title="Login"
-							onPress={() => this.props.navigation.navigate("login")}
+							onPress={() => this.props.navigation.navigate("login_visitor_phoneNo")}
 						></Button>
 					</View>
 					<View style={styles.flexCol}>
 						<Button
 							title="Register"
-							onPress={() => this.props.navigation.navigate("register")}
+							onPress={() => this.props.navigation.navigate("register_visitor")}
 						></Button>
 					</View>
 				</View>

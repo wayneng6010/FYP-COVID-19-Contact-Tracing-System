@@ -25,9 +25,6 @@ export default class phoneNo_verify extends React.Component {
 			tac_code_correct: null,
 			phone_no_sent: null,
 			formDataObj: {
-				ic_num: null,
-				ic_fname: null,
-				ic_address: null,
 				phone_no_sent: null,
 			},
 		};
@@ -38,14 +35,45 @@ export default class phoneNo_verify extends React.Component {
 			phone_no_sent = phone_no;
 		this.setState({ tac_code_correct: tac_code });
 		this.setState({ phone_no_sent: phone_no_sent }); // move this line inside query
-		const query_send_tac = `http://192.168.0.131:5000/sendTacCode?phone_number=${phone_no}&tac_code=${tac_code}`;
-		console.log(query_send_tac);
-		axios
-			.get(query_send_tac)
-			.then((result) => {
-				if (result) {
-					// alert("Tac code sent");
+
+		// const query_send_tac = `http://192.168.0.131:5000/sendTacCode?phone_no=${phone_no}&tac_code=${tac_code}`;
+		// console.log(query_send_tac);
+		// axios
+		// 	.get(query_send_tac)
+		// 	.then((result) => {
+		// 		if (result) {
+		// 			// alert("Tac code sent");
+		// 			ToastAndroid.show("Tac code sent", ToastAndroid.SHORT);
+		// 		}
+		// 	})
+		// 	.catch((error) => {
+		// 		ToastAndroid.show("Tac code failed to sent", ToastAndroid.SHORT);
+		// 		alert(error);
+		// 	});
+
+		console.log(tac_code);
+		await fetch("http://192.168.0.131:5000/sendTacCode", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				item: {
+					phone_no: phone_no,
+					tac_code: tac_code,
+				},
+			}),
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.text();
+			})
+			.then((jsonData) => {
+				// alert(jsonData);
+				if (jsonData == "success") {
 					ToastAndroid.show("Tac code sent", ToastAndroid.SHORT);
+				} else if (jsonData == "failed") {
+					ToastAndroid.show("Tac code failed to sent", ToastAndroid.SHORT);
 				}
 			})
 			.catch((error) => {
@@ -84,7 +112,7 @@ export default class phoneNo_verify extends React.Component {
 		(async () => {
 			// used to check if there is same phone number saved in database
 			phoneNoExisted = await fetch(
-				"http://192.168.0.131:5000/getExistingPhoneNo",
+				"http://192.168.0.131:5000/getExistingPhoneNo_PO",
 				{
 					method: "POST",
 					headers: {
@@ -120,41 +148,14 @@ export default class phoneNo_verify extends React.Component {
 		})();
 	};
 
-	componentDidMount = () => {
-		// alert(JSON.stringify(this.props.navigation.state.params.formData));
-		// this.setState({
-		// 	formDataObj: {
-		// 		ic_num: "this.props.navigation.state.params.formData.ic_num",
-		// 		ic_fname: "this.props.navigation.state.params.formData.ic_fname",
-		// 		ic_address: "this.props.navigation.state.params.formData.ic_address",
-		// 		phone_no_sent: null,
-		// 	},
-		// });
-	};
+	componentDidMount = () => {};
 
 	save_formData = async () => {
-		// const query_save_phone_no = `http://192.168.0.131:5000/save_phone_no?phone_no=${this.state.phone_no_sent}`;
-		// console.log(query_save_phone_no);
-		// await axios
-		// 	.post(query_save_phone_no)
-		// 	.then((response) => {
-		// 		console.log("phone no session saved");
-		// 	})
-		// 	.catch((error) => {
-		// 		alert(error);
-		// 	});
-		const ic_num = this.props.navigation.state.params.formData.ic_num,
-			ic_fname = this.props.navigation.state.params.formData.ic_fname,
-			ic_address = this.props.navigation.state.params.formData.ic_address;
 		this.setState({
 			formDataObj: {
-				ic_num: ic_num,
-				ic_fname: ic_fname,
-				ic_address: ic_address,
 				phone_no_sent: this.state.phone_no_sent,
 			},
 		});
-
 		return true;
 	};
 
@@ -171,7 +172,7 @@ export default class phoneNo_verify extends React.Component {
 			let formDataSaved = await this.save_formData();
 			ToastAndroid.show("Phone number is verified", ToastAndroid.SHORT);
 			if (formDataSaved) {
-				this.props.navigation.replace("email_verify", {
+				this.props.navigation.replace("email_verify_po", {
 					formData: this.state.formDataObj,
 				});
 			}
@@ -187,7 +188,7 @@ export default class phoneNo_verify extends React.Component {
 		return (
 			<SafeAreaView style={styles.container}>
 				<Text style={[styles.subtitle, styles.subtitle_bg]}>
-					Step 2/5: Verify your Phone Number
+					Step 1/5: Verify your Phone Number
 				</Text>
 				<Text style={styles.subtitle}>Your Phone Number</Text>
 				<TextInput

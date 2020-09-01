@@ -14,13 +14,6 @@ import {
 import { BarCodeScanner } from "expo-barcode-scanner";
 
 export default class sign_in extends React.Component {
-	// set an initial state
-	//const [news, setNews] = useState([]);
-
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
-	// useEffect(() => {}, []);
-
-	// const captureIC = () => {};
 	constructor() {
 		super();
 		this.state = {
@@ -41,9 +34,56 @@ export default class sign_in extends React.Component {
 		}
 	};
 
-	handleBarCodeScanned = ({ type, data }) => {
+	handleBarCodeScanned = async ({ type, data }) => {
 		this.setState({ scanned: true });
-		alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+		// alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+		try {
+			var checkInData = JSON.parse(data);
+			if (
+				checkInData.hasOwnProperty("for") &&
+				checkInData.hasOwnProperty("qrid") &&
+				checkInData.hasOwnProperty("pid")
+			) {
+				if (checkInData.for == "COVID-19_Contact_Tracing_App") {
+					// alert("pid " + checkInData.pid);
+					// alert(checkInData.pid);
+
+					await fetch("http://192.168.0.131:5000/check_in_premise", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							for: checkInData.for,
+							qrid: checkInData.qrid,
+							pid: checkInData.pid,
+						}),
+					})
+						.then((res) => {
+							// console.log(JSON.stringify(res.headers));
+							return res.text();
+						})
+						.then((jsonData) => {
+							// alert(JSON.stringify(jsonData));
+							if (jsonData == "success") {
+								alert("Check in successful");
+							} else if (jsonData == "failed") {
+								alert("Check in unsuccessful");
+							} else {
+								alert(JSON.stringify(jsonData));
+							}
+						})
+						.catch((error) => {
+							alert(error);
+						});
+				}
+			} else {
+				alert("Invalid check in QR code");
+				return;
+			}
+		} catch (error) {
+			alert("Error! Invalid check in QR code");
+		}
 	};
 
 	render() {
@@ -65,14 +105,6 @@ export default class sign_in extends React.Component {
 					/>
 				)}
 			</View>
-			// <SafeAreaView style={styles.container}>
-			// 	<Text>Visitor check in page</Text>
-
-			// </SafeAreaView>
-
-			// 	{/* {news.map((data) => {
-			// 			return <Text>{data.url}</Text>;
-			// 		})} */}
 		);
 	}
 }

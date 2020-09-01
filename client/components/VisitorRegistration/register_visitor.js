@@ -36,7 +36,8 @@ export default class register extends React.Component {
 								textDecorationLine: "underline",
 							}}
 							onPress={() =>
-								this.props.navigation.navigate("register_premiseOwner")
+								this.props.navigation.navigate("phoneNo_verify_po")
+								// this.props.navigation.navigate("password_create_po")
 							}
 						>
 							Register here
@@ -90,7 +91,7 @@ export default class register extends React.Component {
 					<Button
 						title="Capture IC"
 						onPress={() => this.props.navigation.navigate("ic_capture")}
-						// onPress={() => this.props.navigation.navigate("email_verify")}
+						// onPress={() => this.props.navigation.navigate("phoneNo_verify")}
 					></Button>
 
 					<Text style={[styles.subtitle, styles.subtitle_1]}>

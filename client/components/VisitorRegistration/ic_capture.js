@@ -10,6 +10,8 @@ import {
 	View,
 	TouchableOpacity,
 	ToastAndroid,
+	BackHandler,
+	Alert,
 } from "react-native";
 import { Camera } from "expo-camera";
 import * as Permissions from "expo-permissions";
@@ -45,6 +47,18 @@ export default class ic_capture extends React.Component {
 		//     }
 	}
 
+	backAction = () => {
+		Alert.alert("Hold on!", "Are you sure you want to exit registration?", [
+			{
+				text: "Cancel",
+				onPress: () => null,
+				style: "cancel",
+			},
+			{ text: "YES", onPress: () => this.props.navigation.goBack(null) },
+		]);
+		return true;
+	};
+
 	componentDidMount = async () => {
 		// alert(this.props.navigation.state.params.name);
 		this.state = {
@@ -59,7 +73,16 @@ export default class ic_capture extends React.Component {
 		if (this.state.hasPermission === false) {
 			alert("No access to camera");
 		}
+
+		this.backHandler = BackHandler.addEventListener(
+			"hardwareBackPress",
+			this.backAction
+		);
 	};
+
+	componentWillUnmount() {
+		this.backHandler.remove();
+	}
 
 	takePicture = async () => {
 		if (this.camera) {

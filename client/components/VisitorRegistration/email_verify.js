@@ -53,22 +53,47 @@ export default class email_verify extends React.Component {
 		// });
 	};
 
-	sendVerificationEmail = (email) => {
+	sendVerificationEmail = async (email) => {
 		// alert(JSON.stringify(this.state.formDataObj));
 		// alert(this.state.phone_no);
 
 		const verification_code = Math.floor(100000 + Math.random() * 900000);
 		this.setState({ verification_code_correct: verification_code });
 		this.setState({ email_sent: email }); // move inside request
-		const query_send_tac = `http://192.168.0.131:5000/sendVerificationEmail?email=${email}&verification_code=${verification_code}`;
-		console.log(query_send_tac);
-		axios
-			.post(query_send_tac)
-			.then((result) => {
-				// alert("Verification email sent");
-				ToastAndroid.show("Verification email sent", ToastAndroid.SHORT);
+
+		// const query_send_tac = `http://192.168.0.131:5000/sendVerificationEmail?email=${email}&verification_code=${verification_code}`;
+		// console.log(query_send_tac);
+		// axios
+		// 	.post(query_send_tac)
+		// 	.then((result) => {
+		// 		// alert("Verification email sent");
+		// 		ToastAndroid.show("Verification email sent", ToastAndroid.SHORT);
+		// 	})
+		// 	.catch((error) => {
+		// 		alert(error);
+		// 	});
+
+		await fetch("http://192.168.0.131:5000/sendVerificationEmail", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				item: {
+					email: email,
+					verification_code: verification_code,
+				},
+			}),
+		})
+			.then((response) => {
+				if (response) {
+					ToastAndroid.show("Verification email sent", ToastAndroid.SHORT);
+				} else {
+					ToastAndroid.show("Verification email failed to send", ToastAndroid.SHORT);;
+				}
 			})
 			.catch((error) => {
+				ToastAndroid.show("Verification email failed to send", ToastAndroid.SHORT);;
 				alert(error);
 			});
 	};
@@ -193,6 +218,8 @@ export default class email_verify extends React.Component {
 					name="email"
 					keyboardType="email-address"
 					autoCompleteType="email"
+					placeholder="e.g. username@gmail.com"
+					maxLength={30}
 					onChangeText={(value) => this.setState({ email: value })}
 					value={this.state.email}
 					style={styles.input}

@@ -69,13 +69,26 @@ export default class password_create extends React.Component {
 				formData: this.state.formDataObj,
 			}),
 		})
-			.then((response) => {
-				if (response) {
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.text();
+			})
+			.then((jsonData) => {
+				// console.log(jsonData);
+				if (jsonData == "success") {
 					alert("Registration Complete");
+					// this.props.navigation.navigate("visitor_home");
 				} else {
 					alert("Registration Failed");
 				}
 			})
+			// .then((response) => {
+			// 	if (response) {
+			// 		alert("Registration Complete");
+			// 	} else {
+			// 		alert("Registration Failed");
+			// 	}
+			// })
 			.catch((error) => {
 				alert(error);
 			});

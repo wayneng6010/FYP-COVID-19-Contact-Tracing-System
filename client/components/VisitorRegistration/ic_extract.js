@@ -505,7 +505,7 @@ export default class ic_extract extends React.Component {
 		} else {
 			this.props.navigation.replace("ic_capture");
 		}
-		// const google_vision_api_key = "AIzaSyDV2M6vNxqRZbKeWuJJ4kMyt9K1hOgSvlo";
+		// const google_vision_api_key = "google_vision_api_key";
 		// here start --------------------------------------------------------------------------------------------------
 		// let body_ocr = JSON.stringify({
 		// 	requests: [
