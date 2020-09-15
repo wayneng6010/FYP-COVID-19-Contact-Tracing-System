@@ -94,6 +94,15 @@ export default class sign_in extends React.Component {
 								style={styles.underline}
 								onPress={() => {
 									this.setModalVisible(!modalVisible);
+									this.props.navigation.navigate("view_check_in_history");
+								}}
+							>
+								View Check In History
+							</Text>
+							<Text
+								style={styles.underline}
+								onPress={() => {
+									this.setModalVisible(!modalVisible);
 									this.props.navigation.navigate("health_risk_assessment");
 								}}
 							>
@@ -103,10 +112,19 @@ export default class sign_in extends React.Component {
 								style={styles.underline}
 								onPress={() => {
 									this.setModalVisible(!modalVisible);
-									this.props.navigation.navigate("qrcode_checkIn");
+									this.props.navigation.navigate("home_risk_assessment");
 								}}
 							>
-								Check In
+								Residential Location Risk Assessment
+							</Text>
+							<Text
+								style={styles.underline}
+								onPress={() => {
+									this.setModalVisible(!modalVisible);
+									this.props.navigation.navigate("manage_dependent");
+								}}
+							>
+								Manage Dependent
 							</Text>
 							<Text
 								style={[styles.underline, styles.underline_logout]}
@@ -147,7 +165,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 		alignItems: "center",
 		justifyContent: "center",
-		marginHorizontal: 20,
+		marginHorizontal: 10,
 	},
 	centeredView: {
 		flex: 1,

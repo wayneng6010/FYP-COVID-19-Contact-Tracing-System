@@ -25,10 +25,19 @@ import login_premiseOwner from "./components/login_premiseOwner";
 import visitor_home from "./components/VisitorApp/home";
 import qrcode_checkIn from "./components/VisitorApp/qrcode_checkIn";
 import health_risk_assessment from "./components/VisitorApp/health_risk_assessment";
+import manage_dependent from "./components/VisitorApp/manage_dependent";
+import ic_capture_dependent from "./components/VisitorApp/ic_capture_dependent";
+import ic_extract_dependent from "./components/VisitorApp/ic_extract_dependent";
+import view_dependent_qrcode from "./components/VisitorApp/view_dependent_qrcode";
+import view_check_in_history from "./components/VisitorApp/view_check_in_history";
+import view_each_check_in_history from "./components/VisitorApp/view_each_check_in_history";
+import home_risk_assessment from "./components/VisitorApp/home_risk_assessment";
 
 // premise owner
 import premiseOwner_home from "./components/PremiseOwnerApp/home";
 import qrcode_view from "./components/PremiseOwnerApp/qrcode_view";
+import qrcode_checkIn_dependent from "./components/PremiseOwnerApp/qrcode_checkIn_dependent";
+import real_time_check_in_record from "./components/PremiseOwnerApp/real_time_check_in_record";
 
 const AuthLoadingScreen = createStackNavigator({
 	verify_rememberMe: {
@@ -182,6 +191,55 @@ const AppStackVisitor = createStackNavigator({
 			headerTitle: "Health Risk Assessment",
 		},
 	},
+	manage_dependent: {
+		screen: manage_dependent,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Manage Dependent",
+		},
+	},
+	ic_capture_dependent: {
+		screen: ic_capture_dependent,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Capture IC for Dependent",
+		},
+	},
+	ic_extract_dependent: {
+		screen: ic_extract_dependent,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Confirm Dependent Information",
+		},
+	},
+	view_dependent_qrcode: {
+		screen: view_dependent_qrcode,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "View Dependent QR Code",
+		},
+	},
+	view_check_in_history: {
+		screen: view_check_in_history,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "View Check In History",
+		},
+	},
+	view_each_check_in_history: {
+		screen: view_each_check_in_history,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "View Check In History",
+		},
+	},
+	home_risk_assessment: {
+		screen: home_risk_assessment,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Home Risk Assessment",
+		},
+	},
 });
 
 const AppStackPremiseOwner = createStackNavigator({
@@ -197,6 +255,20 @@ const AppStackPremiseOwner = createStackNavigator({
 		navigationOptions: {
 			headerTitleAlign: "center",
 			headerTitle: "View QR code",
+		},
+	},
+	qrcode_checkIn_dependent: {
+		screen: qrcode_checkIn_dependent,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Check In For Dependent",
+		},
+	},
+	real_time_check_in_record: {
+		screen: real_time_check_in_record,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Real Time Check In Record",
 		},
 	},
 });

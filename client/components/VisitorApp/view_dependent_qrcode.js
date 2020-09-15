@@ -25,61 +25,26 @@ import * as Permissions from "expo-permissions";
 import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";
 
-export default class qrcode_view extends React.Component {
+export default class view_dependent_qrcode extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
 			// busy: null,
 			// imageSaved: null,
 			premiseName: "Hulala Sdn. Bhd.",
-			all_qrcode: null,
 			qrcode_value: null,
 			qrcode_options: null,
-			selected_entry_point: null,
-			selected_entry_point_id: null,
-			new_entry_point: "",
-			edit_entry_point: "",
-			premise_id: null,
-			modalVisible: false,
-			modalVisible_edit: false,
+			modalVisible_regenerate: false,
+			modalVisible_delete: false,
+			dependent_id: null,
+			dependent_name: null,
+			dependent_relationship: null,
 		};
 	}
 
-	// getSelectedQRCode = async () => {
-	// 	await fetch("http://192.168.0.131:5000/get_main_premise_qrcode", {
-	// 		method: "POST",
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 		body: JSON.stringify({
-	// 			entry_point: this.state.selected_entry_point,
-	// 		}),
-	// 	})
-	// 		.then((res) => {
-	// 			// console.log(JSON.stringify(res.headers));
-	// 			return res.json();
-	// 		})
-	// 		.then((jsonData) => {
-	// 			// alert(JSON.stringify(jsonData));
-	// 			var qrcode_id = jsonData[0]._id,
-	// 				premise_id = jsonData[0].user_premiseowner;
-	// 			this.setState({
-	// 				qrcode_value:
-	// 					'{"for":"COVID-19_Contact_Tracing_App", "qrid":"' +
-	// 					qrcode_id +
-	// 					'", "pid":"' +
-	// 					premise_id +
-	// 					'"}',
-	// 			});
-	// 			// console.log(this.state.qrcode_value);
-	// 		})
-	// 		.catch((error) => {
-	// 			alert(error);
-	// 		});
-	// };
 
-	getAllQRCode = async () => {
-		await fetch("http://192.168.0.131:5000/get_all_premise_qrcode", {
+	getUserID = async () => {
+		await fetch("http://192.168.0.131:5000/get_user_id", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -88,20 +53,16 @@ export default class qrcode_view extends React.Component {
 		})
 			.then((res) => {
 				// console.log(JSON.stringify(res.headers));
-				return res.json();
+				return res.text();
 			})
 			.then((jsonData) => {
-				// alert(JSON.stringify(jsonData));
+				// alert(jsonData);
 				this.setState({
-					all_qrcode: jsonData,
-					premise_id: jsonData[0].user_premiseowner,
-					selected_entry_point: jsonData[0].entry_point,
-					selected_entry_point_id: jsonData[0]._id,
 					qrcode_value:
-						'{"for":"COVID-19_Contact_Tracing_App", "qrid":"' +
-						jsonData[0]._id +
-						'", "pid":"' +
-						jsonData[0].user_premiseowner +
+						'{"for":"COVID-19_Contact_Tracing_App", "role":"dependent", "did":"' +
+						this.props.navigation.state.params.dependent_id +
+						'", "uid":"' +
+						jsonData +
 						'"}',
 				});
 				// console.log(this.state.qrcode_value);
@@ -112,32 +73,15 @@ export default class qrcode_view extends React.Component {
 	};
 
 	componentDidMount = async () => {
-		await fetch("http://192.168.0.131:5000/save_premise_qrcode", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-			.then((res) => {
-				// console.log(JSON.stringify(res.headers));
-				return res.text();
-			})
-			.then((jsonData) => {
-				// alert(jsonData);
-				if (jsonData == "success") {
-					// alert("QR code saved");
-				} else if (jsonData == "failed") {
-					// alert("QR code existed");
-				} else {
-					alert("Error occured while saving qr code");
-				}
-			})
-			.catch((error) => {
-				alert(error);
-			});
+		// alert(this.props.navigation.state.params.dependent_name);
+		this.setState({
+			dependent_id: this.props.navigation.state.params.dependent_id,
+			dependent_name: this.props.navigation.state.params.dependent_name,
+			dependent_relationship: this.props.navigation.state.params
+				.dependent_relationship,
+		});
 
-		// this.getSelectedQRCode();
-		this.getAllQRCode();
+		this.getUserID();
 	};
 
 	saveFile = async (file_path_updated) => {
@@ -189,7 +133,7 @@ export default class qrcode_view extends React.Component {
 			const file_path_updated = `${file_path.uri.slice(
 				0,
 				file_path.uri.lastIndexOf("/") + 1
-			)}CheckIn-QRCode-${this.state.selected_entry_point}.pdf`;
+			)}CheckIn-QRCode-${this.state.dependent_name}.pdf`;
 
 			await FileSystem.moveAsync({
 				from: file_path.uri,
@@ -208,12 +152,12 @@ export default class qrcode_view extends React.Component {
 		this.setState({ qrcode_options: options });
 	};
 
-	setModalVisible = (visible) => {
-		this.setState({ modalVisible: visible });
+	setModalVisible_regenerate = (visible) => {
+		this.setState({ modalVisible_regenerate: visible });
 	};
 
-	setModalVisible_edit = (visible) => {
-		this.setState({ modalVisible_edit: visible });
+	setModalVisible_delete = (visible) => {
+		this.setState({ modalVisible_delete: visible });
 	};
 
 	saveNewEntryPoint = async () => {
@@ -301,50 +245,27 @@ export default class qrcode_view extends React.Component {
 	};
 
 	render() {
-		const { modalVisible, modalVisible_edit, all_qrcode } = this.state;
-		let all_entry_points = null;
-		if (this.state.all_qrcode !== null) {
-			all_entry_points = this.state.all_qrcode.map((data) => {
-				return (
-					<Picker.Item
-						key={data._id}
-						value={data._id}
-						label={data.entry_point}
-					/>
-				);
-			});
-		}
+		const { modalVisible_regenerate, modalVisible_delete } = this.state;
 
 		return (
 			<SafeAreaView style={styles.container}>
 				<Modal
 					animationType="slide"
 					transparent={true}
-					visible={modalVisible}
+					visible={modalVisible_regenerate}
 					onRequestClose={() => {
-						this.setModalVisible(!modalVisible);
+						this.setModalVisible_regenerate(!modalVisible_regenerate);
 					}}
 				>
 					<View style={styles.centeredView}>
 						<View style={styles.modalView}>
-							<Text style={styles.modalText}>New Entry Point Name</Text>
-							<TextInput
-								name="new_entry_point"
-								keyboardType="default"
-								maxLength={20}
-								onChangeText={(value) =>
-									this.setState({ new_entry_point: value })
-								}
-								// onChangeText={(value) => this.onChangePassword(value)}
-								value={this.state.new_entry_point}
-								style={styles.input}
-							/>
+							<Text style={styles.modalText}>Are you sure to regenerate this QR code? This QR code cannot be used after regeneration.</Text>
 							<View style={styles.flexRow1}>
 								<View style={styles.flexCol}>
 									<TouchableHighlight
 										style={{ ...styles.openButton, backgroundColor: "grey" }}
 										onPress={() => {
-											this.setModalVisible(!modalVisible);
+											this.setModalVisible_regenerate(!modalVisible_regenerate);
 										}}
 									>
 										<Text style={styles.textStyle}>Cancel</Text>
@@ -352,12 +273,12 @@ export default class qrcode_view extends React.Component {
 								</View>
 								<View style={styles.flexCol}>
 									<TouchableHighlight
-										style={{ ...styles.openButton, backgroundColor: "#5cb85c" }}
+										style={{ ...styles.openButton, backgroundColor: "#1e90ff" }}
 										onPress={() => {
-											this.addNewEntryPoint();
+											this.editEntryPointName();
 										}}
 									>
-										<Text style={styles.textStyle}>Add</Text>
+										<Text style={styles.textStyle}>Regenerate</Text>
 									</TouchableHighlight>
 								</View>
 							</View>
@@ -368,31 +289,20 @@ export default class qrcode_view extends React.Component {
 				<Modal
 					animationType="slide"
 					transparent={true}
-					visible={modalVisible_edit}
+					visible={modalVisible_delete}
 					onRequestClose={() => {
-						this.setModalVisible_edit(!modalVisible_edit);
+						this.setModalVisible_delete(!modalVisible_delete);
 					}}
 				>
 					<View style={styles.centeredView}>
 						<View style={styles.modalView}>
-							<Text style={styles.modalText}>Edit Entry Point Info</Text>
-							<TextInput
-								name="edit_entry_point"
-								keyboardType="default"
-								maxLength={20}
-								onChangeText={(value) =>
-									this.setState({ edit_entry_point: value })
-								}
-								// onChangeText={(value) => this.onChangePassword(value)}
-								value={this.state.edit_entry_point}
-								style={styles.input}
-							/>
+							<Text style={styles.modalText}>Are you sure to delete this dependent? This QR code cannot be used after deletion.</Text>
 							<View style={styles.flexRow1}>
 								<View style={styles.flexCol}>
 									<TouchableHighlight
 										style={{ ...styles.openButton, backgroundColor: "grey" }}
 										onPress={() => {
-											this.setModalVisible_edit(!modalVisible_edit);
+											this.setModalVisible_delete(!modalVisible_delete);
 										}}
 									>
 										<Text style={styles.textStyle}>Cancel</Text>
@@ -400,47 +310,20 @@ export default class qrcode_view extends React.Component {
 								</View>
 								<View style={styles.flexCol}>
 									<TouchableHighlight
-										style={{ ...styles.openButton, backgroundColor: "#5cb85c" }}
+										style={{ ...styles.openButton, backgroundColor: "#dc3545" }}
 										onPress={() => {
-											this.editEntryPointName();
+											this.addNewEntryPoint();
 										}}
 									>
-										<Text style={styles.textStyle}>Edit</Text>
+										<Text style={styles.textStyle}>Delete</Text>
 									</TouchableHighlight>
 								</View>
 							</View>
 						</View>
 					</View>
 				</Modal>
-				<Text style={styles.title}>Check in QR code of your premise</Text>
-				<View style={[styles.flexRow, styles.flexRow_bg]}>
-					<View style={[styles.flexCol, styles.flexCol_narrower]}>
-						<Text style={styles.branch_label}>Entry Point</Text>
-					</View>
-					<View style={[styles.flexCol, styles.flexCol_wider]}>
-						<View style={styles.pickerBorder}>
-							<Picker
-								selectedValue={this.state.selected_entry_point_id}
-								style={{ height: 50, width: 200 }}
-								onValueChange={(itemValue, itemIndex) => {
-									// alert(JSON.stringify(all_qrcode));
-									this.setState({
-										selected_entry_point_id: itemValue,
-										selected_entry_point: all_qrcode[itemIndex].entry_point,
-										qrcode_value:
-											'{"for":"COVID-19_Contact_Tracing_App", "qrid":"' +
-											itemValue +
-											'", "pid":"' +
-											this.state.premise_id +
-											'"}',
-									});
-								}}
-							>
-								{all_entry_points}
-							</Picker>
-						</View>
-					</View>
-				</View>
+
+				<Text style={styles.title}>Check in QR code for your dependent</Text>
 
 				<View>
 					{this.state.qrcode_value == null ? (
@@ -453,33 +336,19 @@ export default class qrcode_view extends React.Component {
 								getRef={(c) => (this.svg = c)}
 							/>
 
-							<Text style={styles.selectedEntryPoint}>
-								{this.state.selected_entry_point}
-							</Text>
+							<View style={styles.selectedEntryPoint}>
+								<Text style={styles.dependent_name}>
+									{this.state.dependent_name}
+								</Text>
+								<Text style={styles.dependent_relationship}>
+									{this.state.dependent_relationship}
+								</Text>
+							</View>
 						</View>
 					)}
 				</View>
 
 				<View style={styles.flexRow}>
-					<View style={styles.flexCol}>
-						{/* <Button
-							title="Share"
-							onPress={() => this.getBase64("share")}
-						></Button> */}
-						<TouchableHighlight
-							style={{ ...styles.openButton, backgroundColor: "#3cb371" }}
-							onPress={() => {
-								this.setModalVisible_edit(true);
-								this.setState({
-									edit_entry_point: this.state.selected_entry_point,
-								});
-							}}
-						>
-							<View>
-								<Text style={styles.textStyle}>Edit</Text>
-							</View>
-						</TouchableHighlight>
-					</View>
 					<View style={styles.flexCol}>
 						{/* <Button
 							title="Download"
@@ -532,15 +401,32 @@ export default class qrcode_view extends React.Component {
 				<TouchableHighlight
 					style={{
 						...styles.openButton,
-						backgroundColor: "#f5f5f5",
+						backgroundColor: "#6c757d",
+						borderRadius: 0,
 						width: 200,
 					}}
 					onPress={() => {
-						this.setModalVisible(true);
+						this.setModalVisible_regenerate(true);
 					}}
 				>
 					<View>
-						<Text style={styles.textStyle_black}>Add New Entry Point</Text>
+						<Text style={styles.textStyle}>Regenerate QR Code</Text>
+					</View>
+				</TouchableHighlight>
+				<Text />
+				<TouchableHighlight
+					style={{
+						...styles.openButton,
+						backgroundColor: "#dc3545",
+						borderRadius: 0,
+						width: 200,
+					}}
+					onPress={() => {
+						this.setModalVisible_delete(true);
+					}}
+				>
+					<View>
+						<Text style={styles.textStyle}>Delete This Dependent</Text>
 					</View>
 				</TouchableHighlight>
 			</SafeAreaView>
@@ -564,6 +450,7 @@ const styles = StyleSheet.create({
 		fontSize: 20,
 		textAlign: "center",
 		marginVertical: 20,
+		marginBottom: 40,
 		fontWeight: "bold",
 	},
 	flexRow1: {
@@ -578,7 +465,7 @@ const styles = StyleSheet.create({
 	},
 	flexCol: {
 		marginHorizontal: 10,
-		width: 100,
+		width: 150,
 		height: 40,
 		justifyContent: "center",
 		paddingBottom: 15,
@@ -649,7 +536,7 @@ const styles = StyleSheet.create({
 		marginBottom: 15,
 		textAlign: "center",
 		fontSize: 18,
-		fontWeight: "bold",
+		// fontWeight: "bold",
 	},
 	input: {
 		borderColor: "#c0cbd3",
@@ -667,6 +554,18 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontSize: 16,
 		fontWeight: "bold",
+	},
+	dependent_name: {
+		textAlign: "center",
+		color: "white",
+		fontSize: 16,
+		fontWeight: "bold",
+	},
+	dependent_relationship: {
+		textAlign: "center",
+		color: "white",
+		fontSize: 16,
+		fontStyle: "italic",
 	},
 	qrcode_outer: {
 		borderStyle: "solid",

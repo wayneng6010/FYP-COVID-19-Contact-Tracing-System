@@ -12,7 +12,8 @@ import {
 	ToastAndroid,
 	BackHandler,
 	Alert,
-	ActivityIndicator
+	Dimensions,
+	ActivityIndicator,
 } from "react-native";
 import { Camera } from "expo-camera";
 import * as Permissions from "expo-permissions";
@@ -124,17 +125,13 @@ export default class ic_capture extends React.Component {
 				{ compress: 0, format: ImageManipulator.SaveFormat.JPEG }
 			);
 
-			// console.log(manipResult);
-			// setImage(manipResult);
-			// console.log("width: " + manipResult.width);
-			// console.log("height: " + manipResult.height);
 			// this.setState({ capture_loading: false });
-
-			this.props.navigation.replace("ic_extract", {
+			this.props.navigation.replace("ic_extract_dependent", {
 				ic_uri: manipResult.uri,
 				ic_base64: manipResult.base64,
 				ic_width: manipResult.width,
 				ic_height: manipResult.height,
+				dependent_relationship: this.props.navigation.state.params.dependent_relationship,
 			});
 		}
 	};
@@ -144,6 +141,8 @@ export default class ic_capture extends React.Component {
 		return (
 			<View style={{ flex: 1 }}>
 				{/* {this.state.capture_loading ? <ActivityIndicator /> : <View />} */}
+				{/* <Text style={styles.title}>Place the IC within the frame</Text> */}
+
 				<Camera
 					style={{ flex: 1 }}
 					type={Camera.Constants.Type.back}
@@ -222,5 +221,15 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		marginHorizontal: 20,
+	},
+	title: {
+		textAlign: "center",
+		fontSize: 22,
+		backgroundColor: "rgba(0,0,0,1)",
+		color: "white",
+		fontWeight: "bold",
+		paddingHorizontal: 10,
+		paddingVertical: Dimensions.get("window").height * 0.05,
+		elevation: 100,
 	},
 });

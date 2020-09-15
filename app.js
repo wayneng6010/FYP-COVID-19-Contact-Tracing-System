@@ -5,6 +5,13 @@ const userVisitor = require("./Schema").userVisitor;
 const userPremiseOwner = require("./Schema").userPremiseOwner;
 const premiseQRCode = require("./Schema").premiseQRCode;
 const checkInRecord = require("./Schema").checkInRecord;
+const visitorDependent = require("./Schema").visitorDependent;
+const healthRiskAssessmentRecord = require("./Schema")
+	.healthRiskAssessmentRecord;
+const savedCasualContactsGroup = require("./Schema").savedCasualContactsGroup;
+const savedConfirmedCaseCheckIn = require("./Schema").savedConfirmedCaseCheckIn;
+const savedCasualContactCheckIn = require("./Schema").savedCasualContactCheckIn;
+const hotspot = require("./Schema").hotspot;
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
@@ -318,11 +325,11 @@ app.post("/check_in_premise", async (req, res) => {
 			_id: req.body.pid,
 		});
 		if (Object.keys(existedPremiseOwner).length === 0) {
-			res.send("failed");
+			res.send([]);
 		} else {
 			const existedQRCode = await premiseQRCode.findOne({ _id: req.body.qrid });
 			if (Object.keys(existedQRCode).length === 0) {
-				res.send("failed");
+				res.send([]);
 			} else {
 				var now = new Date();
 				const check_in = new checkInRecord({
@@ -334,9 +341,9 @@ app.post("/check_in_premise", async (req, res) => {
 				try {
 					const savedCheckIn = await check_in.save();
 					if (savedCheckIn) {
-						res.send("success");
+						res.send(savedCheckIn);
 					} else {
-						res.send("failed");
+						res.send([]);
 					}
 				} catch (error) {
 					res.status(400).json(error);
@@ -344,7 +351,49 @@ app.post("/check_in_premise", async (req, res) => {
 			}
 		}
 	} else {
-		res.send("failed");
+		res.send([]);
+	}
+});
+
+app.post("/check_in_premise_dependent", async (req, res) => {
+	if (
+		req.body.for === "COVID-19_Contact_Tracing_App" &&
+		req.body.role === "dependent"
+	) {
+		const remember_me = req.cookies["remember_me"];
+		const existedDependent = await visitorDependent.findOne({
+			_id: req.body.did,
+		});
+		const existedVisitor = await userVisitor.findOne({
+			_id: req.body.uid,
+		});
+		if (
+			Object.keys(existedDependent).length === 0 ||
+			Object.keys(existedVisitor).length === 0
+		) {
+			res.send([]);
+		} else {
+			var now = new Date();
+			const check_in = new checkInRecord({
+				user_visitor: req.body.uid,
+				user_premiseowner: decrypt(remember_me.encryptedUid),
+				premise_qr_code: req.body.selected_entry_point_id,
+				visitor_dependent: req.body.did,
+				date_created: new Date(now.getTime() + 480 * 60000),
+			});
+			try {
+				const savedCheckIn = await check_in.save();
+				if (savedCheckIn) {
+					res.send(savedCheckIn);
+				} else {
+					res.send([]);
+				}
+			} catch (error) {
+				res.status(400).json(error);
+			}
+		}
+	} else {
+		res.send([]);
 	}
 });
 
@@ -365,6 +414,205 @@ app.post("/get_all_premise_qrcode", async (req, res) => {
 		user_premiseowner: decrypt(remember_me.encryptedUid),
 	});
 	res.send(allQRCode);
+});
+
+app.post("/get_health_risk_assessment_record", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	const record = await healthRiskAssessmentRecord.findOne({
+		$and: [
+			{ user_visitor: decrypt(remember_me.encryptedUid) },
+			{ visitor_dependent: { $exists: false } },
+			// { visitor_dependent: confirmed_visitor_id  },
+		],
+	});
+	res.send(record);
+});
+
+app.post("/save_health_risk_assessment_result", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	var now = new Date();
+	const record = new healthRiskAssessmentRecord({
+		user_visitor: decrypt(remember_me.encryptedUid),
+		responses: req.body.responses,
+		result: req.body.result,
+		date_created: new Date(now.getTime() + 480 * 60000),
+	});
+	try {
+		const savedRecord = await record.save();
+		if (savedRecord) {
+			res.send("success");
+		} else {
+			res.send("failed");
+		}
+	} catch (error) {
+		res.status(400).json(error);
+	}
+});
+
+app.post("/update_health_risk_assessment_result", async (req, res) => {
+	// const remember_me = req.cookies["remember_me"];
+	var now = new Date();
+	healthRiskAssessmentRecord.updateOne(
+		{
+			_id: req.body.response_record_id,
+		},
+		{
+			$set: {
+				responses: req.body.responses,
+				result: req.body.result,
+				date_created: new Date(now.getTime() + 480 * 60000),
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
+app.post("/get_all_hotspot", async (req, res) => {
+	const allHotspot = await hotspot
+		.find()
+		.populate("check_in_record")
+		.populate("user_premiseowner")
+		.exec();
+	res.send(allHotspot);
+});
+
+app.post("/get_saved_home_location", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	const savedHomeLocation = await userVisitor.findOne({
+		_id: decrypt(remember_me.encryptedUid),
+	});
+	res.send(savedHomeLocation);
+});
+
+app.post("/save_new_dependent", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	var now = new Date();
+	const newDependent = new visitorDependent({
+		ic_num: req.body.ic_number,
+		ic_fname: req.body.full_name,
+		relationship: req.body.relationship,
+		user_visitor: decrypt(remember_me.encryptedUid),
+		date_created: new Date(now.getTime() + 480 * 60000),
+	});
+	try {
+		const savedDependent = await newDependent.save();
+		if (savedDependent) {
+			res.send("success");
+		} else {
+			res.send("failed");
+		}
+	} catch (error) {
+		res.status(400).json(error);
+	}
+});
+
+app.post("/get_user_dependent", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	const allDependent = await visitorDependent.find({
+		user_visitor: decrypt(remember_me.encryptedUid),
+	});
+	res.send(allDependent);
+});
+
+app.post("/get_user_info", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	const user_info = await userVisitor.findOne({
+		_id: decrypt(remember_me.encryptedUid),
+	});
+	res.send(user_info);
+});
+
+app.post("/get_dependent_info", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	const dependent_info = await visitorDependent.findOne({
+		$and: [
+			{ user_visitor: decrypt(remember_me.encryptedUid) },
+			{ _id: req.body.dependent_id },
+		],
+	});
+	res.send(dependent_info);
+});
+
+app.post("/get_user_id", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	res.send(decrypt(remember_me.encryptedUid));
+});
+
+app.post("/get_check_in_records_visitor", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	const checkInRecords = await checkInRecord
+		.find({
+			$and: [
+				{ user_visitor: decrypt(remember_me.encryptedUid) },
+				{ visitor_dependent: { $exists: false } },
+			],
+		})
+		.sort({ date_created: -1 })
+		.populate("user_premiseowner")
+		.exec();
+	res.send(checkInRecords);
+});
+
+app.post("/get_check_in_records_dependent", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	const checkInRecords = await checkInRecord
+		.find({
+			$and: [
+				{ user_visitor: decrypt(remember_me.encryptedUid) },
+				{ visitor_dependent: req.body.dependent_id },
+			],
+		})
+		.sort({ date_created: -1 })
+		.populate("user_premiseowner")
+		.exec();
+	res.send(checkInRecords);
+});
+
+app.post("/get_real_time_check_in_record", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	var check_in_records_arr = new Array();
+	const checkInRecords = await checkInRecord
+		.find({
+			$and: [
+				{ user_premiseowner: decrypt(remember_me.encryptedUid) },
+				// { visitor_dependent: { $exists: false } },
+			],
+		})
+		.sort({ date_created: -1 })
+		.exec();
+
+	var counter = 0;
+	checkInRecords.forEach(async function (item) {
+		const health_risk = await healthRiskAssessmentRecord.findOne({
+			$and: [
+				{ user_visitor: item.user_visitor },
+				{ visitor_dependent: { $exists: false } },
+			],
+		});
+		// console.log(health_risk.result);
+
+		if (!health_risk) {
+			check_in_records_arr.push({
+				_id: item._id,
+				health_risk: "?",
+				date_created: item.date_created,
+			});
+		} else {
+			check_in_records_arr.push({
+				_id: item._id,
+				health_risk: health_risk.result,
+				date_created: item.date_created,
+			});
+		}
+		if (counter == checkInRecords.length - 1) {
+			// console.log(check_in_records_arr);
+			res.send(check_in_records_arr);
+		}
+		counter += 1;
+	});
 });
 
 // app.post("/test", async (req, res) => {

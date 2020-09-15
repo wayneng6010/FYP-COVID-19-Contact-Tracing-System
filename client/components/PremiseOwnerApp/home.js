@@ -79,15 +79,23 @@ export default class home extends React.Component {
 					<View style={styles.centeredView}>
 						<View style={styles.modalView}>
 							<Text style={styles.modalText}>Menu</Text>
-
 							<Text
 								style={styles.underline}
 								onPress={() => {
 									this.setModalVisible(!modalVisible);
-									this.props.navigation.navigate("qrcode_view");
+									this.props.navigation.navigate("real_time_check_in_record");
 								}}
 							>
-								View Check In QR code
+								Real Time Check In Record
+							</Text>
+							<Text
+								style={styles.underline}
+								onPress={() => {
+									this.setModalVisible(!modalVisible);
+									this.props.navigation.navigate("qrcode_checkIn_dependent");
+								}}
+							>
+								Check In For Dependent
 							</Text>
 							<Text
 								style={styles.underline}
@@ -98,15 +106,7 @@ export default class home extends React.Component {
 							>
 								View Check In QR code
 							</Text>
-							<Text
-								style={styles.underline}
-								onPress={() => {
-									this.setModalVisible(!modalVisible);
-									this.props.navigation.navigate("qrcode_view");
-								}}
-							>
-								View Check In QR code
-							</Text>
+							
 							<Text
 								style={[styles.underline, styles.underline_logout]}
 								onPress={() => this.confirm_logout()}
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 		alignItems: "center",
 		justifyContent: "center",
-		marginHorizontal: 20,
+		marginHorizontal: 10,
 	},
 	centeredView: {
 		flex: 1,
