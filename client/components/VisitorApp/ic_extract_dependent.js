@@ -26,7 +26,7 @@ export default class ic_extract_dependent extends React.Component {
 			home_address: null,
 			ic_width: null,
 			ic_height: null,
-			google_vision_api_key: "google_vision_api_key",
+			google_vision_api_key: "api_key",
 			ic_number_x_position_right: null,
 			ic_verified: false,
 			ic_verify_progress: "0%",

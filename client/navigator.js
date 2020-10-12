@@ -25,6 +25,7 @@ import login_premiseOwner from "./components/login_premiseOwner";
 import visitor_home from "./components/VisitorApp/home";
 import qrcode_checkIn from "./components/VisitorApp/qrcode_checkIn";
 import health_risk_assessment from "./components/VisitorApp/health_risk_assessment";
+import view_health_risk from "./components/VisitorApp/view_health_risk";
 import manage_dependent from "./components/VisitorApp/manage_dependent";
 import ic_capture_dependent from "./components/VisitorApp/ic_capture_dependent";
 import ic_extract_dependent from "./components/VisitorApp/ic_extract_dependent";
@@ -184,6 +185,13 @@ const AppStackVisitor = createStackNavigator({
 			headerTitle: "Check In",
 		},
 	},
+	view_health_risk: {
+		screen: view_health_risk,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Health Risk Assessment",
+		},
+	},
 	health_risk_assessment: {
 		screen: health_risk_assessment,
 		navigationOptions: {
@@ -271,6 +279,7 @@ const AppStackPremiseOwner = createStackNavigator({
 			headerTitle: "Real Time Check In Record",
 		},
 	},
+	
 });
 
 const container = createAppContainer(

@@ -34,20 +34,37 @@ export default class health_risk_assessment extends React.Component {
 			checked_saved_response: null,
 			update_saved_response: false,
 			result: null,
+			user_role: null,
+			dependent_id: null,
+			dependent_fname: null,
 		};
 		// alert(this.state.formDataObj.phone_no_sent);
-		this.getSavedRecord();
 	}
 
-	componentDidMount = () => {};
+	componentDidMount = () => {
+		if (this.props.navigation.state.params.role == "visitor") {
+			this.setState({ user_role: "visitor" });
+			this.getSavedRecord("visitor", "");
+		} else {
+			this.setState({
+				user_role: "dependent",
+				dependent_id: this.props.navigation.state.params.dependent_id,
+				dependent_fname: this.props.navigation.state.params.dependent_fname,
+			});
+			this.getSavedRecord(
+				"dependent",
+				this.props.navigation.state.params.dependent_id
+			);
+		}
+	};
 
-	getSavedRecord = async () => {
+	getSavedRecord = async (role, dependent_id) => {
 		await fetch("http://192.168.0.131:5000/get_health_risk_assessment_record", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
-			body: JSON.stringify({}),
+			body: JSON.stringify({ role: role, dependent_id: dependent_id }),
 		})
 			.then((res) => {
 				// console.log(JSON.stringify(res.headers));
@@ -277,6 +294,8 @@ export default class health_risk_assessment extends React.Component {
 					body: JSON.stringify({
 						responses: this.state.responses_arr,
 						result: this.state.result,
+						role: this.state.user_role,
+						dependent_id: this.state.dependent_id,
 					}),
 				}
 			)
@@ -287,7 +306,11 @@ export default class health_risk_assessment extends React.Component {
 				.then((jsonData) => {
 					// alert(JSON.stringify(jsonData));
 					if (jsonData == "success") {
-						this.getSavedRecord();
+						if (this.state.user_role == "visitor") {
+							this.getSavedRecord("visitor", "");
+						} else {
+							this.getSavedRecord("dependent", this.state.dependent_id);
+						}
 					} else if (jsonData == "failed") {
 						alert("Error occured while saving your responses");
 					} else {
@@ -320,7 +343,11 @@ export default class health_risk_assessment extends React.Component {
 				.then((jsonData) => {
 					// alert(JSON.stringify(jsonData));
 					if (jsonData == "success") {
-						this.getSavedRecord();
+						if (this.state.user_role == "visitor") {
+							this.getSavedRecord("visitor", "");
+						} else {
+							this.getSavedRecord("dependent", this.state.dependent_id);
+						}
 					} else if (jsonData == "failed") {
 						alert("Error occured while updating your responses");
 					} else {
@@ -394,6 +421,7 @@ export default class health_risk_assessment extends React.Component {
 			checked_saved_response,
 			saved_responses,
 			update_saved_response,
+			dependent_fname,
 		} = this.state;
 
 		return (
@@ -428,8 +456,9 @@ export default class health_risk_assessment extends React.Component {
 					</View>
 				)}
 				<Text style={styles.subtitle}>
-					1. Have you traveled to (or living in) any of the COVID-19 affected
-					areas/countries in the last 14 days?
+					1. Have {dependent_fname == null ? "you" : dependent_fname} traveled
+					to (or living in) any of the COVID-19 affected areas/countries in the
+					last 14 days?
 				</Text>
 
 				{saved_responses == null || update_saved_response == true ? (
@@ -457,8 +486,9 @@ export default class health_risk_assessment extends React.Component {
 				<Text />
 
 				<Text style={styles.subtitle}>
-					2. Have you had any close contact with a person who is known to have
-					COVID-19 during the last 14 days?
+					2. Have {dependent_fname == null ? "you" : dependent_fname} had any
+					close contact with a person who is known to have COVID-19 during the
+					last 14 days?
 				</Text>
 				{saved_responses == null || update_saved_response == true ? (
 					<RadioForm
@@ -484,7 +514,10 @@ export default class health_risk_assessment extends React.Component {
 
 				<Text />
 
-				<Text style={styles.subtitle}>3. Do you have a fever?</Text>
+				<Text style={styles.subtitle}>
+					3. Do {dependent_fname == null ? "you" : dependent_fname} have a
+					fever?
+				</Text>
 				{saved_responses == null || update_saved_response == true ? (
 					<RadioForm
 						style={styles.radio_form}
@@ -509,7 +542,10 @@ export default class health_risk_assessment extends React.Component {
 
 				<Text />
 
-				<Text style={styles.subtitle}>4. Do you have a cough?</Text>
+				<Text style={styles.subtitle}>
+					4. Do {dependent_fname == null ? "you" : dependent_fname} have a
+					cough?
+				</Text>
 				{saved_responses == null || update_saved_response == true ? (
 					<RadioForm
 						style={styles.radio_form}
@@ -535,7 +571,8 @@ export default class health_risk_assessment extends React.Component {
 				<Text />
 
 				<Text style={styles.subtitle}>
-					5. Do you have a shortness of breath?
+					5. Do {dependent_fname == null ? "you" : dependent_fname} have a
+					shortness of breath?
 				</Text>
 				{saved_responses == null || update_saved_response == true ? (
 					<RadioForm
@@ -583,7 +620,7 @@ export default class health_risk_assessment extends React.Component {
 						<TouchableHighlight
 							style={{
 								...styles.openButton,
-								backgroundColor: "#1e90ff",
+								backgroundColor: "grey",
 								width: 200,
 							}}
 							onPress={() => {

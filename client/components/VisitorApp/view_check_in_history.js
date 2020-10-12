@@ -54,6 +54,9 @@ export default class view_check_in_history extends React.Component {
 					});
 				} else {
 					// alert(jsonData);
+					jsonData.sort(function compare(a, b) {
+						return new Date(a.date_created) - new Date(b.date_created);
+					});
 					this.setState({
 						all_dependent: jsonData,
 					});
@@ -171,7 +174,7 @@ export default class view_check_in_history extends React.Component {
 						) : // { all_dependent_item }
 						// <View />
 						all_dependent == "none" ? (
-							<ActivityIndicator />
+							<Text style={styles.no_record}>No dependent found</Text>
 						) : (
 							<View>
 								{all_dependent.map((data) => {
@@ -235,6 +238,10 @@ export default class view_check_in_history extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	no_record: {
+		textAlign: "center",
+		fontStyle: "italic",
+	},
 	flexRow_bg: {
 		backgroundColor: "#f0f0f0",
 		paddingTop: 40,

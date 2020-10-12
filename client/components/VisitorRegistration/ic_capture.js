@@ -12,7 +12,7 @@ import {
 	ToastAndroid,
 	BackHandler,
 	Alert,
-	ActivityIndicator
+	ActivityIndicator,
 } from "react-native";
 import { Camera } from "expo-camera";
 import * as Permissions from "expo-permissions";
@@ -101,8 +101,10 @@ export default class ic_capture extends React.Component {
 			// alert(JSON.stringify(photo));
 			// console.log(photo.uri);
 
-			var crop_originy = photo.width * 0.3;
-			var crop_height = photo.width * 0.4;
+			var crop_originy = photo.width * 0.35;
+			var crop_height = photo.width * 0.3;
+			var crop_originx = photo.height * 0.1;
+			var crop_width = photo.height * 0.8;
 
 			// image manipulator
 			// const image = Asset.fromModule(require(this.props.navigation.state.params.ic_uri));
@@ -113,15 +115,16 @@ export default class ic_capture extends React.Component {
 				[
 					{
 						crop: {
-							originX: 0,
+							originX: crop_originx,
 							originY: crop_originy,
-							width: photo.height,
+							width: crop_width,
 							height: crop_height,
 						},
 					},
 				],
-				{ base64: true },
-				{ compress: 0, format: ImageManipulator.SaveFormat.JPEG }
+				{ compress: 0.1, format: "jpeg", base64: true }
+				// { base64: true },
+				// { compress: 0, format: ImageManipulator.SaveFormat.JPEG }
 			);
 
 			// console.log(manipResult);
@@ -165,7 +168,7 @@ export default class ic_capture extends React.Component {
 					style={{
 						position: "absolute",
 						width: "100%",
-						height: "30%",
+						height: "35%",
 						top: 0,
 						flex: 1,
 						backgroundColor: "rgba(0,0,0,.5)",
@@ -176,7 +179,7 @@ export default class ic_capture extends React.Component {
 					style={{
 						position: "absolute",
 						width: "100%",
-						height: "30%",
+						height: "35%",
 						bottom: 0,
 						flex: 1,
 						paddingTop: 20,

@@ -31,7 +31,7 @@ export default class qrcode_view extends React.Component {
 		this.state = {
 			// busy: null,
 			// imageSaved: null,
-			premiseName: "Hulala Sdn. Bhd.",
+			premise_name: null,
 			all_qrcode: null,
 			qrcode_value: null,
 			qrcode_options: null,
@@ -136,6 +136,23 @@ export default class qrcode_view extends React.Component {
 				alert(error);
 			});
 
+		await fetch("http://192.168.0.131:5000/get_premise_info", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.json();
+			})
+			.then((jsonData) => {
+				this.setState({ premise_name: jsonData.premise_name });
+				// alert(JSON.stringify(jsonData.premise_name));
+			})
+			.catch((error) => {
+				alert(error);
+			});
 		// this.getSelectedQRCode();
 		this.getAllQRCode();
 	};
@@ -168,18 +185,18 @@ export default class qrcode_view extends React.Component {
 		try {
 			let file_path = await Print.printToFileAsync({
 				html:
-					'<div style = "margin-top: 10%;"><p style = "font-size: 24; font-weight: bold; text-align: center; font-size: 45px;">COVID-19 Contact Tracing System</p>' +
-					'<p style = "font-weight: bold; text-align: center; font-size: 45px;">Check in to ' +
-					this.state.premiseName +
+					'<div style = "margin-top: 10%;"><p style = "font-size: 24; font-weight: bold; text-align: center; font-size: 45px;">COVID-19 CTS</p>' +
+					'<p style = "font-weight: bold; text-align: center; font-size: 45px; background-color: rgba(0,0,0,.15); padding: 10px 20px;">Check in to ' +
+					this.state.premise_name +
 					"</p>" +
-					'<p style = "font-size: 38; font-weight: bold; text-align: center;">' +
+					'<p style = "font-size: 42; font-weight: bold; text-align: center;">Entry Point - ' +
 					this.state.selected_entry_point +
-					"</p>" +
+					"</p><br />" +
 					'<p style="text-align: center; margin-top: -30px;"><img src="data:image;base64,' +
 					dataURL +
 					'"' +
-					'alt="QR code" style="margin-top: 50px; width: 300px; height: 300px;" /></p>' +
-					'<p style="font-size: 28; font-weight: bold; text-align: center; margin-top: 50px;">Scan the QR Code using COVID-19 Contact Tracing App</p>' +
+					'alt="QR code" style="margin-top: 50px; width: 350px; height: 350px;" /></p><br />' +
+					'<p style="font-size: 32; font-weight: bold; text-align: center; margin-top: 50px;">Scan the QR Code using<br />COVID-19 Contact Tracing App</p>' +
 					"</div>",
 				width: 600,
 				height: 800,
@@ -189,7 +206,7 @@ export default class qrcode_view extends React.Component {
 			const file_path_updated = `${file_path.uri.slice(
 				0,
 				file_path.uri.lastIndexOf("/") + 1
-			)}CheckIn-QRCode-${this.state.selected_entry_point}.pdf`;
+			)}CheckInQRCode_${this.state.premise_name}_${this.state.selected_entry_point}.pdf`;
 
 			await FileSystem.moveAsync({
 				from: file_path.uri,

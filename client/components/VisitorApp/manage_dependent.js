@@ -47,7 +47,10 @@ export default class manage_dependent extends React.Component {
 			.then((jsonData) => {
 				// alert(JSON.stringify(jsonData));
 				if (jsonData === undefined || jsonData.length == 0) {
-					alert("No record found");
+					// alert("No record found");
+					this.setState({
+						all_dependent: "none",
+					});
 				} else {
 					// alert(jsonData);
 					this.setState({
@@ -207,9 +210,11 @@ export default class manage_dependent extends React.Component {
 					<ScrollView>
 						{all_dependent == null ? (
 							<ActivityIndicator />
+						) : // { all_dependent_item }
+						// <View />
+						all_dependent == "none" ? (
+							<Text style={styles.no_record}>No dependent found</Text>
 						) : (
-							// { all_dependent_item }
-							// <View />
 							<View style={styles.dependent_view}>
 								{all_dependent.map((data) => {
 									return (
@@ -271,6 +276,10 @@ export default class manage_dependent extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	no_record: {
+		textAlign: "center",
+		fontStyle: "italic",
+	},
 	flexRow_bg: {
 		backgroundColor: "#f0f0f0",
 		paddingTop: 40,

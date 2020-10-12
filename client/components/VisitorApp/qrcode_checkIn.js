@@ -12,6 +12,7 @@ import {
 	TouchableHighlight,
 	Dimensions,
 	Modal,
+	ActivityIndicator,
 } from "react-native";
 
 import { BarCodeScanner } from "expo-barcode-scanner";
@@ -81,6 +82,7 @@ export default class sign_in extends React.Component {
 								this.setState({ check_in_data: jsonData });
 								this.setModalVisible(true);
 							} else {
+								this.setModalVisible(!modalVisible);
 								alert("Check in unsuccessful");
 							}
 							// if (jsonData == "success") {
@@ -112,17 +114,19 @@ export default class sign_in extends React.Component {
 		const { modalVisible, check_in_data } = this.state;
 		return (
 			<View style={styles.container}>
-				{check_in_data == null ? (
-					<View />
-				) : (
-					<Modal
-						animationType="slide"
-						transparent={true}
-						visible={modalVisible}
-						onRequestClose={() => {
-							this.setModalVisible(!modalVisible);
-						}}
-					>
+				<Modal
+					animationType="slide"
+					transparent={true}
+					visible={modalVisible}
+					onRequestClose={() => {
+						this.setModalVisible(!modalVisible);
+					}}
+				>
+					{check_in_data == null ? (
+						<View style={styles.centeredView}>
+							<ActivityIndicator />
+						</View>
+					) : (
 						<View style={styles.centeredView}>
 							<View style={styles.modalView}>
 								<Text style={styles.modalText}>Check In Successful</Text>
@@ -132,8 +136,23 @@ export default class sign_in extends React.Component {
 											#
 											{" " +
 												check_in_data._id
-													.slice(check_in_data._id.length - 4)
+													.slice(check_in_data._id.length - 2)
 													.toUpperCase()}
+										</Text>
+										<Text style={styles.subtitle}>
+											{check_in_data.premise_name}
+										</Text>
+										<Text style={styles.subtitle}>
+											{check_in_data.entry_point}
+										</Text>
+										<Text style={styles.subtitle}>
+											{check_in_data.health_risk_result === "?" ? (
+												<Text>Unknown Risk</Text>
+											) : check_in_data.health_risk_result === true ? (
+												<Text>High Risk</Text>
+											) : (
+												<Text>Low Risk</Text>
+											)}
 										</Text>
 										<Text style={styles.subtitle}>
 											{check_in_data.date_created
@@ -163,8 +182,8 @@ export default class sign_in extends React.Component {
 								</TouchableHighlight>
 							</View>
 						</View>
-					</Modal>
-				)}
+					)}
+				</Modal>
 
 				{/* if scanned state is true, means data is successfully retrieved */}
 				{/* Passing undefined will result in no scanning */}

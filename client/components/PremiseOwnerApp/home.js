@@ -13,6 +13,14 @@ import {
 	Alert,
 } from "react-native";
 
+// import { createBottomTabNavigator } from "react-navigation";
+// import { createBottomTabNavigator } from 'react-navigation-tabs';
+// createBottomTabNavigator(RouteConfigs, TabNavigatorConfig);
+// import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+
+// const Tab = createBottomTabNavigator();
+// import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
+
 export default class home extends React.Component {
 	constructor(props) {
 		super(props);
@@ -106,7 +114,7 @@ export default class home extends React.Component {
 							>
 								View Check In QR code
 							</Text>
-							
+
 							<Text
 								style={[styles.underline, styles.underline_logout]}
 								onPress={() => this.confirm_logout()}
@@ -116,7 +124,7 @@ export default class home extends React.Component {
 							<Text style={styles.underline_last}></Text>
 
 							<TouchableHighlight
-								style={{ ...styles.openButton, backgroundColor: "#2196F3" }}
+								style={{ ...styles.openButton, backgroundColor: "#7b8b96" }}
 								onPress={() => {
 									this.setModalVisible(!modalVisible);
 								}}
@@ -127,10 +135,18 @@ export default class home extends React.Component {
 					</View>
 				</Modal>
 				<Text>Premise Owner Home page</Text>
-				<Button
-					title="Menu"
-					onPress={() => this.setModalVisible(true)}
-				></Button>
+				<View style={styles.nav_bar_bottom}>
+					<TouchableHighlight
+						style={{ ...styles.openButton_nav, backgroundColor: "#3cb371" }}
+						onPress={() => {
+							this.setModalVisible(true)
+						}}
+					>
+						<Text style={styles.menu_text}>Menu</Text>
+					</TouchableHighlight>
+				</View>
+
+				{/* <View style={styles.nav_bar_bottom}><Text>Testing</Text></View> */}
 			</SafeAreaView>
 
 			// 	{/* {news.map((data) => {
@@ -141,6 +157,11 @@ export default class home extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	nav_bar_bottom: {
+		position: "absolute",
+		bottom: 0,
+		width: "100%",
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "white",
@@ -171,15 +192,29 @@ const styles = StyleSheet.create({
 	},
 	openButton: {
 		backgroundColor: "#F194FF",
-		borderRadius: 20,
-		padding: 10,
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 120,
 		elevation: 2,
+	},
+	openButton_nav: {
+		backgroundColor: "#F194FF",
+		width: "100%",
+		elevation: 2,
+		height: 50,
+	},
+	menu_text: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
+		fontSize: 20,
+		paddingTop: 10,
 	},
 	cancelStyle: {
 		color: "white",
 		fontWeight: "bold",
 		textAlign: "center",
-		width: 200,
+		width: 120,
 	},
 	modalText: {
 		marginBottom: 15,

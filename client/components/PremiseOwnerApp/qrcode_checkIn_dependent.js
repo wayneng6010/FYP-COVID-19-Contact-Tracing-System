@@ -24,9 +24,12 @@ export default class sign_in extends React.Component {
 			hasPermission: null,
 			scanned: false,
 			modalVisible: false,
+			modalVisible_1: false,
 			selected_entry_point_id: null,
+			selected_entry_point: null,
 			all_qrcode: null,
 			checkInData: null,
+			returned_check_in_data: null,
 		};
 	}
 
@@ -86,16 +89,16 @@ export default class sign_in extends React.Component {
 		})
 			.then((res) => {
 				// console.log(JSON.stringify(res.headers));
-				return res.text();
+				return res.json();
 			})
 			.then((jsonData) => {
 				// alert(JSON.stringify(jsonData));
-				if (jsonData == "success") {
-					alert("Check in successful");
-				} else if (jsonData == "failed") {
-					alert("Check in unsuccessful");
+				if (jsonData !== []) {
+					this.setState({ returned_check_in_data: jsonData });
+					this.setModalVisible(false);
+					this.setModalVisible_1(true);
 				} else {
-					alert(JSON.stringify(jsonData));
+					alert("Check in unsuccessful");
 				}
 			})
 			.catch((error) => {
@@ -105,6 +108,10 @@ export default class sign_in extends React.Component {
 
 	setModalVisible = (visible) => {
 		this.setState({ modalVisible: visible });
+	};
+
+	setModalVisible_1 = (visible) => {
+		this.setState({ modalVisible_1: visible });
 	};
 
 	handleBarCodeScanned = async ({ type, data }) => {
@@ -143,7 +150,13 @@ export default class sign_in extends React.Component {
 	};
 
 	render() {
-		const { modalVisible, all_qrcode } = this.state;
+		const {
+			modalVisible,
+			modalVisible_1,
+			returned_check_in_data,
+			selected_entry_point,
+			all_qrcode,
+		} = this.state;
 		let all_entry_points = null;
 		if (this.state.all_qrcode !== null) {
 			all_entry_points = this.state.all_qrcode.map((data) => {
@@ -176,9 +189,10 @@ export default class sign_in extends React.Component {
 									selectedValue={this.state.selected_entry_point_id}
 									style={{ height: 50, width: 180 }}
 									onValueChange={(itemValue, itemIndex) => {
-										// alert(JSON.stringify(all_qrcode));
+										// alert(JSON.stringify(all_qrcode[itemIndex].entry_point));
 										this.setState({
 											selected_entry_point_id: itemValue,
+											selected_entry_point: all_qrcode[itemIndex].entry_point,
 										});
 										// alert(itemValue);
 									}}
@@ -214,6 +228,53 @@ export default class sign_in extends React.Component {
 						</View>
 					</View>
 				</Modal>
+				{returned_check_in_data == null ? (
+					<View />
+				) : (
+					<Modal
+						animationType="slide"
+						transparent={true}
+						visible={modalVisible_1}
+						onRequestClose={() => {
+							this.setModalVisible_1(!modalVisible_1);
+						}}
+					>
+						<View style={styles.centeredView}>
+							<View style={styles.modalView}>
+								<Text style={styles.modalText}>Check In Successful</Text>
+								<Text style={styles.subtitle}>
+									{returned_check_in_data.health_risk_result + " Risk"}
+								</Text>
+								<Text style={styles.subtitle}>
+									Entry Point: {selected_entry_point}
+								</Text>
+								<Text style={styles.subtitle}>
+									{returned_check_in_data.date_created
+										.replace("T", " ")
+										.substring(
+											0,
+											returned_check_in_data.date_created.indexOf(".") - 3
+										)}
+								</Text>
+								<View style={styles.flexRow1}>
+									<View style={styles.flexCol}>
+										<TouchableHighlight
+											style={{
+												...styles.openButton_1,
+												backgroundColor: "#3cb371",
+											}}
+											onPress={() => {
+												this.setModalVisible_1(!modalVisible_1);
+											}}
+										>
+											<Text style={styles.textStyle_1}>OK</Text>
+										</TouchableHighlight>
+									</View>
+								</View>
+							</View>
+						</View>
+					</Modal>
+				)}
 				{/* if scanned state is true, means data is successfully retrieved */}
 				{/* Passing undefined will result in no scanning */}
 				<BarCodeScanner
@@ -327,5 +388,10 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: "black",
 		borderRadius: 5,
+	},
+	subtitle: {
+		fontSize: 16,
+		textAlign: "center",
+		marginVertical: 5,
 	},
 });

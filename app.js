@@ -341,7 +341,30 @@ app.post("/check_in_premise", async (req, res) => {
 				try {
 					const savedCheckIn = await check_in.save();
 					if (savedCheckIn) {
-						res.send(savedCheckIn);
+						const health_risk = await healthRiskAssessmentRecord.findOne({
+							$and: [
+								{ user_visitor: decrypt(remember_me.encryptedUid) },
+								{ visitor_dependent: { $exists: false } },
+							],
+						});
+						// console.log(health_risk.result);
+						var health_risk_result;
+
+						if (!health_risk) {
+							health_risk_result = "Unknown";
+						} else {
+							health_risk_result = health_risk.result;
+						}
+						// savedCheckIn["entry_point"] = existedQRCode.entry_point;
+						var return_check_in_data = {
+							_id: savedCheckIn._id,
+							date_created: savedCheckIn.date_created,
+							premise_name: existedPremiseOwner.premise_name,
+							entry_point: existedQRCode.entry_point,
+							health_risk_result: health_risk_result,
+						};
+						// console.log(return_check_in_data);
+						res.send(return_check_in_data);
 					} else {
 						res.send([]);
 					}
@@ -384,7 +407,29 @@ app.post("/check_in_premise_dependent", async (req, res) => {
 			try {
 				const savedCheckIn = await check_in.save();
 				if (savedCheckIn) {
-					res.send(savedCheckIn);
+					const health_risk = await healthRiskAssessmentRecord.findOne({
+						$and: [
+							{ user_visitor: req.body.uid },
+							{ visitor_dependent: req.body.did },
+						],
+					});
+					// console.log(health_risk.result);
+					var health_risk_result;
+
+					if (!health_risk) {
+						health_risk_result = "Unknown";
+					} else if (health_risk.result == true) {
+						health_risk_result = "High";
+					} else if (health_risk.result == false) {
+						health_risk_result = "Low";
+					}
+
+					var return_check_in_data = {
+						_id: savedCheckIn._id,
+						date_created: savedCheckIn.date_created,
+						health_risk_result: health_risk_result,
+					};
+					res.send(return_check_in_data);
 				} else {
 					res.send([]);
 				}
@@ -408,35 +453,70 @@ app.post("/get_main_premise_qrcode", async (req, res) => {
 	res.send(mainQRCode);
 });
 
+app.post("/get_premise_info", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+
+	const premise_info = await userPremiseOwner.findOne({
+		_id: decrypt(remember_me.encryptedUid),
+	});
+
+	res.send(premise_info);
+});
+
 app.post("/get_all_premise_qrcode", async (req, res) => {
 	const remember_me = req.cookies["remember_me"];
+	const premise_name = req.cookies["pname"];
+
 	const allQRCode = await premiseQRCode.find({
 		user_premiseowner: decrypt(remember_me.encryptedUid),
 	});
+	allQRCode.premise_name = premise_name;
 	res.send(allQRCode);
 });
 
 app.post("/get_health_risk_assessment_record", async (req, res) => {
 	const remember_me = req.cookies["remember_me"];
-	const record = await healthRiskAssessmentRecord.findOne({
-		$and: [
-			{ user_visitor: decrypt(remember_me.encryptedUid) },
-			{ visitor_dependent: { $exists: false } },
-			// { visitor_dependent: confirmed_visitor_id  },
-		],
-	});
-	res.send(record);
+
+	if (req.body.role == "visitor") {
+		const record = await healthRiskAssessmentRecord.findOne({
+			$and: [
+				{ user_visitor: decrypt(remember_me.encryptedUid) },
+				{ visitor_dependent: { $exists: false } },
+			],
+		});
+		res.send(record);
+	} else {
+		const record = await healthRiskAssessmentRecord.findOne({
+			$and: [
+				{ user_visitor: decrypt(remember_me.encryptedUid) },
+				{ visitor_dependent: req.body.dependent_id },
+			],
+		});
+		res.send(record);
+	}
 });
 
 app.post("/save_health_risk_assessment_result", async (req, res) => {
 	const remember_me = req.cookies["remember_me"];
 	var now = new Date();
-	const record = new healthRiskAssessmentRecord({
-		user_visitor: decrypt(remember_me.encryptedUid),
-		responses: req.body.responses,
-		result: req.body.result,
-		date_created: new Date(now.getTime() + 480 * 60000),
-	});
+	var record;
+	if (req.body.role == "visitor") {
+		record = new healthRiskAssessmentRecord({
+			user_visitor: decrypt(remember_me.encryptedUid),
+			responses: req.body.responses,
+			result: req.body.result,
+			date_created: new Date(now.getTime() + 480 * 60000),
+		});
+	} else {
+		record = new healthRiskAssessmentRecord({
+			user_visitor: decrypt(remember_me.encryptedUid),
+			visitor_dependent: req.body.dependent_id,
+			responses: req.body.responses,
+			result: req.body.result,
+			date_created: new Date(now.getTime() + 480 * 60000),
+		});
+	}
+
 	try {
 		const savedRecord = await record.save();
 		if (savedRecord) {
@@ -514,7 +594,80 @@ app.post("/get_user_dependent", async (req, res) => {
 	const allDependent = await visitorDependent.find({
 		user_visitor: decrypt(remember_me.encryptedUid),
 	});
-	res.send(allDependent);
+
+	if (Object.keys(allDependent).length === 0) {
+		res.send([]);
+	}
+
+	var counter = 0;
+	var all_dependent_arr = new Array();
+	allDependent.forEach(async function (item) {
+		const health_risk = await healthRiskAssessmentRecord.findOne({
+			$and: [
+				{ user_visitor: decrypt(remember_me.encryptedUid) },
+				{ visitor_dependent: item._id },
+			],
+		});
+
+		if (!health_risk) {
+			all_dependent_arr.push({
+				_id: item._id,
+				ic_fname: item.ic_fname,
+				relationship: item.relationship,
+				health_risk: "Unknown",
+				date_created: item.date_created,
+			});
+		} else if (health_risk.result == true) {
+			all_dependent_arr.push({
+				_id: item._id,
+				ic_fname: item.ic_fname,
+				relationship: item.relationship,
+				health_risk: "High",
+				date_created: item.date_created,
+			});
+		} else if (health_risk.result == false) {
+			all_dependent_arr.push({
+				_id: item._id,
+				ic_fname: item.ic_fname,
+				relationship: item.relationship,
+				health_risk: "Low",
+				date_created: item.date_created,
+			});
+		}
+		if (counter == allDependent.length - 1) {
+			// console.log(all_dependent_arr);
+			res.send(all_dependent_arr);
+		}
+		counter += 1;
+	});
+
+	// res.send(allDependent);
+});
+
+app.post("/get_user_info_health_risk", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	const user_info = await userVisitor.findOne({
+		_id: decrypt(remember_me.encryptedUid),
+	});
+	const health_risk = await healthRiskAssessmentRecord.findOne({
+		user_visitor: decrypt(remember_me.encryptedUid),
+	});
+
+	if (!health_risk) {
+		var user_info_with_health_risk = {
+			_id: user_info._id,
+			ic_fname: user_info.ic_fname,
+			health_risk: "Unknown",
+		};
+	} else {
+		var user_info_with_health_risk = {
+			_id: user_info._id,
+			ic_fname: user_info.ic_fname,
+			health_risk: health_risk.result,
+		};
+	}
+
+	res.send(user_info_with_health_risk);
 });
 
 app.post("/get_user_info", async (req, res) => {
@@ -578,7 +731,7 @@ app.post("/get_real_time_check_in_record", async (req, res) => {
 		.find({
 			$and: [
 				{ user_premiseowner: decrypt(remember_me.encryptedUid) },
-				// { visitor_dependent: { $exists: false } },
+				{ visitor_dependent: { $exists: false } },
 			],
 		})
 		.sort({ date_created: -1 })
@@ -794,6 +947,9 @@ app.post("/login_premiseOwner_phoneNo", async (req, res) => {
 		httpOnly: true,
 	});
 
+	res.cookie("pid", user._id);
+	res.cookie("pname", user.premise_name);
+
 	res.send(true);
 });
 
@@ -820,6 +976,9 @@ app.post("/login_premiseOwner_email", async (req, res) => {
 		maxAge: 604800000, // 7 days
 		httpOnly: true,
 	});
+
+	res.cookie("pid", user._id);
+	res.cookie("pname", user.premise_name);
 
 	res.send(true);
 });
@@ -1071,6 +1230,40 @@ app.get("/getHomeLocation", (req, res) => {
 		});
 });
 
+app.get("/getHotspotDetails", (req, res) => {
+	const place_id = req.query.place_id;
+	const api_key = "api_key";
+	// const querystr = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${home_address}&key=${api_key}`;
+	const querystr = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=formatted_address,name,types,url,photos&key=${api_key}`;
+
+	axios
+		.get(querystr)
+		.then((response) => {
+			// console.log(response.data);
+			res.send(response.data);
+		})
+		.catch((error) => {
+			res.status(400).json(error);
+		});
+});
+
+app.get("/getPhotoReference", (req, res) => {
+	const photo_reference = req.query.photo_reference;
+	const api_key = "api_key";
+	const querystr = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo_reference}&key=${api_key}
+	`;
+
+	axios
+		.get(querystr)
+		.then((response) => {
+			// console.log(response.data);
+			res.send(response.data);
+		})
+		.catch((error) => {
+			res.status(400).json(error);
+		});
+});
+
 app.post("/sendTacCode", (req, res) => {
 	const phone_number = req.body.item.phone_no;
 	const tac_code = req.body.item.tac_code;
@@ -1100,7 +1293,7 @@ app.post("/sendVerificationEmail", async (req, res) => {
 		service: "gmail",
 		auth: {
 			user: "wayne.ng6010@gmail.com",
-			pass: "pass",
+			pass: "ozuueiwutugbeakc",
 		},
 	});
 

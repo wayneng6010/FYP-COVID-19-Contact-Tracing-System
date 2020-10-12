@@ -14,6 +14,8 @@ import {
 	Keyboard,
 	Image,
 	TouchableHighlight,
+	Modal,
+	Linking,
 } from "react-native";
 
 import * as Location from "expo-location";
@@ -35,10 +37,10 @@ export default class home_risk_assessment extends React.Component {
 			// home_address:
 			// 	"98-11-18, sinar bukit dumbar, jalan faraday, 11700 pulau pinang",
 			region: {
-				latitude: 37.78825,
-				longitude: -122.4324,
-				latitudeDelta: 0.002,
-				longitudeDelta: 0.002,
+				latitude: 4.2105,
+				longitude: 101.9758,
+				latitudeDelta: 6,
+				longitudeDelta: 6,
 			},
 			search_prediction: [],
 			search_prediction_selected: true,
@@ -52,6 +54,10 @@ export default class home_risk_assessment extends React.Component {
 			saved_home_location: null,
 			home_location_risk: null,
 			hotspot_nearby: null,
+			modalVisible_selected_hotspot: false,
+			current_hotspot_data: null,
+			current_hotspot_place_details: null,
+			current_hotspot_photo_reference: null,
 		};
 	}
 
@@ -150,17 +156,52 @@ export default class home_risk_assessment extends React.Component {
 				if (jsonData === undefined || jsonData.length == 0) {
 					alert("No record found");
 					this.setState({
-						hotspot: "none",
+						hotspot_data: "none",
 					});
 				} else {
 					var hotspot_data = new Array();
 					jsonData.forEach(function (item) {
-						hotspot_data.push({
-							_id: item._id,
-							place_id: item.place_id,
-							place_lat: parseFloat(item.place_lat),
-							place_lng: parseFloat(item.place_lng),
-						});
+						if (item.type == "premise") {
+							var premise_full_address =
+								item.user_premiseowner.premise_address +
+								", " +
+								item.user_premiseowner.premise_postcode +
+								", " +
+								item.user_premiseowner.premise_state;
+							var check_in_datetime = item.check_in_record.date_created
+								.replace(/-/g, "/")
+								.substring(0, 10);
+							hotspot_data.push({
+								_id: item._id,
+								premise_name: item.user_premiseowner.premise_name,
+								premise_address: premise_full_address,
+								check_in_datetime: check_in_datetime,
+								type: item.type,
+								place_id: item.place_id,
+								place_lat: parseFloat(item.place_lat),
+								place_lng: parseFloat(item.place_lng),
+							});
+						} else if (item.type == "residential") {
+							hotspot_data.push({
+								_id: item._id,
+								// premise_name: item.user_premiseowner.premise_name,
+								// premise_address: premise_full_address,
+								// check_in_datetime: check_in_datetime,
+								type: item.type,
+								place_id: item.place_id,
+								place_lat: parseFloat(item.place_lat),
+								place_lng: parseFloat(item.place_lng),
+							});
+						} else if (item.type == "manual_added") {
+							hotspot_data.push({
+								_id: item._id,
+								type: item.type,
+								description: item.description,
+								place_id: item.place_id,
+								place_lat: parseFloat(item.place_lat),
+								place_lng: parseFloat(item.place_lng),
+							});
+						}
 					});
 					this.setState({
 						hotspot_data: hotspot_data,
@@ -205,8 +246,8 @@ export default class home_risk_assessment extends React.Component {
 						region: {
 							latitude: jsonData.home_lat,
 							longitude: jsonData.home_lng,
-							latitudeDelta: 0.002,
-							longitudeDelta: 0.002,
+							latitudeDelta: 0.04,
+							longitudeDelta: 0.04,
 						},
 						// place_lat: jsonData.home_lat,
 						// place_lng: jsonData.home_lng,
@@ -315,6 +356,63 @@ export default class home_risk_assessment extends React.Component {
 		await this.getSearchLocation(place_id);
 	};
 
+	getHotspotDetails = async (item) => {
+		var hotspot_place_id = item.place_id;
+		// alert(hotspot_place_id);
+		const query_get_hotspot_details = `http://192.168.0.131:5000/getHotspotDetails?place_id=${hotspot_place_id}`;
+		console.log(query_get_hotspot_details);
+		await axios
+			.get(query_get_hotspot_details)
+			.then((response) => {
+				this.setState({
+					current_hotspot_place_details: {
+						place_name: response.data.result.name,
+						place_address: response.data.result.formatted_address,
+						types: response.data.result.types,
+						url: response.data.result.url,
+						// website: response.data.result.website,
+						photo_reference: response.data.result.photos[0].photo_reference,
+					},
+				});
+				// console.log(this.state.current_hotspot_place_details);
+			})
+			.catch((error) => {
+				alert(error);
+			});
+
+		var photo_reference = this.state.current_hotspot_place_details
+			.photo_reference;
+		// alert(photo_reference);
+		// const query_get_photo_reference = `http://192.168.0.131:5000/getPhotoReference?photo_reference=${photo_reference}`;
+		// await axios
+		// 	.get(query_get_photo_reference)
+		// 	.then((response) => {
+		// 		this.setState({
+		// 			current_hotspot_photo_reference: response,
+		// 		});
+		// 		alert(JSON.stringify(response));
+		// 	})
+		// 	.catch((error) => {
+		// 		alert(error);
+		// 	});
+
+		const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo_reference}&key=api_key`;
+		var xhr = new XMLHttpRequest();
+		xhr.open("GET", url, true);
+		xhr.onload = () => {
+			// alert(xhr.responseURL);
+			this.setState({ current_hotspot_photo_reference: xhr.responseURL });
+		};
+		xhr.send(null);
+	};
+
+	setModalVisible_selected_hotspot = (visible, item) => {
+		this.setState({ modalVisible_selected_hotspot: visible });
+		if (visible) {
+			this.getHotspotDetails(item);
+		}
+	};
+
 	render() {
 		const {
 			latitude,
@@ -322,11 +420,263 @@ export default class home_risk_assessment extends React.Component {
 			saved_home_location,
 			hotspot_data,
 			home_location_risk,
+			modalVisible_selected_hotspot,
+			current_hotspot_data,
+			current_hotspot_place_details,
+			current_hotspot_photo_reference,
 			hotspot_nearby,
 		} = this.state;
+
+		const mapStyle = [
+			{
+				featureType: "landscape.man_made",
+				elementType: "geometry",
+				stylers: [
+					{
+						color: "#f7f1df",
+					},
+				],
+			},
+			{
+				featureType: "landscape.natural",
+				elementType: "geometry",
+				stylers: [
+					{
+						color: "#d0e3b4",
+					},
+				],
+			},
+			{
+				featureType: "landscape.natural.terrain",
+				elementType: "geometry",
+				stylers: [
+					{
+						visibility: "off",
+					},
+				],
+			},
+			// {
+			// 	featureType: "poi",
+			// 	elementType: "labels",
+			// 	stylers: [
+			// 		{
+			// 			visibility: "off",
+			// 		},
+			// 	],
+			// },
+			// {
+			// 	featureType: "poi.business",
+			// 	elementType: "all",
+			// 	stylers: [
+			// 		{
+			// 			visibility: "off",
+			// 		},
+			// 	],
+			// },
+			{
+				featureType: "poi.medical",
+				elementType: "geometry",
+				stylers: [
+					{
+						color: "#fbd3da",
+					},
+				],
+			},
+			{
+				featureType: "poi.park",
+				elementType: "geometry",
+				stylers: [
+					{
+						color: "#bde6ab",
+					},
+				],
+			},
+			// {
+			// 	featureType: "road",
+			// 	elementType: "geometry.stroke",
+			// 	stylers: [
+			// 		{
+			// 			visibility: "off",
+			// 		},
+			// 	],
+			// },
+			// {
+			// 	featureType: "road",
+			// 	elementType: "labels",
+			// 	stylers: [
+			// 		{
+			// 			visibility: "off",
+			// 		},
+			// 	],
+			// },
+			{
+				featureType: "road.highway",
+				elementType: "geometry.fill",
+				stylers: [
+					{
+						color: "#ffe15f",
+					},
+				],
+			},
+			// {
+			// 	featureType: "road.highway",
+			// 	elementType: "geometry.stroke",
+			// 	stylers: [
+			// 		{
+			// 			color: "#efd151",
+			// 		},
+			// 	],
+			// },
+			{
+				featureType: "road.arterial",
+				elementType: "geometry.fill",
+				stylers: [
+					{
+						color: "#ffffff",
+					},
+				],
+			},
+			{
+				featureType: "road.local",
+				elementType: "geometry.fill",
+				stylers: [
+					{
+						color: "black",
+					},
+				],
+			},
+			{
+				featureType: "transit.station.airport",
+				elementType: "geometry.fill",
+				stylers: [
+					{
+						color: "#cfb2db",
+					},
+				],
+			},
+			{
+				featureType: "water",
+				elementType: "geometry",
+				stylers: [
+					{
+						color: "#a2daf2",
+					},
+				],
+			},
+		];
 		return (
 			<SafeAreaView style={styles.container}>
-				<Text style={styles.subtitle_bg}>Home Risk Assessment</Text>
+				{/* <Text style={styles.subtitle_bg}>Home Risk Assessment</Text> */}
+				{current_hotspot_data == null ||
+				current_hotspot_photo_reference == null ||
+				current_hotspot_place_details == null ? (
+					<View />
+				) : (
+					<Modal
+						animationType="slide"
+						transparent={true}
+						visible={modalVisible_selected_hotspot}
+						onRequestClose={() => {
+							this.setModalVisible_selected_hotspot(
+								!modalVisible_selected_hotspot
+							);
+						}}
+					>
+						<View style={styles.centeredView}>
+							<View style={styles.modalView}>
+								{current_hotspot_data.type == "premise" ? (
+									<Text style={styles.check_in_datetime}>
+										{"A COVID-19 infected person have checked in to this premise on " +
+											current_hotspot_data.check_in_datetime}
+									</Text>
+								) : current_hotspot_data.type == "residential" ? (
+									<Text style={styles.check_in_datetime}>
+										{"A COVID-19 infected person lives in this residence"}
+									</Text>
+								) : (
+									<Text style={styles.check_in_datetime}>
+										{current_hotspot_data.description}
+									</Text>
+								)}
+								<Image
+									style={{ width: 200, height: 200 }}
+									source={{
+										uri: current_hotspot_photo_reference,
+									}}
+								/>
+								{/* <Text style={styles.premise_name}>
+									{current_hotspot_data.premise_name}
+								</Text>
+								<Text style={styles.premise_address}>
+									{current_hotspot_data.premise_address}
+								</Text> */}
+								<Text style={styles.premise_name}>
+									{current_hotspot_place_details.place_name}
+								</Text>
+								<Text style={styles.premise_address}>
+									{current_hotspot_place_details.place_address}
+								</Text>
+								<Text style={styles.premise_address}>
+									{"Types: " + current_hotspot_place_details.types.join(" | ")}
+								</Text>
+								<TouchableHighlight
+									style={{ ...styles.openButton_2, backgroundColor: "grey" }}
+									onPress={() =>
+										Linking.openURL(current_hotspot_place_details.url)
+									}
+								>
+									<Text style={styles.textStyle}>Open in Google Maps</Text>
+								</TouchableHighlight>
+
+								{/* <Text style={styles.modalText}>
+									{current_hotspot_data.place_id}
+								</Text> */}
+
+								{/* <Text style={styles.modalText}>
+									{current_hotspot_place_details.photos_reference}
+								</Text> */}
+
+								{/* <Image
+									style={{ width: 200, height: 200 }}
+									source={{
+										uri: current_hotspot_photo_reference,
+									}}
+								/>
+								<Text style={styles.modalText}>
+									{"Types: " + current_hotspot_place_details.types.join(", ")}
+								</Text>
+								<TouchableHighlight
+									style={{ ...styles.openButton_2, backgroundColor: "grey" }}
+									onPress={() =>
+										Linking.openURL(current_hotspot_place_details.url)
+									}
+								>
+									<Text style={styles.textStyle}>Open In Google Maps</Text>
+								</TouchableHighlight> */}
+
+								{/* <Text style={styles.modalText}>
+									{current_hotspot_place_details.website}
+								</Text> */}
+
+								{/* <Text /> */}
+								<TouchableHighlight
+									style={{
+										...styles.openButton_1,
+										backgroundColor: "#3cb371",
+										width: 150,
+									}}
+									onPress={() => {
+										this.setModalVisible_selected_hotspot(
+											!modalVisible_selected_hotspot
+										);
+									}}
+								>
+									<Text style={styles.textStyle_1}>OK</Text>
+								</TouchableHighlight>
+							</View>
+						</View>
+					</Modal>
+				)}
 				<Text style={styles.title}>Search Location</Text>
 				<View style={styles.search_outer}>
 					<TextInput
@@ -363,6 +713,7 @@ export default class home_risk_assessment extends React.Component {
 				</View>
 				<MapView
 					style={styles.mapStyle}
+					customMapStyle={mapStyle}
 					region={this.state.region}
 					loadingEnabled={true}
 					loadingIndicatorColor="#666666"
@@ -373,7 +724,7 @@ export default class home_risk_assessment extends React.Component {
 					showsPointsOfInterest={false}
 					provider="google"
 				>
-					{saved_home_location == null ? (
+					{saved_home_location == null || saved_home_location == "none" ? (
 						<View />
 					) : (
 						<Marker
@@ -393,7 +744,7 @@ export default class home_risk_assessment extends React.Component {
 						</Marker>
 					)}
 
-					{hotspot_data == null ? (
+					{hotspot_data == null || hotspot_data == "none" ? (
 						<View />
 					) : (
 						hotspot_data.map((item) => (
@@ -403,9 +754,21 @@ export default class home_risk_assessment extends React.Component {
 									latitude: item.place_lat,
 									longitude: item.place_lng,
 								}}
-								title={item.place_id}
-								description={item.place_id}
-								// onPress={() => alert(item.place_id)}
+								// title={item.premise_name}
+								// description={item.place_id}
+								// description={item.premise_address}
+								onPress={() => {
+									this.setState({
+										current_hotspot_data: item,
+										region: {
+											latitude: item.place_lat,
+											longitude: item.place_lng,
+											latitudeDelta: 0.04,
+											longitudeDelta: 0.04,
+										},
+									});
+									this.setModalVisible_selected_hotspot(true, item);
+								}}
 							>
 								<Image
 									source={require("../../assets/hotspot_icon.png")}
@@ -439,7 +802,10 @@ export default class home_risk_assessment extends React.Component {
 					</View>
 				) : (
 					<View style={styles.home_risk_outer_safe}>
-						<Text style={styles.subtitle}>Your home location is safe.</Text>
+						<Text style={styles.subtitle_no}>
+							No COVID-19 hotspot have been found within a 1km radius from your
+							home location.
+						</Text>
 					</View>
 				)}
 			</SafeAreaView>
@@ -464,8 +830,40 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		marginVertical: 20,
 	},
+	check_in_datetime: {
+		backgroundColor: "#ff534f",
+		width: 300,
+		fontSize: 14,
+		textAlign: "center",
+		marginVertical: 10,
+		padding: 10,
+		color: "white",
+		borderRadius: 10,
+	},
+	premise_name: {
+		fontSize: 16,
+		fontWeight: "bold",
+		textAlign: "center",
+		marginTop: 15,
+		marginBottom: 10,
+	},
+	premise_address: {
+		fontSize: 14,
+		textAlign: "center",
+		marginBottom: 10,
+	},
 	home_risk_outer_danger: {
 		borderColor: "#cd5c5c",
+		borderWidth: 2,
+		backgroundColor: "white",
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		marginHorizontal: 20,
+		borderRadius: 20,
+	},
+	home_risk_outer_safe: {
+		borderColor: "#5cb55c",
 		borderWidth: 2,
 		backgroundColor: "white",
 		display: "flex",
@@ -483,9 +881,17 @@ const styles = StyleSheet.create({
 		// color: "white",
 		// paddingVertical: 10,
 	},
+	subtitle_no: {
+		fontSize: 15,
+		fontWeight: "bold",
+		textAlign: "center",
+		// marginTop: 5,
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+	},
 	mapStyle: {
 		width: Dimensions.get("window").width,
-		height: Dimensions.get("window").height / 2.2,
+		height: Dimensions.get("window").height / 1.85,
 		marginTop: 20,
 		marginBottom: 20,
 	},
@@ -524,9 +930,48 @@ const styles = StyleSheet.create({
 		elevation: 2,
 		marginVertical: 20,
 	},
+	openButton_2: {
+		backgroundColor: "#F194FF",
+		borderRadius: 20,
+		padding: 10,
+		elevation: 2,
+		marginVertical: 10,
+	},
 	textStyle: {
 		color: "white",
 		fontWeight: "bold",
 		textAlign: "center",
+	},
+	textStyle_1: {
+		color: "white",
+		textAlign: "center",
+		fontWeight: "bold",
+	},
+	centeredView: {
+		flex: 1,
+		justifyContent: "center",
+		alignItems: "center",
+		marginTop: 22,
+	},
+	modalView: {
+		margin: 20,
+		backgroundColor: "white",
+		borderRadius: 20,
+		padding: 30,
+		alignItems: "center",
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+	},
+	openButton_1: {
+		backgroundColor: "#F194FF",
+		borderRadius: 20,
+		padding: 10,
+		elevation: 2,
 	},
 });

@@ -94,6 +94,15 @@ export default class sign_in extends React.Component {
 								style={styles.underline}
 								onPress={() => {
 									this.setModalVisible(!modalVisible);
+									this.props.navigation.navigate("manage_dependent");
+								}}
+							>
+								Manage Dependent
+							</Text>
+							<Text
+								style={styles.underline}
+								onPress={() => {
+									this.setModalVisible(!modalVisible);
 									this.props.navigation.navigate("view_check_in_history");
 								}}
 							>
@@ -103,7 +112,7 @@ export default class sign_in extends React.Component {
 								style={styles.underline}
 								onPress={() => {
 									this.setModalVisible(!modalVisible);
-									this.props.navigation.navigate("health_risk_assessment");
+									this.props.navigation.navigate("view_health_risk");
 								}}
 							>
 								Health Risk Assessment
@@ -116,15 +125,6 @@ export default class sign_in extends React.Component {
 								}}
 							>
 								Residential Location Risk Assessment
-							</Text>
-							<Text
-								style={styles.underline}
-								onPress={() => {
-									this.setModalVisible(!modalVisible);
-									this.props.navigation.navigate("manage_dependent");
-								}}
-							>
-								Manage Dependent
 							</Text>
 							<Text
 								style={[styles.underline, styles.underline_logout]}
@@ -146,10 +146,16 @@ export default class sign_in extends React.Component {
 					</View>
 				</Modal>
 				<Text>Visitor Home page</Text>
-				<Button
-					title="Menu"
-					onPress={() => this.setModalVisible(true)}
-				></Button>
+				<View style={styles.nav_bar_bottom}>
+					<TouchableHighlight
+						style={{ ...styles.openButton_nav, backgroundColor: "#3cb371" }}
+						onPress={() => {
+							this.setModalVisible(true)
+						}}
+					>
+						<Text style={styles.menu_text}>Menu</Text>
+					</TouchableHighlight>
+				</View>
 			</SafeAreaView>
 
 			// 	{/* {news.map((data) => {
@@ -190,15 +196,34 @@ const styles = StyleSheet.create({
 	},
 	openButton: {
 		backgroundColor: "#F194FF",
-		borderRadius: 20,
-		padding: 10,
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 120,
 		elevation: 2,
+	},
+	openButton_nav: {
+		backgroundColor: "#F194FF",
+		width: "100%",
+		elevation: 2,
+		height: 50,
+	},
+	menu_text: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
+		fontSize: 20,
+		paddingTop: 10,
+	},
+	nav_bar_bottom: {
+		position: "absolute",
+		bottom: 0,
+		width: "100%",
 	},
 	cancelStyle: {
 		color: "white",
 		fontWeight: "bold",
 		textAlign: "center",
-		width: 200,
+		width: 120,
 	},
 	modalText: {
 		marginBottom: 15,

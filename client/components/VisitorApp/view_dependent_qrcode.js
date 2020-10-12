@@ -31,7 +31,6 @@ export default class view_dependent_qrcode extends React.Component {
 		this.state = {
 			// busy: null,
 			// imageSaved: null,
-			premiseName: "Hulala Sdn. Bhd.",
 			qrcode_value: null,
 			qrcode_options: null,
 			modalVisible_regenerate: false,
@@ -41,7 +40,6 @@ export default class view_dependent_qrcode extends React.Component {
 			dependent_relationship: null,
 		};
 	}
-
 
 	getUserID = async () => {
 		await fetch("http://192.168.0.131:5000/get_user_id", {
@@ -112,18 +110,15 @@ export default class view_dependent_qrcode extends React.Component {
 		try {
 			let file_path = await Print.printToFileAsync({
 				html:
-					'<div style = "margin-top: 10%;"><p style = "font-size: 24; font-weight: bold; text-align: center; font-size: 45px;">COVID-19 Contact Tracing System</p>' +
-					'<p style = "font-weight: bold; text-align: center; font-size: 45px;">Check in to ' +
-					this.state.premiseName +
-					"</p>" +
-					'<p style = "font-size: 38; font-weight: bold; text-align: center;">' +
-					this.state.selected_entry_point +
-					"</p>" +
-					'<p style="text-align: center; margin-top: -30px;"><img src="data:image;base64,' +
+					'<div style = "margin-top: 10%; border: 1px solid grey; border-radius: 20px; width: 500px; height: 250px; padding: 0 25px;">' +
+					'<div style="display: inline-block; width: 200px; height: 200px;"><p style="text-align: center; margin-top: -30px;"><img src="data:image;base64,' +
 					dataURL +
 					'"' +
-					'alt="QR code" style="margin-top: 50px; width: 300px; height: 300px;" /></p>' +
-					'<p style="font-size: 28; font-weight: bold; text-align: center; margin-top: 50px;">Scan the QR Code using COVID-19 Contact Tracing App</p>' +
+					'alt="QR code" style="margin-top: 50px; width: 200px; height: 200px;" /></p></div>' +
+					'<div style="display: inline-block; width: 300px; height: 200px; transform: translate(0, -20px); margin-top: 0; padding-top: 0;"><p style = "line-height: .4; font-size: 20; font-weight: bold; text-align: right; font-size: 35px;">COVID-19 CTS</p>' +
+					'<p style = "line-height: 1; text-align: right; font-size: 24px; margin-bottom: -25px;">' +
+					this.state.dependent_name +
+					'</p><p style="line-height: 1; font-size: 20; text-align: right; margin-top: 50px;">Show this to premise<br/>staff while check in</p></div>' +
 					"</div>",
 				width: 600,
 				height: 800,
@@ -259,7 +254,10 @@ export default class view_dependent_qrcode extends React.Component {
 				>
 					<View style={styles.centeredView}>
 						<View style={styles.modalView}>
-							<Text style={styles.modalText}>Are you sure to regenerate this QR code? This QR code cannot be used after regeneration.</Text>
+							<Text style={styles.modalText}>
+								Are you sure to regenerate this QR code? This QR code cannot be
+								used after regeneration.
+							</Text>
 							<View style={styles.flexRow1}>
 								<View style={styles.flexCol}>
 									<TouchableHighlight
@@ -296,7 +294,10 @@ export default class view_dependent_qrcode extends React.Component {
 				>
 					<View style={styles.centeredView}>
 						<View style={styles.modalView}>
-							<Text style={styles.modalText}>Are you sure to delete this dependent? This QR code cannot be used after deletion.</Text>
+							<Text style={styles.modalText}>
+								Are you sure to delete this dependent? This QR code cannot be
+								used after deletion.
+							</Text>
 							<View style={styles.flexRow1}>
 								<View style={styles.flexCol}>
 									<TouchableHighlight

@@ -15,7 +15,7 @@ import {
 	Picker,
 } from "react-native";
 
-export default class real_time_check_in_record extends React.Component {
+export default class view_check_in_history extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
@@ -27,13 +27,49 @@ export default class real_time_check_in_record extends React.Component {
 		super(props);
 		this.state = {
 			modalVisible: false,
-			check_in_records: null,
-			health_risk: null,
+			all_dependent: null,
+			user_info: null,
+			selected_relation: null,
 		};
 	}
 
-	getVisitorInfo = async () => {
-		await fetch("http://192.168.0.131:5000/get_user_info", {
+	getAllDependent = async () => {
+		await fetch("http://192.168.0.131:5000/get_user_dependent", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({}),
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.json();
+			})
+			.then((jsonData) => {
+				// alert(JSON.stringify(jsonData));
+				if (jsonData === undefined || jsonData.length == 0) {
+					// alert("No record found for dependent");
+					this.setState({
+						all_dependent: "none",
+					});
+				} else {
+					// alert(jsonData);
+					jsonData.sort(function compare(a, b) {
+						return new Date(a.date_created) - new Date(b.date_created);
+					});
+					this.setState({
+						all_dependent: jsonData,
+					});
+				}
+				// console.log(jsonData);
+			})
+			.catch((error) => {
+				alert(error);
+			});
+	};
+
+	getUserInfo = async () => {
+		await fetch("http://192.168.0.131:5000/get_user_info_health_risk", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -61,131 +97,96 @@ export default class real_time_check_in_record extends React.Component {
 			});
 	};
 
-	getDependentInfo = async () => {
-		await fetch("http://192.168.0.131:5000/get_dependent_info", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				dependent_id: this.props.navigation.state.params.dependent_id,
-			}),
-		})
-			.then((res) => {
-				// console.log(JSON.stringify(res.headers));
-				return res.json();
-			})
-			.then((jsonData) => {
-				// alert(JSON.stringify(jsonData));
-				if (jsonData === undefined || jsonData.length == 0) {
-					alert("No record found for dependent");
-				} else {
-					// alert(jsonData);
-					this.setState({
-						user_info: jsonData,
-					});
-				}
-				// console.log(jsonData);
-			})
-			.catch((error) => {
-				alert(error);
-			});
-	};
-
-	getCheckInRecords = async () => {
-		await fetch("http://192.168.0.131:5000/get_real_time_check_in_record", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({}),
-		})
-			.then((res) => {
-				// console.log(JSON.stringify(res.headers));
-				return res.json();
-			})
-			.then((jsonData) => {
-				// alert(JSON.stringify(jsonData));
-				if (jsonData === undefined || jsonData.length == 0) {
-					alert("No record found");
-				} else {
-					// alert(JSON.stringify(jsonData));
-					// jsonData.forEach(function (item) {
-					// 	item.date_created = item.date_created
-					// 		.replace("T", " ")
-					// 		.substring(0, item.date_created.indexOf(".") - 3);
-					// });
-
-					jsonData.sort(function compare(a, b) {
-						return new Date(b.date_created) - new Date(a.date_created);
-					});
-
-					this.setState({
-						check_in_records: jsonData,
-					});
-				}
-				// console.log(jsonData);
-			})
-			.catch((error) => {
-				alert(error);
-			});
-	};
-
 	componentDidMount = async () => {
-		await this.getCheckInRecords();
-		this._interval = setInterval(() => {
-			this.getCheckInRecords();
-		}, 5000);
+		this.getAllDependent();
+		this.getUserInfo();
 
-		// const {check_in_records}  = this.state;
-		// check_in_records.sort(function compare(a, b) {
-		// 	return new Date(b.date_create) - new Date(a.date_create);
-		// });
-		// console.log(check_in_records);
-		// this.setState({
-		// 	check_in_records: check_in_records,
-		// });
+		const { navigation } = this.props;
+		this.focusListener = navigation.addListener("didFocus", () => {
+			this.getAllDependent();
+			this.getUserInfo();
+		});
 	};
-
-	componentWillUnmount() {
-		clearInterval(this._interval);
-	}
 
 	setModalVisible = (visible) => {
 		this.setState({ modalVisible: visible });
 	};
 
 	render() {
-		const { user_info, check_in_records } = this.state;
+		const { user_info, all_dependent } = this.state;
 
 		return (
 			<SafeAreaView style={styles.container}>
 				<View style={styles.reg_content}>
 					<Text style={[styles.subtitle, styles.subtitle_bg]}>
-						Real Time Check In Record
+						View Health Risk
 					</Text>
 					<Text />
-					{/* <View style={[styles.subtitle_1]}>
+
+					<Text style={[styles.subtitle_1]}>You</Text>
+					<View style={styles.dependent_view}>
 						{user_info == null ? (
 							<ActivityIndicator />
 						) : (
+							// { all_dependent_item }
+							// <View />
 							<View>
-								<Text style={[styles.subtitle_2]}>{user_info.ic_fname}</Text>
-								<Text style={[styles.subtitle_3]}>{user_info.ic_num}</Text>
+								<View style={styles.flexRow1}>
+									<View style={[styles.flexCol, styles.flexCol_wider]}>
+										<TouchableOpacity
+											style={styles.dependent_outer_1}
+											key={user_info._id}
+											onPress={() => {
+												this.props.navigation.navigate(
+													"health_risk_assessment",
+													{
+														role: "visitor",
+													}
+												);
+											}}
+										>
+											<Text style={styles.dependent_name}>
+												{user_info.ic_fname}
+											</Text>
+										</TouchableOpacity>
+									</View>
+									<View style={[styles.flexCol, styles.flexCol_narrower]}>
+										<TouchableHighlight
+											onPress={() => {
+												this.props.navigation.navigate(
+													"health_risk_assessment",
+													{
+														role: "visitor",
+													}
+												);
+											}}
+										>
+											{user_info.health_risk === false ? (
+												<Text style={styles.subtitle_bg_green}>Risk</Text>
+											) : user_info.health_risk === true ? (
+												<Text style={styles.subtitle_bg_red}>Risk</Text>
+											) : (
+												<Text style={styles.subtitle_bg_unknown}>Risk</Text>
+											)}
+										</TouchableHighlight>
+									</View>
+								</View>
 							</View>
 						)}
-					</View> */}
+					</View>
 					<Text />
+					<Text />
+					<Text style={[styles.subtitle_1]}>Your Dependent</Text>
 					<ScrollView style={styles.dependent_view}>
-						{check_in_records == null ? (
+						{all_dependent == null ? (
 							<ActivityIndicator />
 						) : // { all_dependent_item }
 						// <View />
-						check_in_records == "none" ? (
-							<Text style={styles.subtitle_4}>No check in record found</Text>
+						all_dependent == "none" ? (
+							<Text style={styles.no_record}>No dependent found</Text>
 						) : (
-							<ScrollView>
-								{check_in_records.map((data) => {
+							<View>
+								{all_dependent.map((data) => {
 									return (
 										<View key={data._id} style={styles.flexRow2}>
 											<View style={[styles.flexCol, styles.flexCol_wider]}>
@@ -193,51 +194,50 @@ export default class real_time_check_in_record extends React.Component {
 													style={styles.dependent_outer}
 													key={data._id}
 													onPress={() => {
-														// this.props.navigation.navigate(
-														// 	"view_dependent_qrcode",
-														// 	{
-														// 		dependent_id: data._id,
-														// 		dependent_name: data.ic_fname,
-														// 		dependent_relationship: data.relationship,
-														// 	}
-														// );
+														this.props.navigation.navigate(
+															"health_risk_assessment",
+															{
+																role: "dependent",
+																dependent_id: data._id,
+																dependent_fname: data.ic_fname,
+															}
+														);
 													}}
 												>
 													<Text style={styles.dependent_name}>
-														#
-														{" " +
-															data._id.slice(data._id.length - 2).toUpperCase()}
+														{data.ic_fname}
 													</Text>
 													<Text style={styles.dependent_relationship}>
-														{data.date_created
-															.replace("T", " ")
-															.substring(0, data.date_created.indexOf(".") - 3)}
+														{data.relationship}
 													</Text>
 												</TouchableOpacity>
 											</View>
 											<View style={[styles.flexCol, styles.flexCol_narrower]}>
-												{data.health_risk === false ? (
-													<Text
-														style={[styles.subtitle, styles.subtitle_bg_green]}
-													>
-														Risk
-													</Text>
-												) : data.health_risk === true ? (
-													<Text
-														style={[styles.subtitle, styles.subtitle_bg_red]}
-													>
-														Risk
-													</Text>
-												) : (
-													<Text style={[styles.subtitle, styles.subtitle_bg_unknown]}>
-														Risk
-													</Text>
-												)}
+												<TouchableHighlight
+													onPress={() => {
+														this.props.navigation.navigate(
+															"health_risk_assessment",
+															{
+																role: "dependent",
+																dependent_id: data._id,
+																dependent_fname: data.ic_fname,
+															}
+														);
+													}}
+												>
+													{data.health_risk === "Low" ? (
+														<Text style={styles.subtitle_bg_green}>Risk</Text>
+													) : data.health_risk === "High" ? (
+														<Text style={styles.subtitle_bg_red}>Risk</Text>
+													) : (
+														<Text style={styles.subtitle_bg_unknown}>Risk</Text>
+													)}
+												</TouchableHighlight>
 											</View>
 										</View>
 									);
 								})}
-							</ScrollView>
+							</View>
 						)}
 					</ScrollView>
 				</View>
@@ -251,29 +251,9 @@ export default class real_time_check_in_record extends React.Component {
 }
 
 const styles = StyleSheet.create({
-	subtitle_bg_green: {
-		backgroundColor: "#3cb371",
-		paddingVertical: 10,
-		paddingHorizontal: 20,
-		borderRadius: 10,
-		fontWeight: "bold",
-		color: "white",
-	},
-	subtitle_bg_red: {
-		backgroundColor: "#cd5c5c",
-		paddingVertical: 10,
-		paddingHorizontal: 20,
-		borderRadius: 10,
-		fontWeight: "bold",
-		color: "white",
-	},
-	subtitle_bg_unknown: {
-		backgroundColor: "grey",
-		paddingVertical: 10,
-		paddingHorizontal: 20,
-		borderRadius: 10,
-		fontWeight: "bold",
-		color: "white",
+	no_record: {
+		textAlign: "center",
+		fontStyle: "italic",
 	},
 	flexRow_bg: {
 		backgroundColor: "#f0f0f0",
@@ -288,7 +268,7 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 	},
 	flexCol_wider: {
-		width: 210,
+		width: 200,
 	},
 	flexCol_narrower: {
 		width: 100,
@@ -300,10 +280,9 @@ const styles = StyleSheet.create({
 	},
 	dependent_view: {
 		width: 350,
-		marginHorizontal: 0,
 	},
 	dependent_outer: {
-		marginHorizontal: 0,
+		marginHorizontal: 10,
 		paddingVertical: 15,
 		// borderBottomColor: "grey",
 		// borderBottomWidth: StyleSheet.hairlineWidth,
@@ -333,7 +312,7 @@ const styles = StyleSheet.create({
 		// borderRadius: 5,
 		alignItems: "center",
 		justifyContent: "center",
-		paddingHorizontal: 0,
+		paddingHorizontal: 10,
 		paddingVertical: 20,
 		width: "95%",
 		shadowColor: "#000",
@@ -344,7 +323,7 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.25,
 		shadowRadius: 3.84,
 		elevation: 5,
-		maxHeight: "100%",
+		maxHeight: "90%",
 	},
 	add_dependent: {
 		position: "absolute",
@@ -372,23 +351,41 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		marginVertical: 5,
 	},
-	subtitle_4: {
+	subtitle_bg_green: {
+		backgroundColor: "#3cb371",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
+		color: "white",
 		textAlign: "center",
-		width: "100%",
-		fontSize: 16,
-		fontStyle: "italic",
 	},
-	subtitle_3: {
+	subtitle_bg_red: {
+		backgroundColor: "#cd5c5c",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
+		color: "white",
 		textAlign: "center",
-		width: "100%",
-		fontSize: 16,
-		fontStyle: "italic",
+	},
+	subtitle_bg_unknown: {
+		backgroundColor: "grey",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
+		color: "white",
+		textAlign: "center",
 	},
 	subtitle_2: {
-		textAlign: "center",
-		width: "100%",
-		fontWeight: "bold",
 		fontSize: 16,
+		textAlign: "center",
+		marginVertical: 5,
+		backgroundColor: "#f7f7f7",
+		width: "105%",
+		paddingHorizontal: 15,
+		paddingVertical: 10,
 	},
 	subtitle_1: {
 		textAlign: "center",
@@ -448,7 +445,7 @@ const styles = StyleSheet.create({
 		flex: 0.1,
 		flexDirection: "row",
 		marginTop: 20,
-		marginBottom: 10,
+		marginBottom: 20,
 	},
 	flexCol: {
 		marginHorizontal: 10,
