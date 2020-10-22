@@ -13,9 +13,18 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 	Picker,
+	Dimensions,
 } from "react-native";
+import {
+	LineChart,
+	BarChart,
+	PieChart,
+	ProgressChart,
+	ContributionGraph,
+	StackedBarChart,
+} from "react-native-chart-kit";
 
-export default class real_time_check_in_record extends React.Component {
+export default class visitor_analytics extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
@@ -27,75 +36,11 @@ export default class real_time_check_in_record extends React.Component {
 		super(props);
 		this.state = {
 			modalVisible: false,
-			check_in_records: null,
-			health_risk: null,
-			all_qrcode: null,
-			selected_entry_point: null,
-			selected_entry_point_id: null,
-			result_date_time_from: null,
-			loading: true,
+			check_in_counts: null,
+			date_from_simplified_arr: null,
+			selected_time_range: null,
 		};
 	}
-
-	getVisitorInfo = async () => {
-		await fetch("http://192.168.0.131:5000/get_user_info", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({}),
-		})
-			.then((res) => {
-				// console.log(JSON.stringify(res.headers));
-				return res.json();
-			})
-			.then((jsonData) => {
-				// alert(JSON.stringify(jsonData));
-				if (jsonData === undefined || jsonData.length == 0) {
-					alert("No record found for user");
-				} else {
-					// alert(jsonData);
-					this.setState({
-						user_info: jsonData,
-					});
-				}
-				// console.log(jsonData);
-			})
-			.catch((error) => {
-				alert(error);
-			});
-	};
-
-	getDependentInfo = async () => {
-		await fetch("http://192.168.0.131:5000/get_dependent_info", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				dependent_id: this.props.navigation.state.params.dependent_id,
-			}),
-		})
-			.then((res) => {
-				// console.log(JSON.stringify(res.headers));
-				return res.json();
-			})
-			.then((jsonData) => {
-				// alert(JSON.stringify(jsonData));
-				if (jsonData === undefined || jsonData.length == 0) {
-					alert("No record found for dependent");
-				} else {
-					// alert(jsonData);
-					this.setState({
-						user_info: jsonData,
-					});
-				}
-				// console.log(jsonData);
-			})
-			.catch((error) => {
-				alert(error);
-			});
-	};
 
 	getCheckInRecords = async () => {
 		// alert("2: " + this.state.selected_entry_point_id);
@@ -104,12 +49,7 @@ export default class real_time_check_in_record extends React.Component {
 		var time_from_iso = new Date(
 			time_from.getTime() - time_from.getTimezoneOffset() * 60000
 		).toISOString();
-		this.setState({
-			result_date_time_from: time_from_iso
-				.replace("T", " ")
-				.substring(0, time_from_iso.indexOf(".") - 3),
-		});
-
+		// alert(time_from_iso);
 		await fetch("http://192.168.0.131:5000/get_real_time_check_in_record", {
 			method: "POST",
 			headers: {
@@ -190,25 +130,76 @@ export default class real_time_check_in_record extends React.Component {
 			});
 	};
 
-	componentDidMount = async () => {
-		await this.getAllQRCode();
-		await this.getCheckInRecords();
-		this._interval = setInterval(() => {
-			this.getCheckInRecords();
-		}, 5000);
+	getCheckInCounts = async () => {
+		var date_from = new Date();
+		date_from = new Date(
+			date_from.getTime() - date_from.getTimezoneOffset() * 60000
+		); // utc +8
+		date_from.setUTCHours(0, 0, 0, 0); // change time to midnight 00:00 of that day
+		date_from.setDate(date_from.getDate() - 7);
 
-		// const {check_in_records}  = this.state;
-		// check_in_records.sort(function compare(a, b) {
-		// 	return new Date(b.date_create) - new Date(a.date_create);
-		// });
-		// console.log(check_in_records);
-		// this.setState({
-		// 	check_in_records: check_in_records,
-		// });
+		var date_from_arr = new Array();
+		var date_from_simplified_arr = new Array();
+		for (var i = 0; i < 7; i++) {
+			date_from_arr.push(date_from.toISOString());
+			date_from_simplified_arr.push(
+				date_from.getDate() + "/" + (date_from.getMonth() + 1)
+			);
+			date_from.setDate(date_from.getDate() + 1);
+			// console.log(date_from_arr);
+			// console.log(date_from_simplified_arr);
+		}
+		this.setState({ date_from_simplified_arr: date_from_simplified_arr });
+
+		var date_to = new Date();
+		date_to = new Date(date_to.getTime() - date_to.getTimezoneOffset() * 60000); // utc +8
+		date_to.setUTCHours(0, 0, 0, 0); // change time to midnight 00:00 of that day
+		date_to.setDate(date_to.getDate() - 6);
+
+		var date_to_arr = new Array();
+		for (var i = 0; i < 7; i++) {
+			date_to_arr.push(date_to.toISOString());
+			date_to.setDate(date_to.getDate() + 1);
+		}
+
+		// alert(date_from_arr);
+
+		await fetch("http://192.168.0.131:5000/get_check_in_counts", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				date_from_arr: date_from_arr,
+				date_to_arr: date_to_arr,
+			}),
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.json();
+			})
+			.then((jsonData) => {
+				if (!jsonData) {
+					this.setState({ check_in_counts: "none" });
+				} else {
+					// console.log(jsonData);
+					this.setState({ check_in_counts: jsonData });
+				}
+				this.setState({ loading: false });
+			})
+			.catch((error) => {
+				alert(error);
+			});
+	};
+
+	componentDidMount = async () => {
+		// await this.getAllQRCode();
+		// await this.getCheckInRecords();
+		this.getCheckInCounts();
 	};
 
 	componentWillUnmount() {
-		clearInterval(this._interval);
+		// clearInterval(this._interval);
 	}
 
 	setModalVisible = (visible) => {
@@ -216,171 +207,81 @@ export default class real_time_check_in_record extends React.Component {
 	};
 
 	render() {
-		const {
-			user_info,
-			check_in_records,
-			all_qrcode,
-			loading,
-			result_date_time_from,
-		} = this.state;
-		let all_entry_points = null;
-		if (this.state.all_qrcode !== null) {
-			all_entry_points = this.state.all_qrcode.map((data) => {
-				return (
-					<Picker.Item
-						key={data._id}
-						value={data._id}
-						label={data.entry_point}
-					/>
-				);
-			});
+		const { check_in_counts, date_from_simplified_arr } = this.state;
+		var data;
+		if (check_in_counts !== null || date_from_simplified_arr !== null) {
+			data = {
+				labels: date_from_simplified_arr,
+				datasets: [
+					{
+						data: check_in_counts,
+						color: (opacity = 0.8) => `rgba(91, 120, 235, ${opacity})`, // optional
+						strokeWidth: 2, // optional
+					},
+				],
+				legend: ["Visitors"], // optional
+			};
 		}
 
 		return (
 			<SafeAreaView style={styles.container}>
 				<View style={styles.reg_content}>
-					<Text style={[styles.subtitle, styles.subtitle_bg]}>
-						For Scan In Visitors Only (Within 1 hr)
-					</Text>
-
-					{/* <View style={[styles.subtitle_1]}>
-						{user_info == null ? (
-							<ActivityIndicator />
-						) : (
-							<View>
-								<Text style={[styles.subtitle_2]}>{user_info.ic_fname}</Text>
-								<Text style={[styles.subtitle_3]}>{user_info.ic_num}</Text>
-							</View>
-						)}
-					</View> */}
-					<View style={[styles.flexRow, styles.flexRow_bg]}>
-						<View style={[styles.flexCol, styles.flexCol_narrower]}>
-							<Text style={styles.branch_label}>Entry Point</Text>
-						</View>
-						<View style={[styles.flexCol, styles.flexCol_wider]}>
+					{check_in_counts == null ? (
+						<ActivityIndicator />
+					) : (
+						<View>
 							<View style={styles.pickerBorder}>
 								<Picker
-									selectedValue={this.state.selected_entry_point_id}
-									style={{ height: 50, width: 200 }}
+									selectedValue={this.state.selected_time_range}
+									style={{ height: 50, width: 180 }}
 									onValueChange={(itemValue, itemIndex) => {
 										// alert(JSON.stringify(all_qrcode));
-										// alert("1: " + itemValue);
-										this.state.selected_entry_point_id = itemValue;
 										this.setState({
-											// selected_entry_point_id: itemValue,
-											selected_entry_point: all_qrcode[itemIndex].entry_point,
-											loading: true,
+											selected_time_range: itemValue,
 										});
-										this.getCheckInRecords();
 									}}
 								>
-									{all_entry_points}
+									<Picker.Item value="day" label="Last 7 days" />
+									<Picker.Item value="week" label="Last 4 weeks" />
+									<Picker.Item value="month" label="Last 6 months" />
 								</Picker>
 							</View>
+							<LineChart
+								data={data}
+								width={Dimensions.get("window").width * 0.9}
+								height={220}
+								chartConfig={{
+									backgroundColor: "#ffffff",
+									backgroundGradientFrom: "#ffffff",
+									backgroundGradientTo: "#ffffff",
+									decimalPlaces: 0, // optional, defaults to 2dp
+									color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+									labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+									style: {
+										borderRadius: 16,
+									},
+									propsForDots: {
+										r: "6",
+										strokeWidth: "2",
+										stroke: "#d9d9d9",
+									},
+								}}
+								style={{
+									marginVertical: 8,
+									borderRadius: 16,
+									borderColor: "#d9d9d9",
+									borderWidth: 1,
+								}}
+							/>
 						</View>
-					</View>
-					{result_date_time_from == null ? (
-						<Text />
-					) : (
-						<Text style={styles.onwards_subtitle}>
-							{"Check ins of " + result_date_time_from + " onwards"}
-						</Text>
 					)}
-
-					<ScrollView style={styles.dependent_view}>
-						{check_in_records == null || loading == true ? (
-							<ActivityIndicator />
-						) : check_in_records == "none" ? (
-							<Text style={styles.subtitle_4}>No check in record found</Text>
-						) : (
-							<SafeAreaView>
-								<ScrollView>
-									{check_in_records.map((data) => {
-										return (
-											<View key={data._id} style={styles.flexRow2}>
-												<View style={[styles.flexCol, styles.flexCol_wider]}>
-													<TouchableOpacity
-														style={styles.dependent_outer}
-														key={data._id}
-														onPress={() => {
-															// this.props.navigation.navigate(
-															// 	"view_dependent_qrcode",
-															// 	{
-															// 		dependent_id: data._id,
-															// 		dependent_name: data.ic_fname,
-															// 		dependent_relationship: data.relationship,
-															// 	}
-															// );
-														}}
-													>
-														<Text style={styles.dependent_name}>
-															#
-															{" " +
-																data._id
-																	.slice(data._id.length - 2)
-																	.toUpperCase()}
-														</Text>
-														<Text style={styles.dependent_relationship}>
-															{data.date_created
-																.replace("T", " ")
-																.substring(
-																	0,
-																	data.date_created.indexOf(".") - 3
-																)}
-														</Text>
-													</TouchableOpacity>
-												</View>
-												<View style={[styles.flexCol, styles.flexCol_narrower]}>
-													{data.health_risk === false ? (
-														<Text
-															style={[
-																styles.subtitle,
-																styles.subtitle_bg_green,
-															]}
-														>
-															Risk
-														</Text>
-													) : data.health_risk === true ? (
-														<Text
-															style={[styles.subtitle, styles.subtitle_bg_red]}
-														>
-															Risk
-														</Text>
-													) : (
-														<Text
-															style={[
-																styles.subtitle,
-																styles.subtitle_bg_unknown,
-															]}
-														>
-															Risk
-														</Text>
-													)}
-												</View>
-											</View>
-										);
-									})}
-								</ScrollView>
-							</SafeAreaView>
-						)}
-					</ScrollView>
 				</View>
 			</SafeAreaView>
-
-			// 	{/* {news.map((data) => {
-			// 			return <Text>{data.url}</Text>;
-			// 		})} */}
 		);
 	}
 }
 
 const styles = StyleSheet.create({
-	onwards_subtitle: {
-		marginBottom: 20,
-		marginTop: 10,
-		fontStyle: "italic",
-		fontWeight: "bold",
-	},
 	subtitle_bg_green: {
 		backgroundColor: "#3cb371",
 		paddingVertical: 10,
@@ -428,9 +329,10 @@ const styles = StyleSheet.create({
 	},
 	pickerBorder: {
 		borderWidth: 1,
-		borderColor: "black",
+		borderColor: "grey",
 		borderRadius: 5,
-		marginRight: 15,
+		width: "30%",
+		marginVertical: 5,
 	},
 	dependent_view: {
 		width: 350,
@@ -554,8 +456,6 @@ const styles = StyleSheet.create({
 		flex: 0.1,
 		flexDirection: "row",
 		marginVertical: 20,
-		marginTop: 20,
-		marginBottom: 10,
 		alignItems: "center",
 		justifyContent: "center",
 		paddingVertical: 10,

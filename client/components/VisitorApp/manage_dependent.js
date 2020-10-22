@@ -53,6 +53,9 @@ export default class manage_dependent extends React.Component {
 					});
 				} else {
 					// alert(jsonData);
+					jsonData.sort(function compare(a, b) {
+						return new Date(a.date_created) - new Date(b.date_created);
+					});
 					this.setState({
 						all_dependent: jsonData,
 					});
@@ -66,6 +69,11 @@ export default class manage_dependent extends React.Component {
 
 	componentDidMount = async () => {
 		this.getAllDependent();
+
+		const { navigation } = this.props;
+		this.focusListener = navigation.addListener("didFocus", () => {
+			this.getAllDependent();
+		});
 	};
 
 	setModalVisible = (visible) => {
@@ -228,6 +236,7 @@ export default class manage_dependent extends React.Component {
 														dependent_id: data._id,
 														dependent_name: data.ic_fname,
 														dependent_relationship: data.relationship,
+														dependent_ic_num: data.ic_num,
 													}
 												);
 											}}

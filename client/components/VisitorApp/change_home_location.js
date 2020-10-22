@@ -12,19 +12,16 @@ import {
 	TextInput,
 	ToastAndroid,
 	Keyboard,
+	TouchableHighlight,
 } from "react-native";
 
 import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
 
-export default class map_findPremiseLocation extends React.Component {
+export default class change_home_location extends React.Component {
 	constructor() {
 		super();
 		this.state = {
-			// latitude: 0,
-			// longitude: 0,
-			// home_address:
-			// 	"98-11-18, sinar bukit dumbar, jalan faraday, 11700 pulau pinang",
 			region: {
 				latitude: 37.78825,
 				longitude: -122.4324,
@@ -38,13 +35,6 @@ export default class map_findPremiseLocation extends React.Component {
 			place_lng: null,
 			search_query: null,
 			place_name: null,
-			formDataObj: {
-				phone_no_sent: null,
-				email_sent: null,
-				place_id: null,
-				place_lat: null,
-				place_lng: null,
-			},
 		};
 	}
 
@@ -144,21 +134,6 @@ export default class map_findPremiseLocation extends React.Component {
 			place_lng: location.coords.longitude,
 			// place_id: place_id,
 		});
-
-		// alert(JSON.stringify(this.props.navigation.state.params.formData));
-		// this.setState({
-		// 	formDataObj: {
-		// 		ic_num: this.props.navigation.state.params.formData.ic_num,
-		// 		ic_fname: this.props.navigation.state.params.formData.ic_fname,
-		// 		ic_address: this.props.navigation.state.params.formData.ic_address,
-		// 		phone_no_sent: this.props.navigation.state.params.formData
-		// 			.phone_no_sent,
-		// 		email_sent: this.props.navigation.state.params.formData.email_sent,
-		// 		place_id: null,
-		// 		place_lat: null,
-		// 		place_lng: null,
-		// 	},
-		// });
 	};
 
 	onPressResult = async (place_id, place_name) => {
@@ -172,47 +147,6 @@ export default class map_findPremiseLocation extends React.Component {
 		await this.getHomeLocation(place_id);
 	};
 
-	save_formData = async () => {
-		// const query_save_location = `http://192.168.0.131:5000/save_location?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
-		// console.log(query_save_location);
-		// await axios
-		// 	.post(query_save_location)
-		// 	.then((response) => {
-		// 		if (response) {
-		// 			console.log("home location session saved");
-		// 		}
-		// 	})
-		// 	.catch((error) => {
-		// 		alert(error);
-		// 	});
-		const phone_no_sent = this.props.navigation.state.params.formData
-				.phone_no_sent,
-			email_sent = this.props.navigation.state.params.formData.email_sent,
-			owner_fname = this.props.navigation.state.params.formData.owner_fname,
-			premise_name = this.props.navigation.state.params.formData.premise_name,
-			premise_address = this.props.navigation.state.params.formData
-				.premise_address,
-			premise_postcode = this.props.navigation.state.params.formData
-				.premise_postcode,
-			premise_state = this.props.navigation.state.params.formData.premise_state;
-		this.setState({
-			formDataObj: {
-				phone_no_sent: phone_no_sent,
-				email_sent: email_sent,
-				owner_fname: owner_fname,
-				premise_name: premise_name,
-				premise_address: premise_address,
-				premise_postcode: premise_postcode,
-				premise_state: premise_state,
-				place_id: this.state.place_id,
-				place_lat: this.state.place_lat,
-				place_lng: this.state.place_lng,
-			},
-		});
-
-		return true;
-	};
-
 	saveHomeLocation = async () => {
 		const place_lat = this.state.place_lat,
 			place_lng = this.state.place_lng,
@@ -221,48 +155,43 @@ export default class map_findPremiseLocation extends React.Component {
 			ToastAndroid.show("Please select a location", ToastAndroid.SHORT);
 			return;
 		} else {
-			let formDataSaved = await this.save_formData();
-			ToastAndroid.show("Home Location Saved", ToastAndroid.SHORT);
-			if (formDataSaved) {
-				this.props.navigation.replace("password_create_po", {
-					formData: this.state.formDataObj,
+			await fetch("http://192.168.0.131:5000/update_home_location", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					place_lat: place_lat,
+					place_lng: place_lng,
+					place_id: place_id,
+				}),
+			})
+				.then((res) => {
+					// console.log(JSON.stringify(res.headers));
+					return res.text();
+				})
+				.then((jsonData) => {
+					// alert(jsonData);
+					if (jsonData == "success") {
+						alert("Home location has been updated");
+						this.props.navigation.pop();
+					} else if (jsonData == "failed") {
+						alert("Home location failed to update");
+					}
+				})
+				.catch((error) => {
+					alert(error);
 				});
-			}
 		}
-		// const query_save_registration = `http://192.168.0.131:5000/save_registration?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
-		// console.log(query_save_registration);
-		// await axios
-		// 	.post(query_save_registration)
-		// 	.then((response) => {
-		// 		console.log("registration saved");
-		// 	})
-		// 	.catch((error) => {
-		// 		alert(error);
-		// 	});
-
-		// alert(
-		// 	"place id: " +
-		// 		this.state.place_id +
-		// 		"\nplace lat: " +
-		// 		this.state.place_lat +
-		// 		"\nplace long: " +
-		// 		this.state.place_lng
-		// );
-		// this.props.navigation.replace("register");
 	};
 
 	render() {
 		const { latitude, longitude } = this.state;
 		return (
 			<SafeAreaView style={styles.container}>
-				<Text style={styles.subtitle_bg}>
-					Step 4/5: Verify your Premise Location
-				</Text>
-				<Text style={styles.subtitle}>
-					We need your premise location for location risk assessment. With this,
-					you will be notified if this location is marked as COVID-19 hotspot.
-				</Text>
-				<Text style={styles.title}>Find Premise Location</Text>
+				<Text style={styles.subtitle_bg}>Update Home Location</Text>
+
+				<Text style={styles.title}>Find Your Home Location</Text>
 				<View style={styles.search_outer}>
 					<TextInput
 						// onChangeText={(value) => this.setState({ search_query: value })}
@@ -296,6 +225,19 @@ export default class map_findPremiseLocation extends React.Component {
 						))}
 					</View>
 				</View>
+
+				<Text />
+				{this.state.place_id == null ? (
+					<Text style={styles.no_location_selected}>
+						{" "}
+						No location is selected
+					</Text>
+				) : (
+					<Text style={styles.location_selected}>
+						Location has been selected
+					</Text>
+				)}
+
 				<MapView
 					style={styles.mapStyle}
 					region={this.state.region}
@@ -336,10 +278,19 @@ export default class map_findPremiseLocation extends React.Component {
 					)}
 				</MapView>
 
-				<Button
+				{/* <Button
 					title="Save Home Location"
 					onPress={() => this.saveHomeLocation()}
-				></Button>
+				></Button> */}
+				<TouchableHighlight
+					style={{
+						...styles.openButton,
+						backgroundColor: "#1e90ff",
+					}}
+					onPress={() => this.saveHomeLocation()}
+				>
+					<Text style={styles.textStyle}>Save Home Location</Text>
+				</TouchableHighlight>
 			</SafeAreaView>
 
 			// 	{/* {news.map((data) => {
@@ -350,6 +301,34 @@ export default class map_findPremiseLocation extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	no_location_selected: {
+		backgroundColor: "#cd5c5c",
+		marginBottom: 10,
+		color: "white",
+		paddingHorizontal: 10,
+		paddingVertical: 10,
+		fontWeight: "bold",
+	},
+	location_selected: {
+		backgroundColor: "#3cb371",
+		marginBottom: 10,
+		color: "white",
+		paddingHorizontal: 10,
+		paddingVertical: 10,
+		fontWeight: "bold",
+	},
+	openButton: {
+		backgroundColor: "#1e90ff",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "white",

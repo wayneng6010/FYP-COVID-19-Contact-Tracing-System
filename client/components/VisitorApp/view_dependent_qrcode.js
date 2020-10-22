@@ -38,6 +38,7 @@ export default class view_dependent_qrcode extends React.Component {
 			dependent_id: null,
 			dependent_name: null,
 			dependent_relationship: null,
+			dependent_ic_num: null,
 		};
 	}
 
@@ -77,6 +78,7 @@ export default class view_dependent_qrcode extends React.Component {
 			dependent_name: this.props.navigation.state.params.dependent_name,
 			dependent_relationship: this.props.navigation.state.params
 				.dependent_relationship,
+			dependent_ic_num: this.props.navigation.state.params.dependent_ic_num,
 		});
 
 		this.getUserID();
@@ -86,9 +88,10 @@ export default class view_dependent_qrcode extends React.Component {
 		if (this.state.qrcode_options === "download") {
 			try {
 				const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+				alert("QR code saved to File Manager->DCIM");
 				if (status === "granted") {
 					const asset = await MediaLibrary.createAssetAsync(file_path_updated);
-					alert("Retrieve the downloaded PDF file via File Manager -> DCIM");
+					// alert("QR code saved to File Manager->DCIM");
 					// await MediaLibrary.saveToLibraryAsync(fileUri);
 					// await MediaLibrary.createAlbumAsync("Download", asset, false);
 				}
@@ -155,14 +158,14 @@ export default class view_dependent_qrcode extends React.Component {
 		this.setState({ modalVisible_delete: visible });
 	};
 
-	saveNewEntryPoint = async () => {
-		await fetch("http://192.168.0.131:5000/save_new_entry_point", {
+	delete_dependent = async () => {
+		await fetch("http://192.168.0.131:5000/delete_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				new_entry_point: this.state.new_entry_point,
+				dependent_id: this.state.dependent_id,
 			}),
 		})
 			.then((res) => {
@@ -172,17 +175,11 @@ export default class view_dependent_qrcode extends React.Component {
 			.then((jsonData) => {
 				// alert(JSON.stringify(jsonData));
 				if (jsonData == "success") {
-					alert("New entry point have been saved");
-					this.setModalVisible(false);
-					this.getAllQRCode();
-				} else if (jsonData == "existed") {
-					alert(
-						"New entry point name should not be similar with existing entry point"
-					);
-				} else if (jsonData == "failed") {
-					alert("Error occured while saving qr code");
+					// alert("This dependent have been deleted");
+					this.setModalVisible_delete(false);
+					this.props.navigation.pop();
 				} else {
-					alert("Error occured while saving qr code");
+					alert("Error occured while deleting this dependent");
 				}
 				// console.log(this.state.qrcode_value);
 			})
@@ -191,26 +188,17 @@ export default class view_dependent_qrcode extends React.Component {
 			});
 	};
 
-	addNewEntryPoint = async () => {
-		if (
-			this.state.new_entry_point == null ||
-			this.state.new_entry_point == ""
-		) {
-			alert("Please fill in new entry point name");
-		} else {
-			this.saveNewEntryPoint();
-		}
-	};
-
-	editEntryPointName = async () => {
-		await fetch("http://192.168.0.131:5000/edit_entry_point_name", {
+	regenerate_dependent_qrcode = async () => {
+		await fetch("http://192.168.0.131:5000/regenerate_dependent_qrcode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				selected_entry_point_id: this.state.selected_entry_point_id,
-				edit_entry_point_name: this.state.edit_entry_point,
+				dependent_id: this.state.dependent_id,
+				ic_fname: this.state.dependent_name,
+				relationship: this.state.dependent_relationship,
+				ic_num: this.state.dependent_ic_num,
 			}),
 		})
 			.then((res) => {
@@ -220,17 +208,11 @@ export default class view_dependent_qrcode extends React.Component {
 			.then((jsonData) => {
 				// alert(JSON.stringify(jsonData));
 				if (jsonData == "success") {
-					alert("Entry point name have been saved");
-					this.setModalVisible_edit(false);
-					this.getAllQRCode();
-				} else if (jsonData == "existed") {
-					alert(
-						"New entry point name should not be similar with existing entry point"
-					);
-				} else if (jsonData == "failed") {
-					alert("Error occured while saving entry point name");
+					// alert("The QR code of this dependent have been regenerated");
+					this.setModalVisible_regenerate(false);
+					this.props.navigation.pop();
 				} else {
-					alert("Error occured while saving entry point name");
+					alert("Error occured while regenerating QR code of this dependent");
 				}
 				// console.log(this.state.qrcode_value);
 			})
@@ -255,8 +237,8 @@ export default class view_dependent_qrcode extends React.Component {
 					<View style={styles.centeredView}>
 						<View style={styles.modalView}>
 							<Text style={styles.modalText}>
-								Are you sure to regenerate this QR code? This QR code cannot be
-								used after regeneration.
+								Are you sure to regenerate this QR code? The previous check ins
+								data will still be kept in the database.
 							</Text>
 							<View style={styles.flexRow1}>
 								<View style={styles.flexCol}>
@@ -273,7 +255,7 @@ export default class view_dependent_qrcode extends React.Component {
 									<TouchableHighlight
 										style={{ ...styles.openButton, backgroundColor: "#1e90ff" }}
 										onPress={() => {
-											this.editEntryPointName();
+											this.regenerate_dependent_qrcode();
 										}}
 									>
 										<Text style={styles.textStyle}>Regenerate</Text>
@@ -295,8 +277,8 @@ export default class view_dependent_qrcode extends React.Component {
 					<View style={styles.centeredView}>
 						<View style={styles.modalView}>
 							<Text style={styles.modalText}>
-								Are you sure to delete this dependent? This QR code cannot be
-								used after deletion.
+								Are you sure to delete this dependent? The previous check ins
+								data will still be kept in the database.
 							</Text>
 							<View style={styles.flexRow1}>
 								<View style={styles.flexCol}>
@@ -313,7 +295,7 @@ export default class view_dependent_qrcode extends React.Component {
 									<TouchableHighlight
 										style={{ ...styles.openButton, backgroundColor: "#dc3545" }}
 										onPress={() => {
-											this.addNewEntryPoint();
+											this.delete_dependent();
 										}}
 									>
 										<Text style={styles.textStyle}>Delete</Text>
@@ -344,6 +326,9 @@ export default class view_dependent_qrcode extends React.Component {
 								<Text style={styles.dependent_relationship}>
 									{this.state.dependent_relationship}
 								</Text>
+								<Text style={styles.dependent_relationship}>
+									{this.state.dependent_ic_num}
+								</Text>
 							</View>
 						</View>
 					)}
@@ -361,7 +346,14 @@ export default class view_dependent_qrcode extends React.Component {
 								this.getBase64("download");
 							}}
 						>
+							{/* <View>
+								<Text style={styles.textStyle}>Download</Text>
+							</View> */}
 							<View>
+								<Image
+									source={require("../../assets/download_icon.png")}
+									style={styles.icon}
+								/>
 								<Text style={styles.textStyle}>Download</Text>
 							</View>
 						</TouchableHighlight>
@@ -377,7 +369,14 @@ export default class view_dependent_qrcode extends React.Component {
 								this.getBase64("share");
 							}}
 						>
+							{/* <View>
+								<Text style={styles.textStyle}>Share</Text>
+							</View> */}
 							<View>
+								<Image
+									source={require("../../assets/share_icon.png")}
+									style={styles.icon}
+								/>
 								<Text style={styles.textStyle}>Share</Text>
 							</View>
 						</TouchableHighlight>
@@ -397,7 +396,6 @@ export default class view_dependent_qrcode extends React.Component {
 					title="Add new entry point"
 					onPress={() => this.setModalVisible(true)}
 				></Button> */}
-				<Text />
 				<Text />
 				<TouchableHighlight
 					style={{
@@ -440,6 +438,12 @@ export default class view_dependent_qrcode extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	icon: {
+		width: 20,
+		height: 20,
+		justifyContent: "center",
+		alignSelf: "center",
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "white",
@@ -555,6 +559,7 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontSize: 16,
 		fontWeight: "bold",
+		width: 200,
 	},
 	dependent_name: {
 		textAlign: "center",

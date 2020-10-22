@@ -26,7 +26,7 @@ export default class ic_extract extends React.Component {
 			home_address: null,
 			ic_width: null,
 			ic_height: null,
-			google_vision_api_key: "AIzaSyDV2M6vNapi_keyxqRZbKeWuJJ4kMyt9K1hOgSvlo",
+			google_vision_api_key: "api_key",
 			ic_number_x_position_right: null,
 			ic_verified: false,
 			ic_verify_progress: "0%",
@@ -63,12 +63,12 @@ export default class ic_extract extends React.Component {
 			}
 		);
 
-		let responseJson_ocr = await response_ocr.json();
-		var extracted_info = JSON.stringify(
-			responseJson_ocr.responses[0].textAnnotations[0].description
-		);
-
 		try {
+			let responseJson_ocr = await response_ocr.json();
+			var extracted_info = JSON.stringify(
+				responseJson_ocr.responses[0].textAnnotations[0].description
+			);
+
 			var extracted_info_arr = extracted_info.split("\\n");
 			var regex_ic_number = /^[0-9]{6}[-]{1}[0-9]{2}[-]{1}[0-9]{4}$/;
 			var states_arr = [
@@ -162,7 +162,7 @@ export default class ic_extract extends React.Component {
 					Math.abs(home_address_x_position - item.boundingPoly.vertices[0].x) /
 					ic_width;
 				if (
-					address_position_x_diff < 0.005 &&
+					address_position_x_diff < 0.01 &&
 					home_address_y_position > item.boundingPoly.vertices[0].y &&
 					ic_number_y_position < item.boundingPoly.vertices[0].y
 				) {
@@ -175,7 +175,7 @@ export default class ic_extract extends React.Component {
 						Math.abs(full_name_y_position - item.boundingPoly.vertices[0].y) /
 						ic_height;
 					if (
-						fullname_position_y_diff < 0.005 &&
+						fullname_position_y_diff < 0.01 &&
 						item.boundingPoly.vertices[0].y > ic_number_y_position &&
 						item.boundingPoly.vertices[0].y < home_address_y_position
 					) {
@@ -424,7 +424,7 @@ export default class ic_extract extends React.Component {
 				return false;
 			}
 		} else {
-			alert("Your IC is invalid! Please capture your original IC");
+			alert("Your IC is invalid! Please make sure the IC is placed straight");
 			return false;
 		}
 	};

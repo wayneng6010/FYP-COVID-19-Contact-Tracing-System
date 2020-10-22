@@ -33,12 +33,18 @@ import view_dependent_qrcode from "./components/VisitorApp/view_dependent_qrcode
 import view_check_in_history from "./components/VisitorApp/view_check_in_history";
 import view_each_check_in_history from "./components/VisitorApp/view_each_check_in_history";
 import home_risk_assessment from "./components/VisitorApp/home_risk_assessment";
+import manage_profile from "./components/VisitorApp/manage_profile";
+import change_phone_no from "./components/VisitorApp/change_phone_no";
+import change_email from "./components/VisitorApp/change_email";
+import change_password from "./components/VisitorApp/change_password";
+import change_home_location from "./components/VisitorApp/change_home_location";
 
 // premise owner
 import premiseOwner_home from "./components/PremiseOwnerApp/home";
 import qrcode_view from "./components/PremiseOwnerApp/qrcode_view";
 import qrcode_checkIn_dependent from "./components/PremiseOwnerApp/qrcode_checkIn_dependent";
 import real_time_check_in_record from "./components/PremiseOwnerApp/real_time_check_in_record";
+import visitor_analytics from "./components/PremiseOwnerApp/visitor_analytics";
 
 const AuthLoadingScreen = createStackNavigator({
 	verify_rememberMe: {
@@ -248,6 +254,41 @@ const AppStackVisitor = createStackNavigator({
 			headerTitle: "Home Risk Assessment",
 		},
 	},
+	manage_profile: {
+		screen: manage_profile,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Manage Profile",
+		},
+	},
+	change_phone_no: {
+		screen: change_phone_no,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Update Phone Number",
+		},
+	},
+	change_email: {
+		screen: change_email,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Update Email Address",
+		},
+	},
+	change_password: {
+		screen: change_password,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Change Password",
+		},
+	},
+	change_home_location: {
+		screen: change_home_location,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Update Home Location",
+		},
+	},
 });
 
 const AppStackPremiseOwner = createStackNavigator({
@@ -279,7 +320,13 @@ const AppStackPremiseOwner = createStackNavigator({
 			headerTitle: "Real Time Check In Record",
 		},
 	},
-	
+	visitor_analytics: {
+		screen: visitor_analytics,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Visitor Analytics",
+		},
+	},
 });
 
 const container = createAppContainer(

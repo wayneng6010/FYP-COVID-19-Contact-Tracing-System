@@ -159,7 +159,7 @@ export default class password_create extends React.Component {
 			let formDataSaved = await this.save_formData();
 			if (formDataSaved) {
 				this.completeRegistration();
-				// this.props.navigation.replace("register");
+				this.props.navigation.replace("welcome");
 			}
 		} else {
 			alert("Password not verified");
@@ -178,7 +178,7 @@ export default class password_create extends React.Component {
 	};
 
 	componentDidMount = () => {
-		alert(JSON.stringify(this.props.navigation.state.params.formData));
+		// alert(JSON.stringify(this.props.navigation.state.params.formData));
 		// this.setState({
 		// 	formDataObj: {
 		// 		ic_num: this.props.navigation.state.params.formData.ic_num,

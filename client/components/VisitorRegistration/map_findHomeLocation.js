@@ -124,7 +124,7 @@ export default class map_findHomeLocation extends React.Component {
 
 	onChangeQuery = async (value) => {
 		this.setState({ search_query: value });
-		if (value.length == 15) {
+		if (value.length > 10) {
 			await this.searchHomeAddress(value);
 			// alert(value);
 			// alert(this.state.search_query);

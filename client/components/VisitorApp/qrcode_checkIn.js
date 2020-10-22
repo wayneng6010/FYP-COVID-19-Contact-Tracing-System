@@ -130,22 +130,21 @@ export default class sign_in extends React.Component {
 						<View style={styles.centeredView}>
 							<View style={styles.modalView}>
 								<Text style={styles.modalText}>Check In Successful</Text>
-								<View style={styles.flexRow1}>
-									<View style={styles.flexCol}>
-										<Text style={styles.subtitle}>
-											#
-											{" " +
-												check_in_data._id
-													.slice(check_in_data._id.length - 2)
-													.toUpperCase()}
-										</Text>
-										<Text style={styles.subtitle}>
-											{check_in_data.premise_name}
-										</Text>
-										<Text style={styles.subtitle}>
-											{check_in_data.entry_point}
-										</Text>
-										<Text style={styles.subtitle}>
+								<Text />
+								<Text style={[styles.subtitle, styles.check_in_id]}>
+									{"ID: # " +
+										check_in_data._id
+											.slice(check_in_data._id.length - 2)
+											.toUpperCase()}
+								</Text>
+								<Text style={styles.subtitle}>
+									{"Premise Name: " + check_in_data.premise_name}
+								</Text>
+								<Text style={styles.subtitle}>
+									{"Entry Point: " + check_in_data.entry_point}
+								</Text>
+
+								{/* <Text style={styles.subtitle}>
 											{check_in_data.health_risk_result === "?" ? (
 												<Text>Unknown Risk</Text>
 											) : check_in_data.health_risk_result === true ? (
@@ -153,26 +152,38 @@ export default class sign_in extends React.Component {
 											) : (
 												<Text>Low Risk</Text>
 											)}
+										</Text> */}
+								<Text style={styles.subtitle}>
+									{"Check In Time: " +
+										check_in_data.date_created
+											.replace("T", " ")
+											.substring(
+												0,
+												check_in_data.date_created.indexOf(".") - 3
+											)}
+								</Text>
+								<View style={[styles.flexCol, styles.flexCol_wider]}>
+									{check_in_data.health_risk_result === false ? (
+										<Text style={[styles.subtitle, styles.subtitle_bg_green]}>
+											Low Risk
 										</Text>
-										<Text style={styles.subtitle}>
-											{check_in_data.date_created
-												.replace("T", " ")
-												.substring(
-													0,
-													check_in_data.date_created.indexOf(".") - 3
-												)}
+									) : check_in_data.health_risk_result === true ? (
+										<Text style={[styles.subtitle, styles.subtitle_bg_red]}>
+											High Risk
 										</Text>
-									</View>
-									<View style={styles.flexCol}>
-										{/* <Text style={styles.subtitle}>Risk</Text> */}
-									</View>
+									) : (
+										<Text style={[styles.subtitle, styles.subtitle_bg_unknown]}>
+											Unknown Risk
+										</Text>
+									)}
 								</View>
+								<Text />
 								<Text />
 								<TouchableHighlight
 									style={{
 										...styles.openButton_1,
-										backgroundColor: "#3cb371",
-										width: 150,
+										backgroundColor: "grey",
+										width: 100,
 									}}
 									onPress={() => {
 										this.setModalVisible(!modalVisible);
@@ -223,6 +234,30 @@ export default class sign_in extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	subtitle_bg_green: {
+		backgroundColor: "#3cb371",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
+		color: "white",
+	},
+	subtitle_bg_red: {
+		backgroundColor: "#cd5c5c",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
+		color: "white",
+	},
+	subtitle_bg_unknown: {
+		backgroundColor: "grey",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
+		color: "white",
+	},
 	container: {
 		flex: 1,
 		flexDirection: "column",
@@ -269,6 +304,7 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 		padding: 10,
 		elevation: 2,
+		width: 100,
 	},
 	textStyle_1: {
 		color: "white",
@@ -285,5 +321,20 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		textAlign: "center",
 		marginVertical: 5,
+	},
+	check_in_id: {
+		fontSize: 20,
+		fontWeight: "bold",
+	},
+	flexCol: {
+		marginHorizontal: 10,
+		width: 100,
+		height: 40,
+		justifyContent: "center",
+		paddingBottom: 15,
+	},
+	flexCol_wider: {
+		width: 150,
+		marginTop: 15,
 	},
 });

@@ -67,6 +67,7 @@ const premiseQRCodeSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "user_premiseowner",
 	},
+	active: { type: Boolean, required: true },
 	date_created: { type: Date },
 });
 
@@ -100,6 +101,7 @@ const visitorDependentSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "user_visitor",
 	},
+	active: { type: Boolean, required: true },
 	date_created: { type: Date },
 });
 
@@ -128,10 +130,14 @@ const savedCasualContactsGroupSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "visitor_dependent",
 	},
+	staff: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "staff",
+	},
 	day_range_check_in: { type: String, required: true },
 	time_range_check_in_before: { type: String, required: true },
 	time_range_check_in_after: { type: String, required: true },
-	completed: { type: Boolean, required: true },
+	// completed: { type: Boolean, required: true },
 	date_created: { type: Date },
 });
 
@@ -149,7 +155,7 @@ const savedConfirmedCaseCheckInSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "user_premiseowner",
 	},
-	completed: { type: Boolean, required: true },
+	// completed: { type: Boolean, required: true },
 	date_created: { type: Date },
 });
 
@@ -161,7 +167,8 @@ const savedCasualContactCheckInSchema = new mongoose.Schema({
 	},
 	saved_confirmed_case_check_in: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref: "saved_confirmed_case_check_in",
+		// ref: "saved_confirmed_case_check_in",
+		ref: "check_in_record",
 	},
 	check_in_record: {
 		type: mongoose.Schema.Types.ObjectId,
@@ -175,7 +182,7 @@ const savedCasualContactCheckInSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: "visitor_dependent",
 	},
-	completed: { type: Boolean, required: true },
+	// completed: { type: Boolean, required: true },
 	date_created: { type: Date },
 });
 

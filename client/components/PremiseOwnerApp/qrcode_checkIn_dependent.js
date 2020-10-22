@@ -242,26 +242,43 @@ export default class sign_in extends React.Component {
 						<View style={styles.centeredView}>
 							<View style={styles.modalView}>
 								<Text style={styles.modalText}>Check In Successful</Text>
-								<Text style={styles.subtitle}>
-									{returned_check_in_data.health_risk_result + " Risk"}
-								</Text>
+								<Text />
 								<Text style={styles.subtitle}>
 									Entry Point: {selected_entry_point}
 								</Text>
+								<View style={[styles.flexCol, styles.flexCol_wider]}>
+									{returned_check_in_data.health_risk_result === "Low" ? (
+										<Text style={[styles.subtitle, styles.subtitle_bg_green]}>
+											Low Risk
+										</Text>
+									) : returned_check_in_data.health_risk_result === "High" ? (
+										<Text style={[styles.subtitle, styles.subtitle_bg_red]}>
+											High Risk
+										</Text>
+									) : (
+										<Text style={[styles.subtitle, styles.subtitle_bg_unknown]}>
+											Unknown Risk
+										</Text>
+									)}
+								</View>
+								{/* <Text style={styles.subtitle}>
+									{returned_check_in_data.health_risk_result + " Risk"}
+								</Text> */}
 								<Text style={styles.subtitle}>
-									{returned_check_in_data.date_created
-										.replace("T", " ")
-										.substring(
-											0,
-											returned_check_in_data.date_created.indexOf(".") - 3
-										)}
+									{"Check In Time: " +
+										returned_check_in_data.date_created
+											.replace("T", " ")
+											.substring(
+												0,
+												returned_check_in_data.date_created.indexOf(".") - 3
+											)}
 								</Text>
 								<View style={styles.flexRow1}>
 									<View style={styles.flexCol}>
 										<TouchableHighlight
 											style={{
 												...styles.openButton_1,
-												backgroundColor: "#3cb371",
+												backgroundColor: "grey",
 											}}
 											onPress={() => {
 												this.setModalVisible_1(!modalVisible_1);
@@ -313,6 +330,30 @@ export default class sign_in extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	subtitle_bg_green: {
+		backgroundColor: "#3cb371",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
+		color: "white",
+	},
+	subtitle_bg_red: {
+		backgroundColor: "#cd5c5c",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
+		color: "white",
+	},
+	subtitle_bg_unknown: {
+		backgroundColor: "grey",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
+		fontWeight: "bold",
+		color: "white",
+	},
 	container: {
 		flex: 1,
 		flexDirection: "column",
@@ -383,6 +424,10 @@ const styles = StyleSheet.create({
 		height: 40,
 		justifyContent: "center",
 		paddingBottom: 15,
+	},
+	flexCol_wider: {
+		width: 150,
+		marginTop: 15,
 	},
 	pickerBorder: {
 		borderWidth: 1,

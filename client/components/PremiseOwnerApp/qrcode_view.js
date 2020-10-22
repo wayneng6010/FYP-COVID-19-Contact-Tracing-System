@@ -42,6 +42,7 @@ export default class qrcode_view extends React.Component {
 			premise_id: null,
 			modalVisible: false,
 			modalVisible_edit: false,
+			modalVisible_more: false,
 		};
 	}
 
@@ -161,9 +162,14 @@ export default class qrcode_view extends React.Component {
 		if (this.state.qrcode_options === "download") {
 			try {
 				const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+				// ToastAndroid.show(
+				// 	"QR code saved to File Manager->DCIM",
+				// 	ToastAndroid.LONG
+				// );
+				alert("QR code saved to File Manager->DCIM");
 				if (status === "granted") {
 					const asset = await MediaLibrary.createAssetAsync(file_path_updated);
-					alert("Retrieve the downloaded PDF file via File Manager -> DCIM");
+					// alert("QR code saved to File Manager->DCIM");
 					// await MediaLibrary.saveToLibraryAsync(fileUri);
 					// await MediaLibrary.createAlbumAsync("Download", asset, false);
 				}
@@ -206,7 +212,9 @@ export default class qrcode_view extends React.Component {
 			const file_path_updated = `${file_path.uri.slice(
 				0,
 				file_path.uri.lastIndexOf("/") + 1
-			)}CheckInQRCode_${this.state.premise_name}_${this.state.selected_entry_point}.pdf`;
+			)}CheckInQRCode_${this.state.premise_name}_${
+				this.state.selected_entry_point
+			}.pdf`;
 
 			await FileSystem.moveAsync({
 				from: file_path.uri,
@@ -231,6 +239,10 @@ export default class qrcode_view extends React.Component {
 
 	setModalVisible_edit = (visible) => {
 		this.setState({ modalVisible_edit: visible });
+	};
+
+	setModalVisible_more = (visible) => {
+		this.setState({ modalVisible_more: visible });
 	};
 
 	saveNewEntryPoint = async () => {
@@ -317,8 +329,106 @@ export default class qrcode_view extends React.Component {
 			});
 	};
 
+	delete_entry_point = async () => {
+		await fetch("http://192.168.0.131:5000/delete_entry_point", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				selected_entry_point_id: this.state.selected_entry_point_id,
+			}),
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.text();
+			})
+			.then((jsonData) => {
+				// alert(JSON.stringify(jsonData));
+				if (jsonData == "success") {
+					alert("This entry point have been deleted");
+					this.setModalVisible_more(false);
+					this.getAllQRCode();
+				} else {
+					alert("Error occured while deleting this entry point");
+				}
+				// console.log(this.state.qrcode_value);
+			})
+			.catch((error) => {
+				alert(error);
+			});
+	};
+
+	regenerate_entry_point = async () => {
+		await fetch("http://192.168.0.131:5000/regenerate_entry_point", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				selected_entry_point_id: this.state.selected_entry_point_id,
+				selected_entry_point: this.state.selected_entry_point,
+			}),
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.text();
+			})
+			.then((jsonData) => {
+				// alert(JSON.stringify(jsonData));
+				if (jsonData == "success") {
+					alert("QR code of this entry point have been regenerated");
+					this.setModalVisible_more(false);
+					this.getAllQRCode();
+				} else {
+					alert("Error occured while regenerating QR code of this entry point");
+				}
+				// console.log(this.state.qrcode_value);
+			})
+			.catch((error) => {
+				alert(error);
+			});
+	};
+
+	confirm_delete_entry_point = async () => {
+		Alert.alert(
+			"Hold on!",
+			"Are you sure to delete this entry point? The previous check ins data will still be kept in the database.",
+			[
+				{
+					text: "Cancel",
+					onPress: () => null,
+					style: "cancel",
+				},
+				{ text: "YES", onPress: () => this.delete_entry_point() },
+			]
+		);
+		return true;
+	};
+
+	confirm_regenerate_entry_point = async () => {
+		Alert.alert(
+			"Hold on!",
+			"Are you sure to regenerate QR code of this entry point? The previous check ins data will still be kept in the database.",
+			[
+				{
+					text: "Cancel",
+					onPress: () => null,
+					style: "cancel",
+				},
+				{ text: "YES", onPress: () => this.regenerate_entry_point() },
+			]
+		);
+		return true;
+	};
+
 	render() {
-		const { modalVisible, modalVisible_edit, all_qrcode } = this.state;
+		const {
+			modalVisible,
+			modalVisible_edit,
+			modalVisible_more,
+			all_qrcode,
+		} = this.state;
 		let all_entry_points = null;
 		if (this.state.all_qrcode !== null) {
 			all_entry_points = this.state.all_qrcode.map((data) => {
@@ -429,6 +539,60 @@ export default class qrcode_view extends React.Component {
 						</View>
 					</View>
 				</Modal>
+
+				<Modal
+					animationType="slide"
+					transparent={true}
+					visible={modalVisible_more}
+					onRequestClose={() => {
+						this.setModalVisible_more(!modalVisible_more);
+					}}
+				>
+					<View style={styles.centeredView}>
+						<View style={styles.modalView}>
+							<Text style={styles.modalText}>More Actions</Text>
+							{/* <Text style={styles.modalText_more}>Delete This Entry Point</Text>
+							<Text style={styles.modalText_more}>Regenerate This QR code</Text> */}
+							<TouchableHighlight
+								style={{
+									...styles.openButton_full,
+									backgroundColor: "#cd5c5c",
+								}}
+								onPress={() => {
+									this.confirm_delete_entry_point();
+								}}
+							>
+								<View>
+									<Text style={styles.textStyle}>Delete This Entry Point</Text>
+								</View>
+							</TouchableHighlight>
+							<Text />
+							<TouchableHighlight
+								style={{
+									...styles.openButton_full,
+									backgroundColor: "#273045",
+								}}
+								onPress={() => {
+									this.confirm_regenerate_entry_point();
+								}}
+							>
+								<View>
+									<Text style={styles.textStyle}>Regenerate This QR code</Text>
+								</View>
+							</TouchableHighlight>
+							<Text />
+							<TouchableHighlight
+								style={{ ...styles.openButton, backgroundColor: "grey" }}
+								onPress={() => {
+									this.setModalVisible_more(!modalVisible_more);
+								}}
+							>
+								<Text style={styles.textStyle}>Cancel</Text>
+							</TouchableHighlight>
+						</View>
+					</View>
+				</Modal>
+
 				<Text style={styles.title}>Check in QR code of your premise</Text>
 				<View style={[styles.flexRow, styles.flexRow_bg]}>
 					<View style={[styles.flexCol, styles.flexCol_narrower]}>
@@ -493,7 +657,10 @@ export default class qrcode_view extends React.Component {
 							}}
 						>
 							<View>
-								<Text style={styles.textStyle}>Edit</Text>
+								<Image
+									source={require("../../assets/edit_icon.png")}
+									style={styles.icon}
+								/>
 							</View>
 						</TouchableHighlight>
 					</View>
@@ -509,7 +676,10 @@ export default class qrcode_view extends React.Component {
 							}}
 						>
 							<View>
-								<Text style={styles.textStyle}>Download</Text>
+								<Image
+									source={require("../../assets/download_icon.png")}
+									style={styles.icon}
+								/>
 							</View>
 						</TouchableHighlight>
 					</View>
@@ -525,11 +695,31 @@ export default class qrcode_view extends React.Component {
 							}}
 						>
 							<View>
-								<Text style={styles.textStyle}>Share</Text>
+								<Image
+									source={require("../../assets/share_icon.png")}
+									style={styles.icon}
+								/>
 							</View>
 						</TouchableHighlight>
 					</View>
 				</View>
+
+				<TouchableHighlight
+					style={{
+						...styles.openButton_moreactions,
+						backgroundColor: "#cd5c5c",
+					}}
+					onPress={() => {
+						this.setModalVisible_more(true);
+						this.setState({
+							edit_entry_point: this.state.selected_entry_point,
+						});
+					}}
+				>
+					<View>
+						<Text style={styles.textStyle}>More Actions</Text>
+					</View>
+				</TouchableHighlight>
 				<Text />
 
 				<View
@@ -544,7 +734,6 @@ export default class qrcode_view extends React.Component {
 					title="Add new entry point"
 					onPress={() => this.setModalVisible(true)}
 				></Button> */}
-				<Text />
 				<Text />
 				<TouchableHighlight
 					style={{
@@ -570,6 +759,12 @@ export default class qrcode_view extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	icon: {
+		width: 20,
+		height: 20,
+		justifyContent: "center",
+		alignSelf: "center",
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "white",
@@ -591,7 +786,7 @@ const styles = StyleSheet.create({
 	flexRow: {
 		flex: 0.1,
 		flexDirection: "row",
-		marginVertical: 40,
+		marginVertical: 30,
 	},
 	flexCol: {
 		marginHorizontal: 10,
@@ -648,9 +843,24 @@ const styles = StyleSheet.create({
 	},
 	openButton: {
 		backgroundColor: "#F194FF",
-		borderRadius: 20,
+		borderRadius: 5,
 		padding: 10,
 		elevation: 2,
+	},
+	openButton_moreactions: {
+		backgroundColor: "#F194FF",
+		borderRadius: 5,
+		padding: 10,
+		elevation: 2,
+		marginTop: 20,
+		width: "90%",
+	},
+	openButton_full: {
+		backgroundColor: "#F194FF",
+		borderRadius: 5,
+		padding: 10,
+		elevation: 2,
+		width: 200,
 	},
 	textStyle: {
 		color: "white",
@@ -668,6 +878,11 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		fontWeight: "bold",
 	},
+	modalText_more: {
+		marginVertical: 15,
+		textAlign: "center",
+		fontSize: 18,
+	},
 	input: {
 		borderColor: "#c0cbd3",
 		borderWidth: 2,
@@ -684,6 +899,7 @@ const styles = StyleSheet.create({
 		color: "white",
 		fontSize: 16,
 		fontWeight: "bold",
+		width: 200,
 	},
 	qrcode_outer: {
 		borderStyle: "solid",

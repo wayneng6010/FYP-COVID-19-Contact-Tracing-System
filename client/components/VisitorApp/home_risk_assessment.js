@@ -325,11 +325,14 @@ export default class home_risk_assessment extends React.Component {
 
 	componentDidMount = async () => {
 		// await this.searchHomeAddress();
-		let { status } = await Location.requestPermissionsAsync();
-		if (status !== "granted") {
-			setErrorMsg("Permission to access location was denied");
-		}
-		let location = await Location.getCurrentPositionAsync({});
+		
+		// let { status } = await Location.requestPermissionsAsync();
+		// if (status !== "granted") {
+		// 	setErrorMsg("Permission to access location was denied");
+		// 	this.props.navigation.pop();
+		// }
+		// let location = await Location.getCurrentPositionAsync({});
+		
 		// this.setState({
 		// 	region: {
 		// 		latitude: location.coords.latitude,

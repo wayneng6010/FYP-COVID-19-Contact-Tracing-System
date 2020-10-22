@@ -402,7 +402,7 @@ export default class ic_extract_dependent extends React.Component {
 				return false;
 			}
 		} else {
-			alert("Your IC is invalid! Please capture your original IC");
+			alert("Your IC is invalid! Please make sure the IC is placed straight");
 			return false;
 		}
 	};
