@@ -11,6 +11,7 @@ import {
 	TextInput,
 	ToastAndroid,
 	Picker,
+	TouchableHighlight,
 } from "react-native";
 
 export default class premise_info extends React.Component {
@@ -78,7 +79,11 @@ export default class premise_info extends React.Component {
 		} else if (premise_postcode.length !== 5) {
 			alert("Premise postcode should be in 5 digits");
 			return;
-		} else if (premise_state == null || premise_state == "" || premise_state == "empty") {
+		} else if (
+			premise_state == null ||
+			premise_state == "" ||
+			premise_state == "empty"
+		) {
 			alert("Please select premise state");
 			return;
 		}
@@ -130,7 +135,7 @@ export default class premise_info extends React.Component {
 					name="premise_address"
 					keyboardType="default"
 					placeholder="e.g. 26, Lebuh Ampang"
-					maxLength={40}
+					maxLength={80}
 					autoCapitalize="words"
 					onChangeText={(value) => this.setState({ premise_address: value })}
 					value={this.state.premise_address}
@@ -185,13 +190,49 @@ export default class premise_info extends React.Component {
 				</View>
 
 				<Text />
-				<Button title="Submit" onPress={() => this.onSubmit()}></Button>
+				{/* <Button title="Submit" onPress={() => this.onSubmit()}></Button> */}
+				<TouchableHighlight
+					style={{
+						...styles.openButton,
+						backgroundColor: "#3cb371",
+					}}
+					onPress={() => this.onSubmit()}
+				>
+					<Text style={styles.textStyle}>Proceed</Text>
+				</TouchableHighlight>
 			</SafeAreaView>
 		);
 	}
 }
 
 const styles = StyleSheet.create({
+	openButton: {
+		backgroundColor: "#F194FF",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+		marginTop: 10,
+	},
+	openButton_active: {
+		backgroundColor: "#1e90ff",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	openButton_disabled: {
+		backgroundColor: "lightgrey",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "white",

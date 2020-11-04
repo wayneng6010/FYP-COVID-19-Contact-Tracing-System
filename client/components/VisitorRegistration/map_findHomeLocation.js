@@ -12,6 +12,7 @@ import {
 	TextInput,
 	ToastAndroid,
 	Keyboard,
+	TouchableHighlight,
 } from "react-native";
 
 import * as Location from "expo-location";
@@ -21,7 +22,7 @@ export default class map_findHomeLocation extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -60,7 +61,7 @@ export default class map_findHomeLocation extends React.Component {
 
 	searchHomeAddress = async (value) => {
 		// alert("asd");
-		const query_search_home_adress = `http://192.168.0.131:5000/searchHomeAddress?search_query=${value}`;
+		const query_search_home_adress = `http://192.168.0.132:5000/searchHomeAddress?search_query=${value}`;
 		console.log(query_search_home_adress);
 		await axios
 			.get(query_search_home_adress)
@@ -93,7 +94,7 @@ export default class map_findHomeLocation extends React.Component {
 	getHomeLocation = async (place_id) => {
 		// alert("asd");
 
-		const query_get_home_location = `http://192.168.0.131:5000/getHomeLocation?place_id=${place_id}`;
+		const query_get_home_location = `http://192.168.0.132:5000/getHomeLocation?place_id=${place_id}`;
 		console.log(query_get_home_location);
 		await axios
 			.get(query_get_home_location)
@@ -183,7 +184,7 @@ export default class map_findHomeLocation extends React.Component {
 	};
 
 	save_formData = async () => {
-		// const query_save_location = `http://192.168.0.131:5000/save_location?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
+		// const query_save_location = `http://192.168.0.132:5000/save_location?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
 		// console.log(query_save_location);
 		// await axios
 		// 	.post(query_save_location)
@@ -232,7 +233,7 @@ export default class map_findHomeLocation extends React.Component {
 				});
 			}
 		}
-		// const query_save_registration = `http://192.168.0.131:5000/save_registration?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
+		// const query_save_registration = `http://192.168.0.132:5000/save_registration?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
 		// console.log(query_save_registration);
 		// await axios
 		// 	.post(query_save_registration)
@@ -259,7 +260,7 @@ export default class map_findHomeLocation extends React.Component {
 		return (
 			<SafeAreaView style={styles.container}>
 				<Text style={styles.subtitle_bg}>
-					Step 4/5: Verify your Home Location
+					Step 4/5: Find your Home Location
 				</Text>
 				<Text style={styles.subtitle}>
 					We need your home location for location risk assessment. With this,
@@ -300,6 +301,20 @@ export default class map_findHomeLocation extends React.Component {
 						))}
 					</View>
 				</View>
+				<Text />
+				{this.state.place_id == null ? (
+					<Text style={styles.no_location_selected}>
+						{" "}
+						No location is selected
+					</Text>
+				) : (
+					<Text style={styles.location_selected}>
+						Location has been selected {"\n"}
+						<Text style={{ ...styles.location_selected, fontWeight: "normal" }}>
+							{this.state.place_name}
+						</Text>
+					</Text>
+				)}
 				<MapView
 					style={styles.mapStyle}
 					region={this.state.region}
@@ -340,10 +355,19 @@ export default class map_findHomeLocation extends React.Component {
 					)}
 				</MapView>
 
-				<Button
+				{/* <Button
 					title="Save Home Location"
 					onPress={() => this.saveHomeLocation()}
-				></Button>
+				></Button> */}
+				<TouchableHighlight
+					style={{
+						...styles.openButton,
+						backgroundColor: "#1e90ff",
+					}}
+					onPress={() => this.saveHomeLocation()}
+				>
+					<Text style={styles.textStyle}>Save Home Location</Text>
+				</TouchableHighlight>
 			</SafeAreaView>
 
 			// 	{/* {news.map((data) => {
@@ -354,6 +378,34 @@ export default class map_findHomeLocation extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	no_location_selected: {
+		backgroundColor: "#cd5c5c",
+		marginBottom: 10,
+		color: "white",
+		paddingHorizontal: 10,
+		paddingVertical: 10,
+		fontWeight: "bold",
+	},
+	location_selected: {
+		backgroundColor: "#3cb371",
+		marginBottom: 10,
+		color: "white",
+		paddingHorizontal: 10,
+		paddingVertical: 10,
+		fontWeight: "bold",
+	},
+	openButton: {
+		backgroundColor: "#1e90ff",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "white",
@@ -376,7 +428,7 @@ const styles = StyleSheet.create({
 	},
 	mapStyle: {
 		width: Dimensions.get("window").width,
-		height: Dimensions.get("window").height / 2.5,
+		height: Dimensions.get("window").height / 2.8,
 		marginTop: 20,
 		marginBottom: 20,
 	},

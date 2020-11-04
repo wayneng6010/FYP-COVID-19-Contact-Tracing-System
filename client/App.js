@@ -66,9 +66,9 @@ export default class App extends React.Component {
 	// const [news, setNews] = useState([]);
 	// const [hasPermission, setHasPermission] = useState(null);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {
-	// fetch("http://192.168.0.131:5000/register", {
+	// fetch("http://192.168.0.132:5000/register", {
 	// 	method: "POST",
 	// 	headers: {
 	// 		"Content-Type": "application/json",
@@ -93,7 +93,7 @@ export default class App extends React.Component {
 	// 		alert(error);
 	// 	});
 	// get related news
-	// const query_related_news = `http://192.168.0.131:5000/getArtistRelatedNews?artist_name=jj lin`;
+	// const query_related_news = `http://192.168.0.132:5000/getArtistRelatedNews?artist_name=jj lin`;
 	// console.log(query_related_news);
 	// axios
 	// 	.get(query_related_news)

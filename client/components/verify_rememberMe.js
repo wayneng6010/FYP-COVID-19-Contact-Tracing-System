@@ -25,7 +25,7 @@ export default class verify_rememberMe extends React.Component {
 
 	verify_login = async () => {
 		// check remember me credentials
-		await fetch("http://192.168.0.131:5000/verify_rememberMe", {
+		await fetch("http://192.168.0.132:5000/verify_rememberMe", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

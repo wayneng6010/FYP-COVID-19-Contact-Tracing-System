@@ -12,6 +12,9 @@ import email_verify from "./components/VisitorRegistration/email_verify";
 import map_findHomeLocation from "./components/VisitorRegistration/map_findHomeLocation";
 import password_create from "./components/VisitorRegistration/password_create";
 import verify_rememberMe from "./components/verify_rememberMe";
+import ic_privacy_statement from "./components/VisitorRegistration/ic_privacy_statement";
+import forgot_password from "./components/forgot_password";
+import forgot_password_po from "./components/forgot_password_po";
 
 // premise owner registration
 import phoneNo_verify_po from "./components/PremiseOwnerRegistration/phoneNo_verify";
@@ -38,6 +41,7 @@ import change_phone_no from "./components/VisitorApp/change_phone_no";
 import change_email from "./components/VisitorApp/change_email";
 import change_password from "./components/VisitorApp/change_password";
 import change_home_location from "./components/VisitorApp/change_home_location";
+import ic_privacy_statement_in_app from "./components/VisitorApp/ic_privacy_statement";
 
 // premise owner
 import premiseOwner_home from "./components/PremiseOwnerApp/home";
@@ -45,6 +49,11 @@ import qrcode_view from "./components/PremiseOwnerApp/qrcode_view";
 import qrcode_checkIn_dependent from "./components/PremiseOwnerApp/qrcode_checkIn_dependent";
 import real_time_check_in_record from "./components/PremiseOwnerApp/real_time_check_in_record";
 import visitor_analytics from "./components/PremiseOwnerApp/visitor_analytics";
+import manage_profile_po from "./components/PremiseOwnerApp/manage_profile";
+import change_phone_no_po from "./components/PremiseOwnerApp/change_phone_no";
+import change_email_po from "./components/PremiseOwnerApp/change_email";
+import change_password_po from "./components/PremiseOwnerApp/change_password";
+import change_premise_location_po from "./components/PremiseOwnerApp/change_premise_location";
 
 const AuthLoadingScreen = createStackNavigator({
 	verify_rememberMe: {
@@ -121,6 +130,13 @@ const AuthStack = createStackNavigator(
 				headerTitle: "Create Password",
 			},
 		},
+		ic_privacy_statement: {
+			screen: ic_privacy_statement,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "How IC data is managed",
+			},
+		},
 		phoneNo_verify_po: {
 			screen: phoneNo_verify_po,
 			navigationOptions: {
@@ -161,6 +177,20 @@ const AuthStack = createStackNavigator(
 			navigationOptions: {
 				headerTitleAlign: "center",
 				headerTitle: "Premise Owner Login",
+			},
+		},
+		forgot_password: {
+			screen: forgot_password,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Forgot Password",
+			},
+		},
+		forgot_password_po: {
+			screen: forgot_password_po,
+			navigationOptions: {
+				headerTitleAlign: "center",
+				headerTitle: "Forgot Password",
 			},
 		},
 	},
@@ -289,6 +319,13 @@ const AppStackVisitor = createStackNavigator({
 			headerTitle: "Update Home Location",
 		},
 	},
+	ic_privacy_statement_in_app: {
+		screen: ic_privacy_statement_in_app,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "How IC data is managed",
+		},
+	},
 });
 
 const AppStackPremiseOwner = createStackNavigator({
@@ -325,6 +362,41 @@ const AppStackPremiseOwner = createStackNavigator({
 		navigationOptions: {
 			headerTitleAlign: "center",
 			headerTitle: "Visitor Analytics",
+		},
+	},
+	manage_profile: {
+		screen: manage_profile_po,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Manage Profile",
+		},
+	},
+	change_phone_no: {
+		screen: change_phone_no_po,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Update Phone Number",
+		},
+	},
+	change_email: {
+		screen: change_email_po,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Update Email Address",
+		},
+	},
+	change_password: {
+		screen: change_password_po,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Change Password",
+		},
+	},
+	change_premise_location: {
+		screen: change_premise_location_po,
+		navigationOptions: {
+			headerTitleAlign: "center",
+			headerTitle: "Change Premise Location",
 		},
 	},
 });

@@ -34,7 +34,7 @@ export default class sign_in extends React.Component {
 	}
 
 	getAllQRCode = async () => {
-		await fetch("http://192.168.0.131:5000/get_all_premise_qrcode", {
+		await fetch("http://192.168.0.132:5000/get_all_premise_qrcode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -74,7 +74,7 @@ export default class sign_in extends React.Component {
 	saveCheckIn = async () => {
 		// alert("ok");
 		const checkInData = this.state.checkInData;
-		await fetch("http://192.168.0.131:5000/check_in_premise_dependent", {
+		await fetch("http://192.168.0.132:5000/check_in_premise_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -278,7 +278,7 @@ export default class sign_in extends React.Component {
 										<TouchableHighlight
 											style={{
 												...styles.openButton_1,
-												backgroundColor: "grey",
+												backgroundColor: "#1e90ff",
 											}}
 											onPress={() => {
 												this.setModalVisible_1(!modalVisible_1);

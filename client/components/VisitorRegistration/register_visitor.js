@@ -14,7 +14,7 @@ export default class register extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -35,8 +35,8 @@ export default class register extends React.Component {
 								color: "blue",
 								textDecorationLine: "underline",
 							}}
-							onPress={() =>
-								this.props.navigation.navigate("phoneNo_verify_po")
+							onPress={
+								() => this.props.navigation.navigate("phoneNo_verify_po")
 								// this.props.navigation.navigate("password_create_po")
 							}
 						>
@@ -94,8 +94,11 @@ export default class register extends React.Component {
 						// onPress={() => this.props.navigation.navigate("phoneNo_verify")}
 					></Button>
 
-					<Text style={[styles.subtitle, styles.subtitle_1]}>
-						Register via Passport
+					<Text
+						style={[styles.subtitle, styles.subtitle_1]}
+						onPress={() => this.props.navigation.navigate("ic_privacy_statement")}
+					>
+						How do we manage your IC data?
 					</Text>
 				</View>
 			</SafeAreaView>

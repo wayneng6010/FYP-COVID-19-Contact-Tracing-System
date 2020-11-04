@@ -14,6 +14,8 @@ import {
 	Label,
 	TextInput,
 	ToastAndroid,
+	TouchableOpacity,
+	TouchableHighlight,
 } from "react-native";
 
 export default class phoneNo_verify extends React.Component {
@@ -36,7 +38,7 @@ export default class phoneNo_verify extends React.Component {
 		this.setState({ tac_code_correct: tac_code });
 		this.setState({ phone_no_sent: phone_no_sent }); // move this line inside query
 
-		// const query_send_tac = `http://192.168.0.131:5000/sendTacCode?phone_no=${phone_no}&tac_code=${tac_code}`;
+		// const query_send_tac = `http://192.168.0.132:5000/sendTacCode?phone_no=${phone_no}&tac_code=${tac_code}`;
 		// console.log(query_send_tac);
 		// axios
 		// 	.get(query_send_tac)
@@ -52,7 +54,7 @@ export default class phoneNo_verify extends React.Component {
 		// 	});
 
 		console.log(tac_code);
-		await fetch("http://192.168.0.131:5000/sendTacCode", {
+		await fetch("http://192.168.0.132:5000/sendTacCode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -83,7 +85,7 @@ export default class phoneNo_verify extends React.Component {
 	};
 
 	verifyPhoneNo = async () => {
-		const phone_no = this.state.phone_no.trim().replace(/\s/g, "");
+		var phone_no = this.state.phone_no;
 		if (phone_no == null || phone_no == "") {
 			alert("Please enter your phone number");
 			return;
@@ -107,12 +109,13 @@ export default class phoneNo_verify extends React.Component {
 			alert("Invalid phone number");
 			return;
 		}
+		phone_no = this.state.phone_no.trim().replace(/\s/g, "");
 
 		let phoneNoExisted;
 		(async () => {
 			// used to check if there is same phone number saved in database
 			phoneNoExisted = await fetch(
-				"http://192.168.0.131:5000/getExistingPhoneNo_PO",
+				"http://192.168.0.132:5000/getExistingPhoneNo_PO",
 				{
 					method: "POST",
 					headers: {
@@ -195,16 +198,28 @@ export default class phoneNo_verify extends React.Component {
 					name="phone_no"
 					keyboardType="numeric"
 					autoCompleteType="tel"
-					onChangeText={(value) => this.setState({ phone_no: value })}
+					onChangeText={(value) =>
+						this.setState({ phone_no: value.replace(/[-,. ]/g, "") })
+					}
+					maxLength={11}
 					value={this.state.phone_no}
 					style={styles.input}
 					placeholder="e.g. 01612345678"
 				/>
 				<Text />
-				<Button
+				{/* <Button
 					title="Send TAC code"
 					onPress={() => this.verifyPhoneNo()}
-				></Button>
+				></Button> */}
+				<TouchableHighlight
+					style={{
+						...styles.openButton,
+						backgroundColor: "#3cb371",
+					}}
+					onPress={() => this.verifyPhoneNo()}
+				>
+					<Text style={styles.textStyle}>Send TAC code</Text>
+				</TouchableHighlight>
 
 				<Text />
 				<Text />
@@ -212,7 +227,10 @@ export default class phoneNo_verify extends React.Component {
 				<TextInput
 					name="tac_code"
 					keyboardType="numeric"
-					onChangeText={(value) => this.setState({ tac_code: value })}
+					maxLength={6}
+					onChangeText={(value) =>
+						this.setState({ tac_code: value.replace(/[-,. ]/g, "") })
+					}
 					editable={this.state.phone_no_sent ? true : false}
 					selectTextOnFocus={this.state.phone_no_sent ? true : false}
 					value={this.state.tac_code}
@@ -222,11 +240,22 @@ export default class phoneNo_verify extends React.Component {
 					placeholder="Six digit TAC code received by SMS"
 				/>
 				<Text />
-				<Button
+				{/* <Button
 					disabled={this.state.phone_no_sent ? false : true}
 					title="Submit"
 					onPress={() => this.checkTacCode()}
-				></Button>
+				></Button> */}
+				<TouchableOpacity
+					disabled={this.state.phone_no_sent ? false : true}
+					style={
+						this.state.phone_no_sent
+							? styles.openButton_active
+							: styles.openButton_disabled
+					}
+					onPress={() => this.checkTacCode()}
+				>
+					<Text style={styles.textStyle}>Submit</Text>
+				</TouchableOpacity>
 			</SafeAreaView>
 
 			// 	{/* {news.map((data) => {
@@ -237,6 +266,32 @@ export default class phoneNo_verify extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	openButton: {
+		backgroundColor: "#F194FF",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	openButton_active: {
+		backgroundColor: "#1e90ff",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	openButton_disabled: {
+		backgroundColor: "lightgrey",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "white",

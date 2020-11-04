@@ -35,7 +35,7 @@ export default class home extends React.Component {
 	}
 
 	logout = async () => {
-		await fetch("http://192.168.0.131:5000/logout", {
+		await fetch("http://192.168.0.132:5000/logout", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -74,7 +74,7 @@ export default class home extends React.Component {
 	};
 
 	componentDidMount = async () => {
-		await fetch("http://192.168.0.131:5000/get_premise_owner_info", {
+		await fetch("http://192.168.0.132:5000/get_premise_owner_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -96,7 +96,7 @@ export default class home extends React.Component {
 				alert(error);
 			});
 
-		await fetch("http://192.168.0.131:5000/get_premise_owner_hotspot", {
+		await fetch("http://192.168.0.132:5000/get_premise_owner_hotspot", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -118,7 +118,7 @@ export default class home extends React.Component {
 				alert(error);
 			});
 
-		await fetch("http://192.168.0.131:5000/get_visitor_confirmed_case_list", {
+		await fetch("http://192.168.0.132:5000/get_visitor_confirmed_case_list", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -232,7 +232,15 @@ export default class home extends React.Component {
 							>
 								Visitor Analytics
 							</Text>
-
+							<Text
+								style={styles.underline}
+								onPress={() => {
+									this.setModalVisible(!modalVisible);
+									this.props.navigation.navigate("manage_profile");
+								}}
+							>
+								Manage Profile
+							</Text>
 							<Text
 								style={[styles.underline, styles.underline_logout]}
 								onPress={() => this.confirm_logout()}

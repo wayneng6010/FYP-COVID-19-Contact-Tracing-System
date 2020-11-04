@@ -26,7 +26,7 @@ export default class ic_extract extends React.Component {
 			home_address: null,
 			ic_width: null,
 			ic_height: null,
-			google_vision_api_key: "api_key",
+			google_vision_api_key: "tempapikey",
 			ic_number_x_position_right: null,
 			ic_verified: false,
 			ic_verify_progress: "0%",
@@ -95,6 +95,7 @@ export default class ic_extract extends React.Component {
 				full_name = "",
 				home_address = "";
 			for (var i = 0; i < extracted_info_arr.length; i++) {
+				// add if got sample or use only 
 				if (ic_number === null || home_address_firstline_position === null) {
 					if (regex_ic_number.test(extracted_info_arr[i])) {
 						ic_number = extracted_info_arr[i];
@@ -155,7 +156,7 @@ export default class ic_extract extends React.Component {
 			var ic_width = this.props.navigation.state.params.ic_width,
 				ic_height = this.props.navigation.state.params.ic_height;
 			var address_position_x_diff, fullname_position_y_diff;
-			var full_name_checked = "";
+			// var full_name_checked = "";
 
 			responseJson_ocr.responses[0].textAnnotations.forEach(function (item) {
 				address_position_x_diff =
@@ -430,7 +431,7 @@ export default class ic_extract extends React.Component {
 	};
 
 	save_formData = async () => {
-		// const query_save_ic_info = `http://192.168.0.131:5000/save_ic_info?ic_num=${this.state.ic_number}&ic_fname=${this.state.full_name}&ic_address=${this.state.home_address}`;
+		// const query_save_ic_info = `http://192.168.0.132:5000/save_ic_info?ic_num=${this.state.ic_number}&ic_fname=${this.state.full_name}&ic_address=${this.state.home_address}`;
 		// console.log(query_save_ic_info);
 		// await axios
 		// 	.post(query_save_ic_info)
@@ -489,7 +490,7 @@ export default class ic_extract extends React.Component {
 			(async () => {
 				// used to check if there is same phone number saved in database
 				icNumExisted = await fetch(
-					"http://192.168.0.131:5000/getExistingIcNum",
+					"http://192.168.0.132:5000/getExistingIcNum",
 					{
 						method: "POST",
 						headers: {

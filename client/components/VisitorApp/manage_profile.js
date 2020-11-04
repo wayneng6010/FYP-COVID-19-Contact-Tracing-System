@@ -21,7 +21,7 @@ export default class manage_profile extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -36,97 +36,8 @@ export default class manage_profile extends React.Component {
 		};
 	}
 
-	completeRegistration = async () => {
-		// const query_save_registration = `http://192.168.0.131:5000/save_registration?password=${this.state.password}`;
-		// console.log(query_save_registration);
-		// await axios
-		// 	.post(query_save_registration)
-		// alert(JSON.stringify(this.state.formDataObj));
-		await fetch("http://192.168.0.131:5000/save_registration", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				formData: this.state.formDataObj,
-			}),
-		})
-			.then((res) => {
-				// console.log(JSON.stringify(res.headers));
-				return res.text();
-			})
-			.then((jsonData) => {
-				// console.log(jsonData);
-				if (jsonData == "success") {
-					alert("Registration Complete");
-					// this.props.navigation.navigate("visitor_home");
-				} else {
-					alert("Registration Failed");
-				}
-			})
-			// .then((response) => {
-			// 	if (response) {
-			// 		alert("Registration Complete");
-			// 	} else {
-			// 		alert("Registration Failed");
-			// 	}
-			// })
-			.catch((error) => {
-				alert(error);
-			});
-	};
-
-	verifyPassword = async () => {
-		const password = this.state.password,
-			cpassword = this.state.cpassword;
-		var password_verified = false;
-		if (
-			password == null ||
-			password == "" ||
-			cpassword == null ||
-			cpassword == ""
-		) {
-			ToastAndroid.show(
-				"Please enter both password and confirm password",
-				ToastAndroid.SHORT
-			);
-			return;
-		} else if (password !== cpassword) {
-			ToastAndroid.show(
-				"Password and confirm password does not match",
-				ToastAndroid.SHORT
-			);
-			return;
-		} else if (password.length < 8) {
-			ToastAndroid.show(
-				"Password should be at least 8 characters",
-				ToastAndroid.SHORT
-			);
-			return;
-		} else {
-			password_verified = true;
-		}
-
-		if (password_verified) {
-			ToastAndroid.show("Password is verified", ToastAndroid.SHORT);
-		} else {
-			alert("Password not verified");
-			return;
-		}
-	};
-
-	onChangePassword = (value) => {
-		this.setState({ password: value });
-		if (value.length == 20) {
-			ToastAndroid.show(
-				"Maximum 20 character for password",
-				ToastAndroid.SHORT
-			);
-		}
-	};
-
 	getUserInfo = async () => {
-		await fetch("http://192.168.0.131:5000/get_user_info", {
+		await fetch("http://192.168.0.132:5000/get_user_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

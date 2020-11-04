@@ -26,7 +26,7 @@ export default class ic_extract_dependent extends React.Component {
 			home_address: null,
 			ic_width: null,
 			ic_height: null,
-			google_vision_api_key: "api_key",
+			google_vision_api_key: "tempapikey",
 			ic_number_x_position_right: null,
 			ic_verified: false,
 			ic_verify_progress: "0%",
@@ -63,12 +63,12 @@ export default class ic_extract_dependent extends React.Component {
 			}
 		);
 
-		let responseJson_ocr = await response_ocr.json();
-		var extracted_info = JSON.stringify(
-			responseJson_ocr.responses[0].textAnnotations[0].description
-		);
-
 		try {
+			let responseJson_ocr = await response_ocr.json();
+			var extracted_info = JSON.stringify(
+				responseJson_ocr.responses[0].textAnnotations[0].description
+			);
+
 			var extracted_info_arr = extracted_info.split("\\n");
 			var regex_ic_number = /^[0-9]{6}[-]{1}[0-9]{2}[-]{1}[0-9]{4}$/;
 			var states_arr = [
@@ -155,13 +155,14 @@ export default class ic_extract_dependent extends React.Component {
 			var ic_width = this.props.navigation.state.params.ic_width,
 				ic_height = this.props.navigation.state.params.ic_height;
 			var address_position_x_diff, fullname_position_y_diff;
+			var full_name_checked = "";
 
 			responseJson_ocr.responses[0].textAnnotations.forEach(function (item) {
 				address_position_x_diff =
 					Math.abs(home_address_x_position - item.boundingPoly.vertices[0].x) /
 					ic_width;
 				if (
-					address_position_x_diff < 0.02 &&
+					address_position_x_diff < 0.01 &&
 					home_address_y_position > item.boundingPoly.vertices[0].y &&
 					ic_number_y_position < item.boundingPoly.vertices[0].y
 				) {
@@ -174,7 +175,7 @@ export default class ic_extract_dependent extends React.Component {
 						Math.abs(full_name_y_position - item.boundingPoly.vertices[0].y) /
 						ic_height;
 					if (
-						fullname_position_y_diff < 0.02 &&
+						fullname_position_y_diff < 0.01 &&
 						item.boundingPoly.vertices[0].y > ic_number_y_position &&
 						item.boundingPoly.vertices[0].y < home_address_y_position
 					) {
@@ -185,6 +186,19 @@ export default class ic_extract_dependent extends React.Component {
 			});
 
 			full_name = full_name.trim();
+
+			// var full_name_checked = "";
+			// for (var i = 0; i < extracted_info_arr.length; i++) {
+			// 	if (
+			// 		full_name.includes(extracted_info_arr[i]) &&
+			// 		extracted_info_arr[i]
+			// 			.substring(0, 5)
+			// 			.includes(full_name.substring(0, 5))
+			// 	) {
+			// 		full_name_checked += extracted_info_arr[i] + " ";
+			// 	}
+			// }
+			// full_name_checked = full_name_checked.trim();
 
 			var position_validation = true;
 			var position_x_diff_1 =
@@ -356,12 +370,20 @@ export default class ic_extract_dependent extends React.Component {
 		var blue =
 			responseJson_color.responses[0].imagePropertiesAnnotation.dominantColors
 				.colors[0].color.blue;
-		console.log("color: " + red + " " + green + " " + blue);
+		// console.log("color: " + red + " " + green + " " + blue);
 		if (
 			Math.abs(red - green) <= 10 ||
 			Math.abs(green - blue) <= 10 ||
 			Math.abs(red - blue) <= 10
 		) {
+			if (
+				Math.abs(red - green) >= 100 ||
+				Math.abs(red - green) >= 100 ||
+				Math.abs(red - green) >= 100
+			) {
+				// colored
+				color_verify = true;
+			}
 			// greyscale
 			color_verify = false;
 		} else {
@@ -410,7 +432,7 @@ export default class ic_extract_dependent extends React.Component {
 	save_formData = async () => {
 		const { ic_number, full_name, home_address } = this.state;
 
-		await fetch("http://192.168.0.131:5000/save_new_dependent", {
+		await fetch("http://192.168.0.132:5000/save_new_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -446,7 +468,7 @@ export default class ic_extract_dependent extends React.Component {
 			// await this.save_session();
 			const { ic_number, full_name, home_address } = this.state;
 
-			await fetch("http://192.168.0.131:5000/save_new_dependent", {
+			await fetch("http://192.168.0.132:5000/save_new_dependent", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -454,7 +476,8 @@ export default class ic_extract_dependent extends React.Component {
 				body: JSON.stringify({
 					ic_number: ic_number,
 					full_name: full_name,
-					relationship: this.props.navigation.state.params.dependent_relationship,
+					relationship: this.props.navigation.state.params
+						.dependent_relationship,
 				}),
 			})
 				.then((res) => {
@@ -511,7 +534,7 @@ export default class ic_extract_dependent extends React.Component {
 			(async () => {
 				// used to check if there is same phone number saved in database
 				icNumExisted = await fetch(
-					"http://192.168.0.131:5000/getExistingIcNum",
+					"http://192.168.0.132:5000/getExistingIcNum",
 					{
 						method: "POST",
 						headers: {
@@ -547,7 +570,10 @@ export default class ic_extract_dependent extends React.Component {
 				}
 			})();
 		} else {
-			this.props.navigation.replace("ic_capture_dependent");
+			this.props.navigation.replace("ic_capture_dependent", {
+				dependent_relationship: this.props.navigation.state.params
+					.dependent_relationship,
+			});
 		}
 	};
 
@@ -580,10 +606,10 @@ export default class ic_extract_dependent extends React.Component {
 					<Text style={styles.input}>
 						{this.state.ic_verified ? this.state.full_name : ""}
 					</Text>
-					<Text style={styles.label}>Home address</Text>
+					{/* <Text style={styles.label}>Home address</Text>
 					<Text style={styles.input}>
 						{this.state.ic_verified ? this.state.home_address : ""}
-					</Text>
+					</Text> */}
 
 					<Text></Text>
 					<Button

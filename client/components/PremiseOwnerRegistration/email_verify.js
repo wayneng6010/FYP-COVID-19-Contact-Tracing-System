@@ -10,6 +10,8 @@ import {
 	View,
 	TextInput,
 	ToastAndroid,
+	TouchableHighlight,
+	TouchableOpacity,
 } from "react-native";
 
 export default class email_verify extends React.Component {
@@ -34,8 +36,9 @@ export default class email_verify extends React.Component {
 		const verification_code = Math.floor(100000 + Math.random() * 900000);
 		this.setState({ verification_code_correct: verification_code });
 		this.setState({ email_sent: email }); // move inside request
+		console.log(verification_code);
 
-		await fetch("http://192.168.0.131:5000/sendVerificationEmail", {
+		await fetch("http://192.168.0.132:5000/sendVerificationEmail", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -67,26 +70,29 @@ export default class email_verify extends React.Component {
 	};
 
 	verifyEmail = async () => {
-		const email = this.state.email.trim().replace(/\s/g, "");
-		if (email == null || email == "") {
+		if (this.state.email == null || this.state.email == "") {
 			alert("Please enter your email address");
 			return;
-		} else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) === false) {
+		} else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.state.email) === false) {
 			alert("Invalid email address");
 			return;
 		}
+		const email = this.state.email.trim().replace(/\s/g, "");
 		let emailExisted;
 		(async () => {
 			// used to check if there is same email saved in database
-			emailExisted = await fetch("http://192.168.0.131:5000/getExistingEmail_PO", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					email: email,
-				}),
-			})
+			emailExisted = await fetch(
+				"http://192.168.0.132:5000/getExistingEmail_PO",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						email: email,
+					}),
+				}
+			)
 				.then((res) => {
 					// console.log(JSON.stringify(res.headers));
 					return res.json();
@@ -159,6 +165,7 @@ export default class email_verify extends React.Component {
 					name="email"
 					keyboardType="email-address"
 					autoCompleteType="email"
+					autoCapitalize="none"
 					placeholder="e.g. username@gmail.com"
 					maxLength={30}
 					onChangeText={(value) => this.setState({ email: value })}
@@ -166,10 +173,19 @@ export default class email_verify extends React.Component {
 					style={styles.input}
 				/>
 				<Text />
-				<Button
+				{/* <Button
 					title="Send Verification Email"
 					onPress={() => this.verifyEmail()}
-				></Button>
+				></Button> */}
+				<TouchableHighlight
+					style={{
+						...styles.openButton,
+						backgroundColor: "#3cb371",
+					}}
+					onPress={() => this.verifyEmail()}
+				>
+					<Text style={styles.textStyle}>Send Verification Email</Text>
+				</TouchableHighlight>
 
 				<Text />
 				<Text />
@@ -177,25 +193,65 @@ export default class email_verify extends React.Component {
 				<TextInput
 					name="verification_code"
 					keyboardType="numeric"
+					maxLength={6}
 					editable={this.state.email_sent ? true : false}
 					selectTextOnFocus={this.state.email_sent ? true : false}
-					onChangeText={(value) => this.setState({ verification_code: value })}
+					onChangeText={(value) =>
+						this.setState({ verification_code: value.replace(/[-,. ]/g, "") })
+					}
 					value={this.state.verification_code}
 					style={this.state.email_sent ? styles.input : styles.input_disabled}
 				/>
 
 				<Text />
-				<Button
+				{/* <Button
 					disabled={this.state.email_sent ? false : true}
 					title="Submit"
 					onPress={() => this.checkVerificationCode()}
-				></Button>
+				></Button> */}
+				<TouchableOpacity
+					disabled={this.state.email_sent ? false : true}
+					style={
+						this.state.email_sent
+							? styles.openButton_active
+							: styles.openButton_disabled
+					}
+					onPress={() => this.checkVerificationCode()}
+				>
+					<Text style={styles.textStyle}>Submit</Text>
+				</TouchableOpacity>
 			</SafeAreaView>
 		);
 	}
 }
 
 const styles = StyleSheet.create({
+	openButton: {
+		backgroundColor: "#F194FF",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	openButton_active: {
+		backgroundColor: "#1e90ff",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	openButton_disabled: {
+		backgroundColor: "lightgrey",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	textStyle: {
+		color: "white",
+		fontWeight: "bold",
+		textAlign: "center",
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "white",

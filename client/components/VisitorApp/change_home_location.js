@@ -40,7 +40,7 @@ export default class change_home_location extends React.Component {
 
 	searchHomeAddress = async (value) => {
 		// alert("asd");
-		const query_search_home_adress = `http://192.168.0.131:5000/searchHomeAddress?search_query=${value}`;
+		const query_search_home_adress = `http://192.168.0.132:5000/searchHomeAddress?search_query=${value}`;
 		console.log(query_search_home_adress);
 		await axios
 			.get(query_search_home_adress)
@@ -73,7 +73,7 @@ export default class change_home_location extends React.Component {
 	getHomeLocation = async (place_id) => {
 		// alert("asd");
 
-		const query_get_home_location = `http://192.168.0.131:5000/getHomeLocation?place_id=${place_id}`;
+		const query_get_home_location = `http://192.168.0.132:5000/getHomeLocation?place_id=${place_id}`;
 		console.log(query_get_home_location);
 		await axios
 			.get(query_get_home_location)
@@ -155,7 +155,7 @@ export default class change_home_location extends React.Component {
 			ToastAndroid.show("Please select a location", ToastAndroid.SHORT);
 			return;
 		} else {
-			await fetch("http://192.168.0.131:5000/update_home_location", {
+			await fetch("http://192.168.0.132:5000/update_home_location", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -234,7 +234,10 @@ export default class change_home_location extends React.Component {
 					</Text>
 				) : (
 					<Text style={styles.location_selected}>
-						Location has been selected
+						Location has been selected {"\n"}
+						<Text style={{ ...styles.location_selected, fontWeight: "normal" }}>
+							{this.state.place_name}
+						</Text>
 					</Text>
 				)}
 

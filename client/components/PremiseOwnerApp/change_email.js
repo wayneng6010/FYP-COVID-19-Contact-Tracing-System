@@ -14,15 +14,7 @@ import {
 	TouchableOpacity,
 } from "react-native";
 
-export default class email_verify extends React.Component {
-	// set an initial state
-	//const [news, setNews] = useState([]);
-
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
-	// useEffect(() => {}, []);
-
-	// const captureIC = () => {};
-
+export default class change_email extends React.Component {
 	constructor() {
 		super();
 		this.state = {
@@ -30,13 +22,6 @@ export default class email_verify extends React.Component {
 			verification_code: null,
 			verification_code_correct: null,
 			email_sent: null,
-			formDataObj: {
-				ic_num: null,
-				ic_fname: null,
-				ic_address: null,
-				phone_no_sent: null,
-				email_sent: null,
-			},
 		};
 		// alert(this.state.formDataObj.phone_no_sent);
 	}
@@ -119,7 +104,7 @@ export default class email_verify extends React.Component {
 		let emailExisted;
 		(async () => {
 			// used to check if there is same email saved in database
-			emailExisted = await fetch("http://192.168.0.132:5000/getExistingEmail", {
+			emailExisted = await fetch("http://192.168.0.132:5000/getExistingEmail_PO", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -153,32 +138,32 @@ export default class email_verify extends React.Component {
 		})();
 	};
 
-	save_formData = async () => {
-		// const query_save_email = `http://192.168.0.132:5000/save_email?email=${this.state.email_sent}`;
-		// console.log(query_save_email);
-		// await axios
-		// 	.post(query_save_email)
-		// 	.then((response) => {
-		// 		console.log("email session saved");
-		// 	})
-		// 	.catch((error) => {
-		// 		alert(error);
-		// 	});
-		const ic_num = this.props.navigation.state.params.formData.ic_num,
-			ic_fname = this.props.navigation.state.params.formData.ic_fname,
-			ic_address = this.props.navigation.state.params.formData.ic_address,
-			phone_no_sent = this.props.navigation.state.params.formData.phone_no_sent;
-		this.setState({
-			formDataObj: {
-				ic_num: ic_num,
-				ic_fname: ic_fname,
-				ic_address: ic_address,
-				phone_no_sent: phone_no_sent,
-				email_sent: this.state.email_sent,
+	update_email = async () => {
+		await fetch("http://192.168.0.132:5000/update_email_po", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
 			},
-		});
-
-		return true;
+			body: JSON.stringify({
+				new_email: this.state.email_sent,
+			}),
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.text();
+			})
+			.then((jsonData) => {
+				// alert(jsonData);
+				if (jsonData == "success") {
+					alert("Email address has been updated");
+					this.props.navigation.pop();
+				} else if (jsonData == "failed") {
+					alert("Email address failed to update");
+				}
+			})
+			.catch((error) => {
+				alert(error);
+			});
 	};
 
 	checkVerificationCode = async () => {
@@ -196,14 +181,8 @@ export default class email_verify extends React.Component {
 		}
 		if (this.state.verification_code == this.state.verification_code_correct) {
 			// alert("Email is verified");
-			let formDataSaved = await this.save_formData();
 			ToastAndroid.show("Email is verified", ToastAndroid.SHORT);
-			if (formDataSaved) {
-				// alert(JSON.stringify(this.state.formDataObj));
-				this.props.navigation.replace("map_findHomeLocation", {
-					formData: this.state.formDataObj,
-				});
-			}
+			this.update_email();
 		} else {
 			alert("Incorrect verification code");
 		}
@@ -216,15 +195,15 @@ export default class email_verify extends React.Component {
 		return (
 			<SafeAreaView style={styles.container}>
 				<Text style={[styles.subtitle, styles.subtitle_bg]}>
-					Step 3/5: Verify your Email Address
+					Update Email Address
 				</Text>
-				<Text style={styles.subtitle}>Your Email</Text>
+				<Text style={styles.subtitle}>Your New Email</Text>
 				<TextInput
 					name="email"
 					keyboardType="email-address"
 					autoCompleteType="email"
-					autoCapitalize="none"
 					placeholder="e.g. username@gmail.com"
+					autoCapitalize="none"
 					maxLength={30}
 					onChangeText={(value) => this.setState({ email: value })}
 					value={this.state.email}
@@ -254,9 +233,7 @@ export default class email_verify extends React.Component {
 					maxLength={6}
 					editable={this.state.email_sent ? true : false}
 					selectTextOnFocus={this.state.email_sent ? true : false}
-					onChangeText={(value) =>
-						this.setState({ verification_code: value.replace(/[-,. ]/g, "") })
-					}
+					onChangeText={(value) => this.setState({ verification_code: value.replace(/[-,. ]/g, "") })}
 					value={this.state.verification_code}
 					style={this.state.email_sent ? styles.input : styles.input_disabled}
 				/>
@@ -276,7 +253,7 @@ export default class email_verify extends React.Component {
 					}
 					onPress={() => this.checkVerificationCode()}
 				>
-					<Text style={styles.textStyle}>Submit</Text>
+					<Text style={styles.textStyle}>Update</Text>
 				</TouchableOpacity>
 			</SafeAreaView>
 

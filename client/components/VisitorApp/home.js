@@ -23,6 +23,7 @@ import MapView, { Marker } from "react-native-maps";
 export default class home extends React.Component {
 	constructor(props) {
 		super(props);
+		// this.verifyToken();
 		this.state = {
 			modalVisible: false,
 			modalVisible_visitor: false,
@@ -47,7 +48,7 @@ export default class home extends React.Component {
 	}
 
 	componentDidMount = async () => {
-		await fetch("http://192.168.0.131:5000/get_user_info", {
+		await fetch("http://192.168.0.132:5000/get_user_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -69,7 +70,7 @@ export default class home extends React.Component {
 				alert(error);
 			});
 
-		await fetch("http://192.168.0.131:5000/get_visitor_casual_contact_list", {
+		await fetch("http://192.168.0.132:5000/get_visitor_casual_contact_list", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -117,7 +118,7 @@ export default class home extends React.Component {
 				alert(error);
 			});
 
-		await fetch("http://192.168.0.131:5000/get_dependent_casual_contact_list", {
+		await fetch("http://192.168.0.132:5000/get_dependent_casual_contact_list", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -165,7 +166,7 @@ export default class home extends React.Component {
 	};
 
 	logout = async () => {
-		await fetch("http://192.168.0.131:5000/logout", {
+		await fetch("http://192.168.0.132:5000/logout", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

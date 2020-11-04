@@ -19,7 +19,7 @@ export default class real_time_check_in_record extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -31,14 +31,14 @@ export default class real_time_check_in_record extends React.Component {
 			health_risk: null,
 			all_qrcode: null,
 			selected_entry_point: null,
-			selected_entry_point_id: null,
+			selected_entry_point_id: "all_entry_point",
 			result_date_time_from: null,
 			loading: true,
 		};
 	}
 
 	getVisitorInfo = async () => {
-		await fetch("http://192.168.0.131:5000/get_user_info", {
+		await fetch("http://192.168.0.132:5000/get_user_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -67,7 +67,7 @@ export default class real_time_check_in_record extends React.Component {
 	};
 
 	getDependentInfo = async () => {
-		await fetch("http://192.168.0.131:5000/get_dependent_info", {
+		await fetch("http://192.168.0.132:5000/get_dependent_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -110,7 +110,7 @@ export default class real_time_check_in_record extends React.Component {
 				.substring(0, time_from_iso.indexOf(".") - 3),
 		});
 
-		await fetch("http://192.168.0.131:5000/get_real_time_check_in_record", {
+		await fetch("http://192.168.0.132:5000/get_real_time_check_in_record", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -153,7 +153,7 @@ export default class real_time_check_in_record extends React.Component {
 	};
 
 	getAllQRCode = async () => {
-		await fetch("http://192.168.0.131:5000/get_all_premise_qrcode", {
+		await fetch("http://192.168.0.132:5000/get_all_premise_qrcode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -170,7 +170,7 @@ export default class real_time_check_in_record extends React.Component {
 					all_qrcode: jsonData,
 					// premise_id: jsonData[0].user_premiseowner,
 					selected_entry_point: jsonData[0].entry_point,
-					selected_entry_point_id: jsonData[0]._id,
+					// selected_entry_point_id: jsonData[0]._id,
 				});
 
 				// if (
@@ -266,14 +266,30 @@ export default class real_time_check_in_record extends React.Component {
 										// alert(JSON.stringify(all_qrcode));
 										// alert("1: " + itemValue);
 										this.state.selected_entry_point_id = itemValue;
-										this.setState({
-											// selected_entry_point_id: itemValue,
-											selected_entry_point: all_qrcode[itemIndex].entry_point,
-											loading: true,
-										});
+										if (itemValue !== null) {
+											// alert(itemIndex);
+											this.setState({
+												// selected_entry_point_id: itemValue,
+												selected_entry_point:
+													all_qrcode[itemIndex - 1].entry_point,
+												loading: true,
+											});
+										} else {
+											this.setState({
+												// selected_entry_point_id: itemValue,
+												selected_entry_point: "all_entry_point",
+												loading: true,
+											});
+										}
+
 										this.getCheckInRecords();
 									}}
 								>
+									<Picker.Item
+										key={null}
+										value={null}
+										label="- All Entry Point -"
+									/>
 									{all_entry_points}
 								</Picker>
 							</View>

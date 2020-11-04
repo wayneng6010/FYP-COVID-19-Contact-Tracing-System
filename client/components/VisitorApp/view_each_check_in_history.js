@@ -13,13 +13,16 @@ import {
 	ActivityIndicator,
 	TouchableOpacity,
 	Picker,
+	Image,
+	Linking,
 } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
 export default class view_each_check_in_history extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -33,11 +36,18 @@ export default class view_each_check_in_history extends React.Component {
 			visitor_id: null,
 			dependent_id: null,
 			check_in_records: null,
+			selected_check_in: null,
+			region: {
+				latitude: 4.2105,
+				longitude: 101.9758,
+				latitudeDelta: 6,
+				longitudeDelta: 6,
+			},
 		};
 	}
 
 	getVisitorInfo = async () => {
-		await fetch("http://192.168.0.131:5000/get_user_info", {
+		await fetch("http://192.168.0.132:5000/get_user_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -66,7 +76,7 @@ export default class view_each_check_in_history extends React.Component {
 	};
 
 	getDependentInfo = async () => {
-		await fetch("http://192.168.0.131:5000/get_dependent_info", {
+		await fetch("http://192.168.0.132:5000/get_dependent_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -97,7 +107,7 @@ export default class view_each_check_in_history extends React.Component {
 	};
 
 	getCheckInRecordsVisitor = async () => {
-		await fetch("http://192.168.0.131:5000/get_check_in_records_visitor", {
+		await fetch("http://192.168.0.132:5000/get_check_in_records_visitor", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -111,7 +121,9 @@ export default class view_each_check_in_history extends React.Component {
 			.then((jsonData) => {
 				// alert(JSON.stringify(jsonData));
 				if (jsonData === undefined || jsonData.length == 0) {
-					alert("No record found");
+					this.setState({
+						check_in_records: "none",
+					});
 				} else {
 					// alert(jsonData);
 					jsonData.forEach(function (item) {
@@ -132,7 +144,7 @@ export default class view_each_check_in_history extends React.Component {
 	};
 
 	getCheckInRecordsDependent = async () => {
-		await fetch("http://192.168.0.131:5000/get_check_in_records_dependent", {
+		await fetch("http://192.168.0.132:5000/get_check_in_records_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -193,11 +205,114 @@ export default class view_each_check_in_history extends React.Component {
 	};
 
 	render() {
-		const { user_info, check_in_records } = this.state;
+		const {
+			modalVisible,
+			user_info,
+			check_in_records,
+			selected_check_in,
+		} = this.state;
 
 		return (
 			<SafeAreaView style={styles.container}>
 				<View style={styles.reg_content}>
+					{selected_check_in == null ? (
+						<View />
+					) : (
+						<Modal
+							animationType="slide"
+							transparent={true}
+							visible={modalVisible}
+							onRequestClose={() => {
+								this.setModalVisible(!modalVisible);
+							}}
+						>
+							<View style={styles.centeredView}>
+								<View style={styles.modalView}>
+									<Text style={styles.modalText}>Check In Details</Text>
+
+									<Text style={styles.subtitle}>
+										<Text style={{ fontWeight: "bold" }}>
+											{"Checked in at\n"}
+										</Text>
+										{selected_check_in.date_created}
+									</Text>
+									<Text style={{ height: 5 }} />
+
+									<Text style={styles.subtitle}>
+										<Text style={{ fontWeight: "bold" }}>
+											{"Premise name\n"}
+										</Text>
+										{selected_check_in.user_premiseowner.premise_name +
+											"\n(Entry point: " +
+											selected_check_in.premise_qr_code.entry_point +
+											")"}
+									</Text>
+									<MapView
+										style={styles.mapStyle}
+										// customMapStyle={mapStyle}
+										region={{
+											latitude: selected_check_in.user_premiseowner.premise_lat,
+											longitude:
+												selected_check_in.user_premiseowner.premise_lng,
+											latitudeDelta: 0.002,
+											longitudeDelta: 0.002,
+										}}
+										loadingEnabled={true}
+										loadingIndicatorColor="#666666"
+										loadingBackgroundColor="#eeeeee"
+										moveOnMarkerPress={false}
+										// showsUserLocation={true}
+										showsCompass={true}
+										showsPointsOfInterest={false}
+										provider="google"
+									>
+										<Marker
+											// onLoad={() => this.forceUpdate()}
+											// key={1}
+											coordinate={{
+												latitude:
+													selected_check_in.user_premiseowner.premise_lat,
+												longitude:
+													selected_check_in.user_premiseowner.premise_lng,
+											}}
+											title="Premise Location"
+											description={
+												selected_check_in.user_premiseowner.premise_name
+											}
+										>
+											<Image
+												source={require("../../assets/marker_icon.png")}
+												style={{ height: 35, width: 35 }}
+											/>
+										</Marker>
+									</MapView>
+									<TouchableHighlight
+										style={{
+											...styles.openButton_ok,
+											backgroundColor: "#3cb371",
+										}}
+										onPress={() =>
+											Linking.openURL(
+												`https://www.google.com/maps/search/?api=1&query=<address>&query_place_id=${selected_check_in.user_premiseowner.premise_id}`
+											)
+										}
+									>
+										<Text style={styles.textStyle}>Open in Google Maps</Text>
+									</TouchableHighlight>
+									<Text />
+									<TouchableHighlight
+										style={{ ...styles.openButton_ok, backgroundColor: "grey" }}
+										onPress={() => {
+											this.setModalVisible(!modalVisible);
+										}}
+									>
+										<Text style={styles.textStyle}>OK</Text>
+									</TouchableHighlight>
+								</View>
+							</View>
+						</Modal>
+					)}
+
 					<Text style={[styles.subtitle, styles.subtitle_bg]}>
 						View Check In History
 					</Text>
@@ -238,6 +353,8 @@ export default class view_each_check_in_history extends React.Component {
 														// 		dependent_relationship: data.relationship,
 														// 	}
 														// );
+														this.state.selected_check_in = data;
+														this.setModalVisible(true);
 													}}
 												>
 													<Text style={styles.dependent_name}>
@@ -254,7 +371,10 @@ export default class view_each_check_in_history extends React.Component {
 														...styles.openButton,
 														backgroundColor: "grey",
 													}}
-													onPress={() => {}}
+													onPress={() => {
+														this.state.selected_check_in = data;
+														this.setModalVisible(true);
+													}}
 												>
 													<Text style={styles.textStyle}>Details</Text>
 												</TouchableHighlight>
@@ -276,6 +396,19 @@ export default class view_each_check_in_history extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	openButton_ok: {
+		backgroundColor: "#F194FF",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 200,
+		elevation: 2,
+	},
+	mapStyle: {
+		width: 320,
+		height: 300,
+		marginTop: 20,
+		marginBottom: 20,
+	},
 	flexRow_bg: {
 		backgroundColor: "#f0f0f0",
 		paddingTop: 40,
@@ -468,7 +601,8 @@ const styles = StyleSheet.create({
 		margin: 20,
 		backgroundColor: "white",
 		borderRadius: 20,
-		padding: 35,
+		paddingVertical: 35,
+		paddingHorizontal: 15,
 		alignItems: "center",
 		shadowColor: "#000",
 		shadowOffset: {

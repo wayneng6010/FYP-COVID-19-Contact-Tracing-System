@@ -15,6 +15,8 @@ const hotspot = require("./Schema").hotspot;
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
+var sanitize = require("mongo-sanitize");
+
 // passport remember me
 // const passport = require("passport");
 // const passportRememberMe = require("passport-remember-me");
@@ -241,11 +243,10 @@ app.post("/save_premise_qrcode", async (req, res) => {
 	const remember_me = req.cookies["remember_me"];
 	const existedMainQRCode = await premiseQRCode
 		.find({
-			// $and: [
-			// 	{ entry_point: "Main" },
-			// 	{ user_premiseowner: decrypt(remember_me.encryptedUid) },
-			// ],
-			user_premiseowner: decrypt(remember_me.encryptedUid),
+			$and: [
+				{ active: true },
+				{ user_premiseowner: decrypt(remember_me.encryptedUid) },
+			],
 		})
 		.populate("user_premiseowner");
 	if (Object.keys(existedMainQRCode).length === 0) {
@@ -253,6 +254,7 @@ app.post("/save_premise_qrcode", async (req, res) => {
 		const qrcode = new premiseQRCode({
 			entry_point: "Main",
 			user_premiseowner: decrypt(remember_me.encryptedUid),
+			active: true,
 			date_created: new Date(now.getTime() + 480 * 60000),
 		});
 		try {
@@ -821,6 +823,7 @@ app.post("/save_new_dependent", async (req, res) => {
 		ic_fname: req.body.full_name,
 		relationship: req.body.relationship,
 		user_visitor: decrypt(remember_me.encryptedUid),
+		active: true,
 		date_created: new Date(now.getTime() + 480 * 60000),
 	});
 	try {
@@ -922,6 +925,161 @@ app.post("/get_user_info_health_risk", async (req, res) => {
 	res.send(user_info_with_health_risk);
 });
 
+app.post("/update_premise_name", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	userPremiseOwner.updateOne(
+		{
+			_id: decrypt(remember_me.encryptedUid),
+		},
+		{
+			$set: {
+				premise_name: req.body.new_premise_name,
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
+app.post("/update_owner_fname", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	userPremiseOwner.updateOne(
+		{
+			_id: decrypt(remember_me.encryptedUid),
+		},
+		{
+			$set: {
+				owner_fname: req.body.new_owner_fname,
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
+app.post("/update_premise_address", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	userPremiseOwner.updateOne(
+		{
+			_id: decrypt(remember_me.encryptedUid),
+		},
+		{
+			$set: {
+				premise_address: req.body.new_premise_address,
+				premise_postcode: req.body.new_premise_postcode,
+				premise_state: req.body.new_premise_state,
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
+app.post("/update_phone_no_po", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	userPremiseOwner.updateOne(
+		{
+			_id: decrypt(remember_me.encryptedUid),
+		},
+		{
+			$set: {
+				phone_no: req.body.new_phone_no,
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
+app.post("/update_email_po", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	userPremiseOwner.updateOne(
+		{
+			_id: decrypt(remember_me.encryptedUid),
+		},
+		{
+			$set: {
+				email: req.body.new_email,
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
+app.post("/check_current_password_po", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	const user = await userPremiseOwner.findOne({
+		_id: decrypt(remember_me.encryptedUid),
+	});
+	if (!user) {
+		return res.send(false);
+	}
+
+	// check if password correct
+	const validPsw = await bcrypt.compare(
+		req.body.current_password,
+		user.password
+	);
+	if (!validPsw) {
+		return res.send(false);
+	}
+
+	res.send(true);
+});
+
+app.post("/change_password_po", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+
+	const salt = await bcrypt.genSalt(10); // default complexity 10
+	const hashPsw = await bcrypt.hash(req.body.new_password, salt);
+
+	userPremiseOwner.updateOne(
+		{
+			_id: decrypt(remember_me.encryptedUid),
+		},
+		{
+			$set: {
+				password: hashPsw,
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
+app.post("/update_premise_location", async (req, res) => {
+	const remember_me = req.cookies["remember_me"];
+	userPremiseOwner.updateOne(
+		{
+			_id: decrypt(remember_me.encryptedUid),
+		},
+		{
+			$set: {
+				premise_lat: req.body.place_lat,
+				premise_lng: req.body.place_lng,
+				premise_id: req.body.place_id,
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
 app.post("/update_phone_no", async (req, res) => {
 	const remember_me = req.cookies["remember_me"];
 	userVisitor.updateOne(
@@ -1001,6 +1159,46 @@ app.post("/change_password", async (req, res) => {
 	);
 });
 
+app.post("/change_password_forgot_password", async (req, res) => {
+	const salt = await bcrypt.genSalt(10); // default complexity 10
+	const hashPsw = await bcrypt.hash(req.body.new_password, salt);
+
+	userVisitor.updateOne(
+		{
+			email: req.body.email,
+		},
+		{
+			$set: {
+				password: hashPsw,
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
+app.post("/change_password_forgot_password_po", async (req, res) => {
+	const salt = await bcrypt.genSalt(10); // default complexity 10
+	const hashPsw = await bcrypt.hash(req.body.new_password, salt);
+
+	userPremiseOwner.updateOne(
+		{
+			email: req.body.email,
+		},
+		{
+			$set: {
+				password: hashPsw,
+			},
+		},
+		(err, place) => {
+			if (err) return res.send("failed");
+			return res.send("success");
+		}
+	);
+});
+
 app.post("/update_home_location", async (req, res) => {
 	const remember_me = req.cookies["remember_me"];
 	userVisitor.updateOne(
@@ -1059,6 +1257,10 @@ app.post("/get_check_in_records_visitor", async (req, res) => {
 		})
 		.sort({ date_created: -1 })
 		.populate("user_premiseowner")
+		.populate({
+			path: "premise_qr_code",
+			select: "entry_point",
+		})
 		.exec();
 	res.send(checkInRecords);
 });
@@ -1074,6 +1276,10 @@ app.post("/get_check_in_records_dependent", async (req, res) => {
 		})
 		.sort({ date_created: -1 })
 		.populate("user_premiseowner")
+		.populate({
+			path: "premise_qr_code",
+			select: "entry_point",
+		})
 		.exec();
 	res.send(checkInRecords);
 });
@@ -1082,17 +1288,31 @@ app.post("/get_real_time_check_in_record", async (req, res) => {
 	const remember_me = req.cookies["remember_me"];
 	var check_in_records_arr = new Array();
 	// console.log(req.body.selected_entry_point_id);
-	const checkInRecords = await checkInRecord
-		.find({
-			$and: [
-				{ user_premiseowner: decrypt(remember_me.encryptedUid) },
-				{ visitor_dependent: { $exists: false } },
-				{ premise_qr_code: req.body.selected_entry_point_id },
-				{ date_created: { $gte: new Date(req.body.time_from) } },
-			],
-		})
-		.sort({ date_created: -1 })
-		.exec();
+	var checkInRecords;
+	if (req.body.selected_entry_point_id == null) {
+		checkInRecords = await checkInRecord
+			.find({
+				$and: [
+					{ user_premiseowner: decrypt(remember_me.encryptedUid) },
+					{ visitor_dependent: { $exists: false } },
+					{ date_created: { $gte: new Date(req.body.time_from) } },
+				],
+			})
+			.sort({ date_created: -1 })
+			.exec();
+	} else {
+		checkInRecords = await checkInRecord
+			.find({
+				$and: [
+					{ user_premiseowner: decrypt(remember_me.encryptedUid) },
+					{ visitor_dependent: { $exists: false } },
+					{ premise_qr_code: req.body.selected_entry_point_id },
+					{ date_created: { $gte: new Date(req.body.time_from) } },
+				],
+			})
+			.sort({ date_created: -1 })
+			.exec();
+	}
 
 	// console.log(req.body.time_from);
 	// console.log(new Date(req.body.time_from));
@@ -1140,7 +1360,7 @@ app.post("/get_check_in_counts", async (req, res) => {
 	// console.log("////////////");
 	// console.log(date_to_arr);
 
-	for (i = 0; i < 7; i++) {
+	for (i = 0; i < date_from_arr.length; i++) {
 		var checkInCount = await checkInRecord.countDocuments({
 			$and: [
 				{ user_premiseowner: decrypt(remember_me.encryptedUid) },
@@ -1154,13 +1374,93 @@ app.post("/get_check_in_counts", async (req, res) => {
 	res.send(check_in_count_arr);
 });
 
-// app.post("/test", async (req, res) => {
-// 	const remember_me = req.cookies["remember_me"];
-// 	// const user = await userPremiseOwner
-// 	// 	.findById(decrypt(remember_me.encryptedUid));
-// 	const userByPost = await premiseQRCode.findById("5f427562ba68a73ae08b6d53").populate('user_premiseowner');
-// 	res.send(JSON.stringify(userByPost));
-// });
+app.post("/get_demography_counts", async (req, res) => {
+	var counter = 0;
+	const remember_me = req.cookies["remember_me"];
+
+	const checkIns = await checkInRecord
+		.find({ user_premiseowner: decrypt(remember_me.encryptedUid) })
+		.populate("user_visitor", "ic_num")
+		.populate("visitor_dependent", "ic_num")
+		.exec();
+
+	if (!checkIns || Object.keys(checkIns).length === 0) {
+		res.send(false);
+	}
+
+	var gender_count = new Array(0, 0);
+	var ic_num, ic_lastChar;
+
+	checkIns.forEach(async function (item) {
+		if (item.visitor_dependent !== undefined) {
+			ic_num = item.visitor_dependent.ic_num;
+		} else {
+			ic_num = item.user_visitor.ic_num;
+		}
+		ic_lastChar = ic_num.slice(ic_num.length - 1);
+
+		if (ic_lastChar % 2 == 0) {
+			gender_count[1] += 1;
+		} else {
+			gender_count[0] += 1;
+		}
+
+		if (counter == checkIns.length - 1) {
+			res.send(gender_count);
+		}
+		counter += 1;
+	});
+});
+
+app.post("/get_demography_age_counts", async (req, res) => {
+	var counter = 0;
+	const remember_me = req.cookies["remember_me"];
+
+	const checkIns = await checkInRecord
+		.find({ user_premiseowner: decrypt(remember_me.encryptedUid) })
+		.populate("user_visitor", "ic_num")
+		.populate("visitor_dependent", "ic_num")
+		.exec();
+
+	if (!checkIns || Object.keys(checkIns).length === 0) {
+		res.send(false);
+	}
+
+	var age_count = new Array(0, 0, 0, 0);
+	var ic_num, ic_firstTwoChar, birth_year, age;
+	var d = new Date();
+	var this_year = d.getFullYear();
+
+	checkIns.forEach(async function (item) {
+		if (item.visitor_dependent !== undefined) {
+			ic_num = item.visitor_dependent.ic_num;
+		} else {
+			ic_num = item.user_visitor.ic_num;
+		}
+		ic_firstTwoChar = ic_num.substring(0, 2);
+		if (ic_firstTwoChar < parseInt(this_year.toString().substring(2, 4))) {
+			birth_year = 2000 + parseInt(ic_firstTwoChar);
+		} else {
+			birth_year = 1900 + parseInt(ic_firstTwoChar);
+		}
+
+		age = this_year - birth_year;
+
+		if (age <= 14) {
+			age_count[0] += 1;
+		} else if (age <= 24) {
+			age_count[1] += 1;
+		} else if (age <= 64) {
+			age_count[2] += 1;
+		} else if (age > 64) {
+			age_count[3] += 1;
+		}
+		if (counter == checkIns.length - 1) {
+			res.send(age_count);
+		}
+		counter += 1;
+	});
+});
 
 app.post("/save_registration", async (req, res) => {
 	// sess = req.session;
@@ -1253,9 +1553,30 @@ app.post("/save_registration_po", async (req, res) => {
 		date_created: new Date(now.getTime() + 480 * 60000),
 	});
 
+	var user_id;
+
 	try {
 		const savedUser = await premiseOwner.save();
 		if (savedUser) {
+			user_id = savedUser._id;
+			// res.send("success");
+		} else {
+			res.send("failed");
+		}
+	} catch (error) {
+		res.status(400).json(error);
+	}
+
+	var now = new Date();
+	const qrcode = new premiseQRCode({
+		entry_point: "Main",
+		user_premiseowner: user_id,
+		active: true,
+		date_created: new Date(now.getTime() + 480 * 60000),
+	});
+	try {
+		const savedQRCode = await qrcode.save();
+		if (savedQRCode) {
 			res.send("success");
 		} else {
 			res.send("failed");
@@ -1265,6 +1586,36 @@ app.post("/save_registration_po", async (req, res) => {
 	}
 
 	// res.end("done");
+});
+
+app.post("/verifyToken", async (req, res) => {
+	const token = req.cookies["auth-token"];
+
+	// if dont have the token
+	// console.log(token);
+	if (!token) {
+		return res.send("failed");
+	}
+	try {
+		// verify token
+		const verified = jwt.verify(token, "vE7YWqEuJQOXjlKxU7e4SOl");
+		// store user ID and time of token issued to indicate that the user is authenticated
+		req.user = verified;
+
+		// // is it first login
+		// const staff_info = await userVisitor.findOne({ _id: sid });
+		// if (!staff_info) {
+		// 	return res.send("failed");
+		// }
+
+		// if (staff_info.first_login == true) {
+		// 	return res.send("failed_first_login");
+		// }
+
+		return res.send("success");
+	} catch (err) {
+		return res.send("failed");
+	}
 });
 
 app.post("/verify_rememberMe", async (req, res) => {
@@ -1283,6 +1634,22 @@ app.post("/verify_rememberMe", async (req, res) => {
 		if (!user) {
 			return res.send("not logged in");
 		}
+		// create and assign a token
+		// const token = jwt.sign({ _id: user._id }, "vE7YWqEuJQOXjlKxU7e4SOl");
+		// save token and user id to cookie
+		// res.cookie("auth-token", token); // to verify if user have login
+		res.cookie(
+			"remember_me",
+			{
+				encryptedUid: remember_me.encryptedUid,
+				role: "visitor",
+			},
+			{
+				maxAge: 604800000, // 7 days
+				httpOnly: true,
+			}
+		);
+
 		return res.send("visitor");
 	} else if (remember_me.role == "premise owner") {
 		const user = await userPremiseOwner.findOne({
@@ -1291,6 +1658,22 @@ app.post("/verify_rememberMe", async (req, res) => {
 		if (!user) {
 			return res.send("not logged in");
 		}
+		// create and assign a token
+		// const token = jwt.sign({ _id: user._id }, "vE7YWqEuJQOXjlKxU7e4SOl");
+		// save token and user id to cookie
+		// res.cookie("auth-token", token); // to verify if user have login
+		res.cookie(
+			"remember_me",
+			{
+				encryptedUid: remember_me.encryptedUid,
+				role: "premise owner",
+			},
+			{
+				maxAge: 604800000, // 7 days
+				httpOnly: true,
+			}
+		);
+
 		return res.send("premise owner");
 	}
 	// return res.send(true);
@@ -1298,9 +1681,11 @@ app.post("/verify_rememberMe", async (req, res) => {
 
 app.post("/logout", async (req, res) => {
 	const remember_me = req.cookies["remember_me"];
+	// const token = req.cookies["auth-token"];
 
 	if (remember_me) {
 		res.clearCookie("remember_me");
+		// res.clearCookie("auth-token");
 		return res.send("success");
 	} else {
 		return res.send("failed");
@@ -1308,16 +1693,19 @@ app.post("/logout", async (req, res) => {
 });
 
 app.post("/login_premiseOwner_phoneNo", async (req, res) => {
+	var phone_no_sanitized = sanitize(req.body.user.phone_no);
+	var password_sanitized = sanitize(req.body.user.password);
+
 	// check if email exist
 	const user = await userPremiseOwner.findOne({
-		phone_no: req.body.user.phone_no,
+		phone_no: phone_no_sanitized,
 	});
 	if (!user) {
 		return res.send(false);
 	}
 
 	// check if password correct
-	const validPsw = await bcrypt.compare(req.body.user.password, user.password);
+	const validPsw = await bcrypt.compare(password_sanitized, user.password);
 	if (!validPsw) {
 		return res.send(false);
 	}
@@ -1333,6 +1721,12 @@ app.post("/login_premiseOwner_phoneNo", async (req, res) => {
 		httpOnly: true,
 	});
 
+	// create and assign a token
+	// const token = jwt.sign({ _id: user._id }, "vE7YWqEuJQOXjlKxU7e4SOl");
+	// save token and user id to cookie
+	// res.cookie("auth-token", token); // to verify if user have login
+
+	// res.cookie("auth-token", token);
 	res.cookie("pid", user._id);
 	res.cookie("pname", user.premise_name);
 
@@ -1340,14 +1734,17 @@ app.post("/login_premiseOwner_phoneNo", async (req, res) => {
 });
 
 app.post("/login_premiseOwner_email", async (req, res) => {
+	var email_sanitized = sanitize(req.body.user.email);
+	var password_sanitized = sanitize(req.body.user.password);
+
 	// check if email exist
-	const user = await userPremiseOwner.findOne({ email: req.body.user.email });
+	const user = await userPremiseOwner.findOne({ email: email_sanitized });
 	if (!user) {
 		return res.send(false);
 	}
 
 	// check if password correct
-	const validPsw = await bcrypt.compare(req.body.user.password, user.password);
+	const validPsw = await bcrypt.compare(password_sanitized, user.password);
 	if (!validPsw) {
 		return res.send(false);
 	}
@@ -1363,6 +1760,12 @@ app.post("/login_premiseOwner_email", async (req, res) => {
 		httpOnly: true,
 	});
 
+	// create and assign a token
+	// const token = jwt.sign({ _id: user._id }, "vE7YWqEuJQOXjlKxU7e4SOl");
+	// save token and user id to cookie
+	// res.cookie("auth-token", token); // to verify if user have login
+
+	// res.cookie("auth-token", token);
 	res.cookie("pid", user._id);
 	res.cookie("pname", user.premise_name);
 
@@ -1370,14 +1773,17 @@ app.post("/login_premiseOwner_email", async (req, res) => {
 });
 
 app.post("/login_visitor_phoneNo", async (req, res) => {
+	var phone_no_sanitized = sanitize(req.body.user.phone_no);
+	var password_sanitized = sanitize(req.body.user.password);
+
 	// check if email exist
-	const user = await userVisitor.findOne({ phone_no: req.body.user.phone_no });
+	const user = await userVisitor.findOne({ phone_no: phone_no_sanitized });
 	if (!user) {
 		return res.send(false);
 	}
 
 	// check if password correct
-	const validPsw = await bcrypt.compare(req.body.user.password, user.password);
+	const validPsw = await bcrypt.compare(password_sanitized, user.password);
 	if (!validPsw) {
 		return res.send(false);
 	}
@@ -1392,6 +1798,13 @@ app.post("/login_visitor_phoneNo", async (req, res) => {
 		maxAge: 604800000, // 7 days
 		httpOnly: true,
 	});
+
+	// create and assign a token
+	// const token = jwt.sign({ _id: user._id }, "vE7YWqEuJQOXjlKxU7e4SOl");
+
+	// save token and user id to cookie
+	// res.cookie("auth-token", token); // to verify if user have login
+
 	// create and assign a token
 	// const token = jwt.sign({ _id: user._id }, "vE7YWqEuJQOXjlKxU7e4SOl");
 
@@ -1403,14 +1816,17 @@ app.post("/login_visitor_phoneNo", async (req, res) => {
 });
 
 app.post("/login_visitor_email", async (req, res) => {
+	var email_sanitized = sanitize(req.body.user.email);
+	var password_sanitized = sanitize(req.body.user.password);
+
 	// check if email exist
-	const user = await userVisitor.findOne({ email: req.body.user.email });
+	const user = await userVisitor.findOne({ email: email_sanitized });
 	if (!user) {
 		return res.send(false);
 	}
 
 	// check if password correct
-	const validPsw = await bcrypt.compare(req.body.user.password, user.password);
+	const validPsw = await bcrypt.compare(password_sanitized, user.password);
 	if (!validPsw) {
 		return res.send(false);
 	}
@@ -1428,6 +1844,14 @@ app.post("/login_visitor_email", async (req, res) => {
 		maxAge: 604800000, // 7 days
 		httpOnly: true,
 	});
+
+	// create and assign a token
+	// const token = jwt.sign({ _id: staff_info._id }, "vE7YWqEuJQOXjlKxU7e4SOl");
+
+	// save token and user id to cookie
+	// res.cookie("auth-token", token); // to verify if user have login
+
+	res.send(true);
 
 	// console.log(req.cookies["remember_me"].encryptedUid);
 	// console.log(encryptedUid);
@@ -1506,7 +1930,6 @@ app.post("/login_visitor_email", async (req, res) => {
 	// } else {
 	// 	console.log("cookie: " + req.cookies.remember_me);
 	// }
-	res.send(true);
 });
 
 app.post("/ic_ocr", async (req, res) => {
@@ -1585,7 +2008,7 @@ app.post("/ic_ocr", async (req, res) => {
 
 app.get("/searchHomeAddress", (req, res) => {
 	const search_query = req.query.search_query;
-	const api_key = "api_key";
+	const api_key = "tempapikey";
 	const querystr = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${search_query}&components=country:my&types=establishment&key=${api_key}`;
 
 	axios
@@ -1601,7 +2024,7 @@ app.get("/searchHomeAddress", (req, res) => {
 
 app.get("/getHomeLocation", (req, res) => {
 	const place_id = req.query.place_id;
-	const api_key = "api_key";
+	const api_key = "tempapikey";
 	// const querystr = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${home_address}&key=${api_key}`;
 	const querystr = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=geometry&key=${api_key}`;
 
@@ -1616,9 +2039,41 @@ app.get("/getHomeLocation", (req, res) => {
 		});
 });
 
+app.post("/get_hotspot_nearby_name", (req, res) => {
+	const hotspot_nearby = req.body.hotspot_nearby;
+	const api_key = "tempapikey";
+	// const querystr = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${home_address}&key=${api_key}`;
+	var counter = 0;
+	var hotspot_nearby_with_name = new Array();
+	var returned_name;
+	hotspot_nearby.forEach(async function (item) {
+		const querystr = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${item.place_id}&fields=name&key=${api_key}`;
+		await axios
+			.get(querystr)
+			.then((response) => {
+				// console.log(response.data.result.name);
+				returned_name = response.data.result.name;
+			})
+			.catch((error) => {
+				res.status(400).json(error);
+			});
+		hotspot_nearby_with_name.push({
+			_id: counter,
+			place_id: item.place_id,
+			straight_distance: item.straight_distance,
+			returned_name: returned_name,
+		});
+		if (counter == hotspot_nearby.length - 1) {
+			// console.log(all_dependent_arr);
+			res.send(hotspot_nearby_with_name);
+		}
+		counter += 1;
+	});
+});
+
 app.get("/getHotspotDetails", (req, res) => {
 	const place_id = req.query.place_id;
-	const api_key = "api_key";
+	const api_key = "tempapikey";
 	// const querystr = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${home_address}&key=${api_key}`;
 	const querystr = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=formatted_address,name,types,url,photos&key=${api_key}`;
 
@@ -1635,7 +2090,7 @@ app.get("/getHotspotDetails", (req, res) => {
 
 app.get("/getPhotoReference", (req, res) => {
 	const photo_reference = req.query.photo_reference;
-	const api_key = "api_key";
+	const api_key = "tempapikey";
 	const querystr = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo_reference}&key=${api_key}
 	`;
 
@@ -1690,6 +2145,38 @@ app.post("/sendVerificationEmail", async (req, res) => {
 		text:
 			verification_code +
 			" is your verification code for COVID-19 Contact Tracing App registration",
+	};
+
+	transporter.sendMail(mailOptions, function (error, info) {
+		if (error) {
+			// console.log(error);
+			res.send(500);
+		} else {
+			// console.log("Email sent: " + info.response);
+			res.send(200);
+		}
+	});
+});
+
+app.post("/sendVerificationEmail_fp", async (req, res) => {
+	const email = req.body.item.email;
+	const verification_code = req.body.item.verification_code;
+
+	var transporter = nodemailer.createTransport({
+		service: "gmail",
+		auth: {
+			user: "wayne.ng6010@gmail.com",
+			pass: "ozuueiwutugbeakc",
+		},
+	});
+
+	var mailOptions = {
+		from: "wayne.ng6010@gmail.com",
+		to: email,
+		subject: "Verification email for COVID-19 Contact Tracing App",
+		text:
+			verification_code +
+			" is your verification code for COVID-19 Contact Tracing App forgot password",
 	};
 
 	transporter.sendMail(mailOptions, function (error, info) {

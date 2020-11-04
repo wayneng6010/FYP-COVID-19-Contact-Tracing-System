@@ -59,7 +59,7 @@ export default class health_risk_assessment extends React.Component {
 	};
 
 	getSavedRecord = async (role, dependent_id) => {
-		await fetch("http://192.168.0.131:5000/get_health_risk_assessment_record", {
+		await fetch("http://192.168.0.132:5000/get_health_risk_assessment_record", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -285,7 +285,7 @@ export default class health_risk_assessment extends React.Component {
 	save_result = async () => {
 		if (this.state.update_saved_response == false) {
 			await fetch(
-				"http://192.168.0.131:5000/save_health_risk_assessment_result",
+				"http://192.168.0.132:5000/save_health_risk_assessment_result",
 				{
 					method: "POST",
 					headers: {
@@ -323,7 +323,7 @@ export default class health_risk_assessment extends React.Component {
 				});
 		} else if (this.state.update_saved_response == true) {
 			await fetch(
-				"http://192.168.0.131:5000/update_health_risk_assessment_result",
+				"http://192.168.0.132:5000/update_health_risk_assessment_result",
 				{
 					method: "POST",
 					headers: {

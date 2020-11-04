@@ -23,14 +23,14 @@ export default class login_visitor_phoneNo extends React.Component {
 			alternative_login_with: "email",
 		};
 	}
-	
+
 	verifyLogin = async () => {
 		// var password_verified = false;
 		if (this.state.login_with == "phone number") {
 			const phone_no = this.state.phone_no,
 				password = this.state.password;
 			// check login credentials
-			await fetch("http://192.168.0.131:5000/login_visitor_phoneNo", {
+			await fetch("http://192.168.0.132:5000/login_visitor_phoneNo", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -62,7 +62,7 @@ export default class login_visitor_phoneNo extends React.Component {
 			const email = this.state.email,
 				password = this.state.password;
 			// check login credentials
-			await fetch("http://192.168.0.131:5000/login_visitor_email", {
+			await fetch("http://192.168.0.132:5000/login_visitor_email", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -190,6 +190,7 @@ export default class login_visitor_phoneNo extends React.Component {
 							name="email"
 							keyboardType="email-address"
 							autoCompleteType="email"
+							autoCapitalize="words"
 							maxLength={30}
 							placeholder="e.g. username@gmail.com"
 							onChangeText={(value) => this.setState({ email: value })}
@@ -212,7 +213,19 @@ export default class login_visitor_phoneNo extends React.Component {
 					style={styles.input}
 				/>
 
-				<Text />
+				<View style={styles.right_link}>
+					<Text
+						style={{
+							color: "#113c62",
+							textDecorationLine: "underline",
+							fontWeight: "bold",
+							textAlign: "right",
+						}}
+						onPress={() => this.switchLoginMethod()}
+					>
+						Login with {this.state.alternative_login_with}
+					</Text>
+				</View>
 				<View style={styles.right_link}>
 					<Text
 						style={{
@@ -221,9 +234,9 @@ export default class login_visitor_phoneNo extends React.Component {
 							fontWeight: "bold",
 							textAlign: "right",
 						}}
-						onPress={() => this.switchLoginMethod()}
+						onPress={() => this.props.navigation.navigate("forgot_password")}
 					>
-						Login with {this.state.alternative_login_with}
+						Forgot password?
 					</Text>
 				</View>
 
@@ -310,5 +323,6 @@ const styles = StyleSheet.create({
 	},
 	right_link: {
 		width: 300,
+		marginTop: 20,
 	},
 });

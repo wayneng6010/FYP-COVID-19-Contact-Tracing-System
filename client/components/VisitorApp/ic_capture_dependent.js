@@ -24,7 +24,7 @@ export default class ic_capture extends React.Component {
 	// set an initial state
 	// const [hasPermission, setHasPermission] = useState(null);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
 	// constructor => () => {
 	// 	(async () => {
 	// 		const { status } = await Permissions.askAsync(Permissions.CAMERA);
@@ -104,6 +104,8 @@ export default class ic_capture extends React.Component {
 
 			var crop_originy = photo.width * 0.3;
 			var crop_height = photo.width * 0.4;
+			var crop_originx = photo.height * 0.1;
+			var crop_width = photo.height * 0.8;
 
 			// image manipulator
 			// const image = Asset.fromModule(require(this.props.navigation.state.params.ic_uri));
@@ -114,15 +116,14 @@ export default class ic_capture extends React.Component {
 				[
 					{
 						crop: {
-							originX: 0,
+							originX: crop_originx,
 							originY: crop_originy,
-							width: photo.height,
+							width: crop_width,
 							height: crop_height,
 						},
 					},
 				],
-				{ base64: true },
-				{ compress: 0, format: ImageManipulator.SaveFormat.JPEG }
+				{ compress: 0.1, format: "jpeg", base64: true }
 			);
 
 			// this.setState({ capture_loading: false });
@@ -131,7 +132,8 @@ export default class ic_capture extends React.Component {
 				ic_base64: manipResult.base64,
 				ic_width: manipResult.width,
 				ic_height: manipResult.height,
-				dependent_relationship: this.props.navigation.state.params.dependent_relationship,
+				dependent_relationship: this.props.navigation.state.params
+					.dependent_relationship,
 			});
 		}
 	};

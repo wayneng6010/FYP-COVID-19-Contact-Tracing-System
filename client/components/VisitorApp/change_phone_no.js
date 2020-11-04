@@ -36,7 +36,7 @@ export default class change_phone_no extends React.Component {
 		this.setState({ phone_no_sent: phone_no_sent }); // move this line inside query
 
 		console.log(tac_code);
-		await fetch("http://192.168.0.131:5000/sendTacCode", {
+		await fetch("http://192.168.0.132:5000/sendTacCode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -67,7 +67,7 @@ export default class change_phone_no extends React.Component {
 	};
 
 	verifyPhoneNo = async () => {
-		const phone_no = this.state.phone_no.trim().replace(/\s/g, "");
+		var phone_no = this.state.phone_no;
 		this.setState({ phone_no: phone_no });
 		if (phone_no == null || phone_no == "") {
 			alert("Please enter your phone number");
@@ -92,12 +92,13 @@ export default class change_phone_no extends React.Component {
 			alert("Invalid phone number");
 			return;
 		}
+		phone_no = this.state.phone_no.trim().replace(/\s/g, "");
 
 		let phoneNoExisted;
 		(async () => {
 			// used to check if there is same phone number saved in database
 			phoneNoExisted = await fetch(
-				"http://192.168.0.131:5000/getExistingPhoneNo",
+				"http://192.168.0.132:5000/getExistingPhoneNo",
 				{
 					method: "POST",
 					headers: {
@@ -134,7 +135,7 @@ export default class change_phone_no extends React.Component {
 	};
 
 	update_phone_no = async () => {
-		await fetch("http://192.168.0.131:5000/update_phone_no", {
+		await fetch("http://192.168.0.132:5000/update_phone_no", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -192,7 +193,8 @@ export default class change_phone_no extends React.Component {
 					name="phone_no"
 					keyboardType="numeric"
 					autoCompleteType="tel"
-					onChangeText={(value) => this.setState({ phone_no: value })}
+					onChangeText={(value) => this.setState({ phone_no: value.replace(/[-,. ]/g, "") })}
+					maxLength={11}
 					value={this.state.phone_no}
 					style={styles.input}
 					placeholder="e.g. 01612345678"
@@ -218,7 +220,8 @@ export default class change_phone_no extends React.Component {
 				<TextInput
 					name="tac_code"
 					keyboardType="numeric"
-					onChangeText={(value) => this.setState({ tac_code: value })}
+					onChangeText={(value) => this.setState({ tac_code: value.replace(/[-,. ]/g, "") })}
+					maxLength={6}
 					editable={this.state.phone_no_sent ? true : false}
 					selectTextOnFocus={this.state.phone_no_sent ? true : false}
 					value={this.state.tac_code}

@@ -16,6 +16,7 @@ import {
 	TouchableHighlight,
 	Modal,
 	Linking,
+	ActivityIndicator,
 } from "react-native";
 
 import * as Location from "expo-location";
@@ -25,7 +26,7 @@ export default class home_risk_assessment extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -55,15 +56,17 @@ export default class home_risk_assessment extends React.Component {
 			home_location_risk: null,
 			hotspot_nearby: null,
 			modalVisible_selected_hotspot: false,
+			modalVisible_nearby_hotspot: false,
 			current_hotspot_data: null,
 			current_hotspot_place_details: null,
 			current_hotspot_photo_reference: null,
+			hotspot_nearby_with_name: null,
 		};
 	}
 
 	searchHomeAddress = async (value) => {
 		// alert("asd");
-		const query_search_home_adress = `http://192.168.0.131:5000/searchHomeAddress?search_query=${value}`;
+		const query_search_home_adress = `http://192.168.0.132:5000/searchHomeAddress?search_query=${value}`;
 		console.log(query_search_home_adress);
 		await axios
 			.get(query_search_home_adress)
@@ -96,7 +99,7 @@ export default class home_risk_assessment extends React.Component {
 	getSearchLocation = async (place_id) => {
 		// alert("asd");
 
-		const query_get_home_location = `http://192.168.0.131:5000/getHomeLocation?place_id=${place_id}`;
+		const query_get_home_location = `http://192.168.0.132:5000/getHomeLocation?place_id=${place_id}`;
 		console.log(query_get_home_location);
 		await axios
 			.get(query_get_home_location)
@@ -139,7 +142,7 @@ export default class home_risk_assessment extends React.Component {
 	};
 
 	getAllHotspot = async () => {
-		await fetch("http://192.168.0.131:5000/get_all_hotspot", {
+		await fetch("http://192.168.0.132:5000/get_all_hotspot", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -215,7 +218,7 @@ export default class home_risk_assessment extends React.Component {
 	};
 
 	getUserHomeLocation = async () => {
-		await fetch("http://192.168.0.131:5000/get_saved_home_location", {
+		await fetch("http://192.168.0.132:5000/get_saved_home_location", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -252,6 +255,40 @@ export default class home_risk_assessment extends React.Component {
 						// place_lat: jsonData.home_lat,
 						// place_lng: jsonData.home_lng,
 						saved_home_location: jsonData,
+					});
+				}
+			})
+			.catch((error) => {
+				alert(error);
+			});
+	};
+
+	getHotspotNearbyName = async () => {
+		await fetch("http://192.168.0.132:5000/get_hotspot_nearby_name", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ hotspot_nearby: this.state.hotspot_nearby }),
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.json();
+			})
+			.then((jsonData) => {
+				// alert(JSON.stringify(jsonData));
+				// console.log(jsonData);
+				if (jsonData === undefined || jsonData.length == 0) {
+					alert("No record found");
+					this.setState({
+						hotspot_nearby_with_name: "none",
+					});
+				} else {
+					jsonData.sort(function compare(a, b) {
+						return a.straight_distance - b.straight_distance;
+					});
+					this.setState({
+						hotspot_nearby_with_name: jsonData,
 					});
 				}
 			})
@@ -299,7 +336,7 @@ export default class home_risk_assessment extends React.Component {
 			// haversine formula
 			var R = 6378137; // earth’s mean radius in meter
 			var dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
-			var dLong = ((p2.lat - p1.lat) * Math.PI) / 180;
+			var dLong = ((p2.lng - p1.lng) * Math.PI) / 180;
 			var a =
 				Math.sin(dLat / 2) * Math.sin(dLat / 2) +
 				Math.cos((p1.lat * Math.PI) / 180) *
@@ -311,28 +348,42 @@ export default class home_risk_assessment extends React.Component {
 
 			if (d / 1000 <= 1) {
 				home_risk = true;
-				hotspot_nearby.push(item);
+				// get place name
+				item.straight_distance = Math.round(d);
+				hotspot_nearby.push({
+					place_id: item.place_id,
+					straight_distance: item.straight_distance,
+				});
 			}
 			// var distance = this.getDistanceBetween(p1, p2);
 			// alert("distance: " + d / 1000 + " km");
 		});
-		this.setState({
-			hotspot_nearby: hotspot_nearby,
-			home_location_risk: home_risk,
-		});
+		if (hotspot_nearby === undefined || hotspot_nearby.length == 0) {
+			this.setState({
+				hotspot_nearby_with_name: [],
+				home_location_risk: home_risk,
+			});
+		} else {
+			this.setState({
+				hotspot_nearby: hotspot_nearby,
+				home_location_risk: home_risk,
+			});
+			await this.getHotspotNearbyName();
+		}
+
 		// alert(JSON.stringify(this.state.hotspot_nearby));
 	};
 
 	componentDidMount = async () => {
 		// await this.searchHomeAddress();
-		
+
 		// let { status } = await Location.requestPermissionsAsync();
 		// if (status !== "granted") {
 		// 	setErrorMsg("Permission to access location was denied");
 		// 	this.props.navigation.pop();
 		// }
 		// let location = await Location.getCurrentPositionAsync({});
-		
+
 		// this.setState({
 		// 	region: {
 		// 		latitude: location.coords.latitude,
@@ -362,7 +413,7 @@ export default class home_risk_assessment extends React.Component {
 	getHotspotDetails = async (item) => {
 		var hotspot_place_id = item.place_id;
 		// alert(hotspot_place_id);
-		const query_get_hotspot_details = `http://192.168.0.131:5000/getHotspotDetails?place_id=${hotspot_place_id}`;
+		const query_get_hotspot_details = `http://192.168.0.132:5000/getHotspotDetails?place_id=${hotspot_place_id}`;
 		console.log(query_get_hotspot_details);
 		await axios
 			.get(query_get_hotspot_details)
@@ -386,7 +437,7 @@ export default class home_risk_assessment extends React.Component {
 		var photo_reference = this.state.current_hotspot_place_details
 			.photo_reference;
 		// alert(photo_reference);
-		// const query_get_photo_reference = `http://192.168.0.131:5000/getPhotoReference?photo_reference=${photo_reference}`;
+		// const query_get_photo_reference = `http://192.168.0.132:5000/getPhotoReference?photo_reference=${photo_reference}`;
 		// await axios
 		// 	.get(query_get_photo_reference)
 		// 	.then((response) => {
@@ -399,7 +450,7 @@ export default class home_risk_assessment extends React.Component {
 		// 		alert(error);
 		// 	});
 
-		const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo_reference}&key=api_key`;
+		const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo_reference}&key=tempapikey`;
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.onload = () => {
@@ -416,6 +467,10 @@ export default class home_risk_assessment extends React.Component {
 		}
 	};
 
+	setModalVisible_nearby_hotspot = (visible) => {
+		this.setState({ modalVisible_nearby_hotspot: visible });
+	};
+
 	render() {
 		const {
 			latitude,
@@ -424,10 +479,13 @@ export default class home_risk_assessment extends React.Component {
 			hotspot_data,
 			home_location_risk,
 			modalVisible_selected_hotspot,
+			modalVisible_nearby_hotspot,
 			current_hotspot_data,
 			current_hotspot_place_details,
 			current_hotspot_photo_reference,
 			hotspot_nearby,
+			hotspot_nearby_with_name,
+			region,
 		} = this.state;
 
 		const mapStyle = [
@@ -680,110 +738,176 @@ export default class home_risk_assessment extends React.Component {
 						</View>
 					</Modal>
 				)}
-				<Text style={styles.title}>Search Location</Text>
-				<View style={styles.search_outer}>
-					<TextInput
-						// onChangeText={(value) => this.setState({ search_query: value })}
-						onChangeText={(value) => this.onChangeQuery(value)}
-						value={this.state.search_query}
-						style={{
-							borderColor: "#c0cbd3",
-							borderWidth: 2,
-							width: 300,
-							paddingHorizontal: 10,
-						}}
-					></TextInput>
-					{/* <Text>{this.state.search_prediction.place_name}</Text> */}
-					<View
-						style={
-							this.state.search_prediction_selected
-								? styles.dropdown_hidden
-								: styles.dropdown
-						}
-					>
-						{this.state.search_prediction.map((item) => (
-							<Text
-								style={{ paddingVertical: 10 }}
-								key={item.place_id}
-								onPress={() =>
-									this.onPressResult(item.place_id, item.place_name)
-								}
-							>
-								{item.place_name}
-							</Text>
-						))}
-					</View>
-				</View>
-				<MapView
-					style={styles.mapStyle}
-					customMapStyle={mapStyle}
-					region={this.state.region}
-					loadingEnabled={true}
-					loadingIndicatorColor="#666666"
-					loadingBackgroundColor="#eeeeee"
-					moveOnMarkerPress={false}
-					// showsUserLocation={true}
-					showsCompass={true}
-					showsPointsOfInterest={false}
-					provider="google"
-				>
-					{saved_home_location == null || saved_home_location == "none" ? (
-						<View />
-					) : (
-						<Marker
-							// onLoad={() => this.forceUpdate()}
-							// key={1}
-							coordinate={{
-								latitude: saved_home_location.home_lat,
-								longitude: saved_home_location.home_lng,
-							}}
-							title="Your Home Location"
-							description={saved_home_location.ic_address}
-						>
-							<Image
-								source={require("../../assets/home_icon.png")}
-								style={{ height: 35, width: 35 }}
-							/>
-						</Marker>
-					)}
 
-					{hotspot_data == null || hotspot_data == "none" ? (
-						<View />
-					) : (
-						hotspot_data.map((item) => (
+				{hotspot_nearby_with_name == null ? (
+					<View />
+				) : (
+					<Modal
+						animationType="slide"
+						transparent={true}
+						visible={modalVisible_nearby_hotspot}
+						onRequestClose={() => {
+							this.setModalVisible_nearby_hotspot(!modalVisible_nearby_hotspot);
+						}}
+					>
+						<View style={styles.centeredView}>
+							<View style={styles.modalView}>
+								<Text style={styles.modalText}>Nearby Hotspots</Text>
+								<View style={styles.flexRow3}>
+									<View style={[styles.flexCol, styles.flexCol_wider]}>
+										<Text style={styles.premise_name_1}>Premise Name</Text>
+									</View>
+									<View style={[styles.flexCol, styles.flexCol_narrower]}>
+										<Text style={styles.premise_name_1}>Distance</Text>
+									</View>
+									<View style={[styles.flexCol, styles.flexCol_narrower]}>
+										<Text style={styles.premise_name_1}>Map</Text>
+									</View>
+								</View>
+								<ScrollView
+									style={{ width: Dimensions.get("window").width * 0.9 }}
+								>
+									{hotspot_nearby_with_name.map((data) => {
+										return (
+											<View key={data._id} style={styles.flexRow2}>
+												<View style={[styles.flexCol, styles.flexCol_wider]}>
+													<Text style={styles.premise_name}>
+														{data.returned_name.length > 30
+															? data.returned_name.substring(0, 30) + "..."
+															: data.returned_name}
+													</Text>
+												</View>
+												<View style={[styles.flexCol, styles.flexCol_narrower]}>
+													<Text style={styles.premise_name}>
+														{data.straight_distance + " m"}
+													</Text>
+												</View>
+												<View style={[styles.flexCol, styles.flexCol_narrower]}>
+													<TouchableHighlight
+														style={{
+															...styles.openButton_3,
+															backgroundColor: "grey",
+														}}
+														onPress={() =>
+															Linking.openURL(
+																`https://www.google.com/maps/search/?api=1&query=<address>&query_place_id=${data.place_id}`
+															)
+														}
+													>
+														<Text style={styles.textStyle}>Map</Text>
+													</TouchableHighlight>
+												</View>
+											</View>
+										);
+									})}
+								</ScrollView>
+								<Text />
+								<TouchableHighlight
+									style={{
+										...styles.openButton_1,
+										backgroundColor: "#3cb371",
+										width: 150,
+									}}
+									onPress={() => {
+										this.setModalVisible_nearby_hotspot(
+											!modalVisible_nearby_hotspot
+										);
+									}}
+								>
+									<Text style={styles.textStyle_1}>OK</Text>
+								</TouchableHighlight>
+							</View>
+						</View>
+					</Modal>
+				)}
+
+				<Text style={styles.title}>Your Home Location</Text>
+				<View style={styles.mapOuter}>
+					<MapView
+						style={styles.mapStyle}
+						customMapStyle={mapStyle}
+						region={this.state.region}
+						loadingEnabled={true}
+						loadingIndicatorColor="#666666"
+						loadingBackgroundColor="#eeeeee"
+						moveOnMarkerPress={false}
+						// showsUserLocation={true}
+						showsCompass={true}
+						showsPointsOfInterest={false}
+						provider="google"
+					>
+						{saved_home_location == null || saved_home_location == "none" ? (
+							<View />
+						) : (
 							<Marker
-								key={item._id}
+								// onLoad={() => this.forceUpdate()}
+								// key={1}
 								coordinate={{
-									latitude: item.place_lat,
-									longitude: item.place_lng,
+									latitude: saved_home_location.home_lat,
+									longitude: saved_home_location.home_lng,
 								}}
-								// title={item.premise_name}
-								// description={item.place_id}
-								// description={item.premise_address}
-								onPress={() => {
-									this.setState({
-										current_hotspot_data: item,
-										region: {
-											latitude: item.place_lat,
-											longitude: item.place_lng,
-											latitudeDelta: 0.04,
-											longitudeDelta: 0.04,
-										},
-									});
-									this.setModalVisible_selected_hotspot(true, item);
-								}}
+								title="Your Home Location"
+								description={saved_home_location.ic_address}
 							>
 								<Image
-									source={require("../../assets/hotspot_icon.png")}
+									source={require("../../assets/home_icon.png")}
 									style={{ height: 35, width: 35 }}
 								/>
 							</Marker>
-						))
-					)}
-				</MapView>
+						)}
 
-				{home_location_risk == null ? (
-					<View />
+						{hotspot_data == null || hotspot_data == "none" ? (
+							<View />
+						) : (
+							hotspot_data.map((item) => (
+								<Marker
+									key={item._id}
+									coordinate={{
+										latitude: item.place_lat,
+										longitude: item.place_lng,
+									}}
+									// title={item.premise_name}
+									// description={item.place_id}
+									// description={item.premise_address}
+									onPress={() => {
+										this.setState({
+											current_hotspot_data: item,
+											region: {
+												latitude: item.place_lat,
+												longitude: item.place_lng,
+												latitudeDelta: 0.04,
+												longitudeDelta: 0.04,
+											},
+										});
+										this.setModalVisible_selected_hotspot(true, item);
+									}}
+								>
+									<Image
+										source={require("../../assets/hotspot_icon.png")}
+										style={{ height: 35, width: 35 }}
+									/>
+								</Marker>
+							))
+						)}
+					</MapView>
+					<TouchableHighlight
+						style={{
+							...styles.openButton_refocus,
+							backgroundColor: "#6c757d",
+						}}
+						onPress={() => {
+							this.setState({ region: region });
+						}}
+					>
+						<Image
+							source={require("../../assets/refocus_icon.png")}
+							style={{ height: 20, width: 20 }}
+						/>
+					</TouchableHighlight>
+				</View>
+
+				{home_location_risk == null || hotspot_nearby_with_name == null ? (
+					<ActivityIndicator />
 				) : home_location_risk === true ? (
 					<View style={styles.home_risk_outer_danger}>
 						<Text style={styles.subtitle}>
@@ -798,6 +922,7 @@ export default class home_risk_assessment extends React.Component {
 							}}
 							onPress={() => {
 								// this.updateResponse();
+								this.setModalVisible_nearby_hotspot(true);
 							}}
 						>
 							<Text style={styles.textStyle}>View Nearby Hotspot</Text>
@@ -821,6 +946,54 @@ export default class home_risk_assessment extends React.Component {
 }
 
 const styles = StyleSheet.create({
+	openButton_refocus: {
+		backgroundColor: "#F194FF",
+		borderRadius: 5,
+		paddingVertical: 10,
+		width: 50,
+		elevation: 2,
+		position: "absolute",
+		top: 30,
+		left: 10,
+		flex: 1,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	mapOuter: {
+		position: "relative",
+	},
+	modalText: {
+		fontWeight: "bold",
+		textAlign: "center",
+		fontSize: 16,
+		marginBottom: 10,
+	},
+	flexRow2: {
+		flex: 0.1,
+		flexDirection: "row",
+		marginTop: 10,
+		marginBottom: 10,
+	},
+	flexRow3: {
+		flex: 0.1,
+		flexDirection: "row",
+		marginTop: 20,
+		marginBottom: 20,
+		width: Dimensions.get("window").width * 0.9,
+	},
+	flexCol: {
+		marginHorizontal: 10,
+		width: 110,
+		height: 40,
+		justifyContent: "center",
+		paddingBottom: 15,
+	},
+	flexCol_wider: {
+		width: 170,
+	},
+	flexCol_narrower: {
+		width: 60,
+	},
 	container: {
 		flex: 1,
 		backgroundColor: "white",
@@ -829,9 +1002,15 @@ const styles = StyleSheet.create({
 		// marginHorizontal: 20,
 	},
 	title: {
-		fontSize: 20,
+		fontSize: 18,
 		textAlign: "center",
-		marginVertical: 20,
+		fontWeight: "bold",
+		marginTop: 20,
+		marginBottom: 5,
+		backgroundColor: "lightgrey",
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 10,
 	},
 	check_in_datetime: {
 		backgroundColor: "#ff534f",
@@ -849,6 +1028,12 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		marginTop: 15,
 		marginBottom: 10,
+	},
+	premise_name_1: {
+		fontSize: 14,
+		fontWeight: "bold",
+		textAlign: "center",
+		marginTop: 15,
 	},
 	premise_address: {
 		fontSize: 14,
@@ -940,6 +1125,13 @@ const styles = StyleSheet.create({
 		elevation: 2,
 		marginVertical: 10,
 	},
+	openButton_3: {
+		backgroundColor: "#F194FF",
+		borderRadius: 5,
+		padding: 10,
+		elevation: 2,
+		marginVertical: 10,
+	},
 	textStyle: {
 		color: "white",
 		fontWeight: "bold",
@@ -960,7 +1152,8 @@ const styles = StyleSheet.create({
 		margin: 20,
 		backgroundColor: "white",
 		borderRadius: 20,
-		padding: 30,
+		paddingVertical: 30,
+		paddingHorizontal: 10,
 		alignItems: "center",
 		shadowColor: "#000",
 		shadowOffset: {

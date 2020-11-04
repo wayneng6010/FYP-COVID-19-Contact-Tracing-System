@@ -61,7 +61,7 @@ export default class sign_in extends React.Component {
 					// alert("pid " + checkInData.pid);
 					// alert(checkInData.pid);
 
-					await fetch("http://192.168.0.131:5000/check_in_premise", {
+					await fetch("http://192.168.0.132:5000/check_in_premise", {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",

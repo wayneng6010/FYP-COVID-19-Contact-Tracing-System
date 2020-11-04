@@ -14,11 +14,11 @@ import {
 	Label,
 	TextInput,
 	ToastAndroid,
-	TouchableOpacity,
 	TouchableHighlight,
+	TouchableOpacity,
 } from "react-native";
 
-export default class phoneNo_verify extends React.Component {
+export default class change_phone_no extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -26,12 +26,6 @@ export default class phoneNo_verify extends React.Component {
 			tac_code: null,
 			tac_code_correct: null,
 			phone_no_sent: null,
-			formDataObj: {
-				ic_num: null,
-				ic_fname: null,
-				ic_address: null,
-				phone_no_sent: null,
-			},
 		};
 	}
 
@@ -41,20 +35,6 @@ export default class phoneNo_verify extends React.Component {
 		this.setState({ tac_code_correct: tac_code });
 		this.setState({ phone_no_sent: phone_no_sent }); // move this line inside query
 
-		// const query_send_tac = `http://192.168.0.132:5000/sendTacCode?phone_no=${phone_no}&tac_code=${tac_code}`;
-		// console.log(query_send_tac);
-		// axios
-		// 	.get(query_send_tac)
-		// 	.then((result) => {
-		// 		if (result) {
-		// 			// alert("Tac code sent");
-		// 			ToastAndroid.show("Tac code sent", ToastAndroid.SHORT);
-		// 		}
-		// 	})
-		// 	.catch((error) => {
-		// 		ToastAndroid.show("Tac code failed to sent", ToastAndroid.SHORT);
-		// 		alert(error);
-		// 	});
 		console.log(tac_code);
 		await fetch("http://192.168.0.132:5000/sendTacCode", {
 			method: "POST",
@@ -88,6 +68,7 @@ export default class phoneNo_verify extends React.Component {
 
 	verifyPhoneNo = async () => {
 		var phone_no = this.state.phone_no;
+		this.setState({ phone_no: phone_no });
 		if (phone_no == null || phone_no == "") {
 			alert("Please enter your phone number");
 			return;
@@ -117,7 +98,7 @@ export default class phoneNo_verify extends React.Component {
 		(async () => {
 			// used to check if there is same phone number saved in database
 			phoneNoExisted = await fetch(
-				"http://192.168.0.132:5000/getExistingPhoneNo",
+				"http://192.168.0.132:5000/getExistingPhoneNo_PO",
 				{
 					method: "POST",
 					headers: {
@@ -153,42 +134,32 @@ export default class phoneNo_verify extends React.Component {
 		})();
 	};
 
-	componentDidMount = () => {
-		// alert(JSON.stringify(this.props.navigation.state.params.formData));
-		// this.setState({
-		// 	formDataObj: {
-		// 		ic_num: "this.props.navigation.state.params.formData.ic_num",
-		// 		ic_fname: "this.props.navigation.state.params.formData.ic_fname",
-		// 		ic_address: "this.props.navigation.state.params.formData.ic_address",
-		// 		phone_no_sent: null,
-		// 	},
-		// });
-	};
-
-	save_formData = async () => {
-		// const query_save_phone_no = `http://192.168.0.132:5000/save_phone_no?phone_no=${this.state.phone_no_sent}`;
-		// console.log(query_save_phone_no);
-		// await axios
-		// 	.post(query_save_phone_no)
-		// 	.then((response) => {
-		// 		console.log("phone no session saved");
-		// 	})
-		// 	.catch((error) => {
-		// 		alert(error);
-		// 	});
-		const ic_num = this.props.navigation.state.params.formData.ic_num,
-			ic_fname = this.props.navigation.state.params.formData.ic_fname,
-			ic_address = this.props.navigation.state.params.formData.ic_address;
-		this.setState({
-			formDataObj: {
-				ic_num: ic_num,
-				ic_fname: ic_fname,
-				ic_address: ic_address,
-				phone_no_sent: this.state.phone_no_sent,
+	update_phone_no = async () => {
+		await fetch("http://192.168.0.132:5000/update_phone_no_po", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
 			},
-		});
-
-		return true;
+			body: JSON.stringify({
+				new_phone_no: this.state.phone_no_sent,
+			}),
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.text();
+			})
+			.then((jsonData) => {
+				// alert(jsonData);
+				if (jsonData == "success") {
+					alert("Phone number has been updated");
+					this.props.navigation.pop();
+				} else if (jsonData == "failed") {
+					alert("Phone number failed to update");
+				}
+			})
+			.catch((error) => {
+				alert(error);
+			});
 	};
 
 	checkTacCode = async () => {
@@ -201,13 +172,8 @@ export default class phoneNo_verify extends React.Component {
 		if (this.state.tac_code == this.state.tac_code_correct) {
 			// await this.save_session();
 			// alert("Phone number is verified");
-			let formDataSaved = await this.save_formData();
 			ToastAndroid.show("Phone number is verified", ToastAndroid.SHORT);
-			if (formDataSaved) {
-				this.props.navigation.replace("email_verify", {
-					formData: this.state.formDataObj,
-				});
-			}
+			this.update_phone_no();
 		} else {
 			alert("Incorrect TAC code");
 		}
@@ -220,17 +186,17 @@ export default class phoneNo_verify extends React.Component {
 		return (
 			<SafeAreaView style={styles.container}>
 				<Text style={[styles.subtitle, styles.subtitle_bg]}>
-					Step 2/5: Verify your Phone Number
+					Update Phone Number
 				</Text>
-				<Text style={styles.subtitle}>Your Phone Number</Text>
+				<Text style={styles.subtitle}>Your New Phone Number</Text>
 				<TextInput
 					name="phone_no"
 					keyboardType="numeric"
 					autoCompleteType="tel"
+					maxLength={11}
 					onChangeText={(value) =>
 						this.setState({ phone_no: value.replace(/[-,. ]/g, "") })
 					}
-					maxLength={11}
 					value={this.state.phone_no}
 					style={styles.input}
 					placeholder="e.g. 01612345678"
@@ -259,9 +225,9 @@ export default class phoneNo_verify extends React.Component {
 					onChangeText={(value) =>
 						this.setState({ tac_code: value.replace(/[-,. ]/g, "") })
 					}
+					maxLength={6}
 					editable={this.state.phone_no_sent ? true : false}
 					selectTextOnFocus={this.state.phone_no_sent ? true : false}
-					maxLength={6}
 					value={this.state.tac_code}
 					style={
 						this.state.phone_no_sent ? styles.input : styles.input_disabled
@@ -283,7 +249,7 @@ export default class phoneNo_verify extends React.Component {
 					}
 					onPress={() => this.checkTacCode()}
 				>
-					<Text style={styles.textStyle}>Submit</Text>
+					<Text style={styles.textStyle}>Update</Text>
 				</TouchableOpacity>
 			</SafeAreaView>
 

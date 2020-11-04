@@ -47,7 +47,7 @@ export default class change_password extends React.Component {
 				// alert(jsonData);
 				if (jsonData == "success") {
 					// alert("Logout Successful");
-					this.props.navigation.navigate("login_visitor_phoneNo");
+					this.props.navigation.navigate("login_premiseOwner");
 				} else if (jsonData == "failed") {
 					alert("Failed to logout");
 				} else {
@@ -60,7 +60,7 @@ export default class change_password extends React.Component {
 	};
 
 	change_password = async () => {
-		await fetch("http://192.168.0.132:5000/change_password", {
+		await fetch("http://192.168.0.132:5000/change_password_po", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -109,7 +109,7 @@ export default class change_password extends React.Component {
 		(async () => {
 			// used to check if there is same email saved in database
 			current_password_correct = await fetch(
-				"http://192.168.0.132:5000/check_current_password",
+				"http://192.168.0.132:5000/check_current_password_po",
 				{
 					method: "POST",
 					headers: {
@@ -149,12 +149,6 @@ export default class change_password extends React.Component {
 				} else if (npassword.length < 8) {
 					ToastAndroid.show(
 						"Password should be at least 8 characters",
-						ToastAndroid.SHORT
-					);
-					return;
-				} else if (npassword.length > 20) {
-					ToastAndroid.show(
-						"Password should be at maximum 20 characters",
 						ToastAndroid.SHORT
 					);
 					return;

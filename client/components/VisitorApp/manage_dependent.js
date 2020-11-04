@@ -19,7 +19,7 @@ export default class manage_dependent extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -33,7 +33,7 @@ export default class manage_dependent extends React.Component {
 	}
 
 	getAllDependent = async () => {
-		await fetch("http://192.168.0.131:5000/get_user_dependent", {
+		await fetch("http://192.168.0.132:5000/get_user_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -166,7 +166,7 @@ export default class manage_dependent extends React.Component {
 							</Text>
 							<Text style={{ fontSize: 16 }}>- IC number</Text>
 							<Text style={{ fontSize: 16 }}>- Full name</Text>
-							<Text style={{ fontSize: 16 }}>- Residential Address</Text>
+							{/* <Text style={{ fontSize: 16 }}>- Residential Address</Text> */}
 
 							<View style={styles.flexRow1}>
 								<View style={styles.flexCol}>
@@ -198,8 +198,14 @@ export default class manage_dependent extends React.Component {
 							</View>
 							<Text />
 							<Text />
-							<Text style={[styles.subtitle, styles.subtitle_1]}>
-								Add via Passport
+							<Text
+								style={[styles.subtitle, styles.subtitle_1]}
+								onPress={() => {
+									this.setModalVisible(!modalVisible);
+									this.props.navigation.navigate("ic_privacy_statement_in_app");
+								}}
+							>
+								How do we manage the IC data?
 							</Text>
 						</View>
 					</View>

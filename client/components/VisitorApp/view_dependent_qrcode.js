@@ -43,7 +43,7 @@ export default class view_dependent_qrcode extends React.Component {
 	}
 
 	getUserID = async () => {
-		await fetch("http://192.168.0.131:5000/get_user_id", {
+		await fetch("http://192.168.0.132:5000/get_user_id", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -159,7 +159,7 @@ export default class view_dependent_qrcode extends React.Component {
 	};
 
 	delete_dependent = async () => {
-		await fetch("http://192.168.0.131:5000/delete_dependent", {
+		await fetch("http://192.168.0.132:5000/delete_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -189,7 +189,7 @@ export default class view_dependent_qrcode extends React.Component {
 	};
 
 	regenerate_dependent_qrcode = async () => {
-		await fetch("http://192.168.0.131:5000/regenerate_dependent_qrcode", {
+		await fetch("http://192.168.0.132:5000/regenerate_dependent_qrcode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
