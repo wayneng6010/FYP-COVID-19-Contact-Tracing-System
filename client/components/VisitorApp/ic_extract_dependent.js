@@ -137,7 +137,7 @@ export default class ic_extract_dependent extends React.Component {
 					if (item.description === ic_number) {
 						ic_number_x_position = item.boundingPoly.vertices[0].x;
 						ic_number_x_position_right = item.boundingPoly.vertices[1].x;
-						ic_number_y_position = item.boundingPoly.vertices[0].y;
+						ic_number_y_position = item.boundingPoly.vertices[3].y;
 					} else if (home_address.split(", ")[0].includes(item.description)) {
 						home_address_x_position = item.boundingPoly.vertices[0].x;
 						home_address_y_position = item.boundingPoly.vertices[0].y;
@@ -321,13 +321,23 @@ export default class ic_extract_dependent extends React.Component {
 		let responseJson_label = await response_label.json();
 		// console.log(JSON.stringify(responseJson_label));
 		var label_verify = false;
-		responseJson_label.responses[0].labelAnnotations.forEach(function (item) {
-			if (item != "") {
-				if (item.description === "Identity document") {
-					label_verify = true;
-				}
-			}
-		});
+		// responseJson_label.responses[0].labelAnnotations.forEach(function (item) {
+		// 	if (item != "") {
+		// 		if (item.description === "Identity document") {
+		// 			label_verify = true;
+		// 		}
+		// 	}
+		// });
+
+		console.log(
+			responseJson_label.responses[0].labelAnnotations[0].description
+		);
+		if (
+			responseJson_label.responses[0].labelAnnotations[0].description ===
+			"Identity document"
+		) {
+			label_verify = true;
+		}
 
 		console.log("label verify: " + label_verify);
 		return label_verify;
@@ -378,14 +388,15 @@ export default class ic_extract_dependent extends React.Component {
 		) {
 			if (
 				Math.abs(red - green) >= 100 ||
-				Math.abs(red - green) >= 100 ||
-				Math.abs(red - green) >= 100
+				Math.abs(green - blue) >= 100 ||
+				Math.abs(red - blue) >= 100
 			) {
 				// colored
 				color_verify = true;
+			} else {
+				// greyscale
+				color_verify = false;
 			}
-			// greyscale
-			color_verify = false;
 		} else {
 			// colored
 			color_verify = true;
@@ -412,19 +423,19 @@ export default class ic_extract_dependent extends React.Component {
 						this.setState({ ic_verify_progress: "100%" });
 						return true;
 					} else {
-						alert("Your IC is invalid! Please capture your original IC");
+						alert("Dependent IC is invalid! Please do not capture printed IC, make sure all part of IC is clearly captured");
 						return false;
 					}
 				} else {
-					alert("Your IC is invalid! Please do not capture photostated IC");
+					alert("Dependent IC is invalid! Please do not capture photostated IC");
 					return false;
 				}
 			} else {
-				alert("Your IC is invalid! Please capture your original IC");
+				alert("Dependent IC is invalid! Please capture dependent original IC");
 				return false;
 			}
 		} else {
-			alert("Your IC is invalid! Please make sure the IC is placed straight");
+			alert("Dependent IC is invalid! Please make sure the IC is placed straight and all the text on IC is clear");
 			return false;
 		}
 	};
@@ -432,7 +443,7 @@ export default class ic_extract_dependent extends React.Component {
 	save_formData = async () => {
 		const { ic_number, full_name, home_address } = this.state;
 
-		await fetch("http://192.168.0.132:5000/save_new_dependent", {
+		await fetch("http://192.168.0.131:5000/save_new_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -468,7 +479,7 @@ export default class ic_extract_dependent extends React.Component {
 			// await this.save_session();
 			const { ic_number, full_name, home_address } = this.state;
 
-			await fetch("http://192.168.0.132:5000/save_new_dependent", {
+			await fetch("http://192.168.0.131:5000/save_new_dependent", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -534,7 +545,7 @@ export default class ic_extract_dependent extends React.Component {
 			(async () => {
 				// used to check if there is same phone number saved in database
 				icNumExisted = await fetch(
-					"http://192.168.0.132:5000/getExistingIcNum",
+					"http://192.168.0.131:5000/getExistingIcNum",
 					{
 						method: "POST",
 						headers: {
@@ -563,9 +574,12 @@ export default class ic_extract_dependent extends React.Component {
 
 				if (icNumExisted) {
 					alert("This IC number has been registered before");
-					this.props.navigation.replace("ic_capture_dependent");
+					this.props.navigation.replace("ic_capture_dependent", {
+						dependent_relationship: this.props.navigation.state.params
+							.dependent_relationship,
+					});
 				} else {
-					alert("Your IC is valid!");
+					alert("Dependent IC is valid!");
 					this.setState({ ic_verified: true });
 				}
 			})();
@@ -616,7 +630,10 @@ export default class ic_extract_dependent extends React.Component {
 						title="Retake Image"
 						disabled={this.state.ic_verified ? false : true}
 						onPress={() =>
-							this.props.navigation.replace("ic_capture_dependent")
+							this.props.navigation.replace("ic_capture_dependent", {
+								dependent_relationship: this.props.navigation.state.params
+									.dependent_relationship,
+							})
 						}
 					></Button>
 

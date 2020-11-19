@@ -18,7 +18,7 @@ export default class forgot_password extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -48,7 +48,7 @@ export default class forgot_password extends React.Component {
 		this.setState({ verification_code_correct: verification_code });
 		this.setState({ email_sent: email }); // move inside request
 
-		// const query_send_tac = `http://192.168.0.132:5000/sendVerificationEmail?email=${email}&verification_code=${verification_code}`;
+		// const query_send_tac = `http://192.168.0.131:5000/sendVerificationEmail?email=${email}&verification_code=${verification_code}`;
 		console.log(verification_code);
 		// axios
 		// 	.post(query_send_tac)
@@ -60,7 +60,7 @@ export default class forgot_password extends React.Component {
 		// 		alert(error);
 		// 	});
 
-		await fetch("http://192.168.0.132:5000/sendVerificationEmail_fp", {
+		await fetch("http://192.168.0.131:5000/sendVerificationEmail_fp", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -104,7 +104,7 @@ export default class forgot_password extends React.Component {
 		let emailExisted;
 		(async () => {
 			// used to check if there is same email saved in database
-			emailExisted = await fetch("http://192.168.0.132:5000/getExistingEmail", {
+			emailExisted = await fetch("http://192.168.0.131:5000/getExistingEmail", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -167,7 +167,7 @@ export default class forgot_password extends React.Component {
 		if (!this.state.email_verified) {
 			return;
 		}
-		await fetch("http://192.168.0.132:5000/change_password_forgot_password", {
+		await fetch("http://192.168.0.131:5000/change_password_forgot_password", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

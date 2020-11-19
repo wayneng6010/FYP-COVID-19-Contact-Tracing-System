@@ -48,7 +48,7 @@ export default class change_email extends React.Component {
 		this.setState({ verification_code_correct: verification_code });
 		this.setState({ email_sent: email }); // move inside request
 
-		// const query_send_tac = `http://192.168.0.132:5000/sendVerificationEmail?email=${email}&verification_code=${verification_code}`;
+		// const query_send_tac = `http://192.168.0.131:5000/sendVerificationEmail?email=${email}&verification_code=${verification_code}`;
 		console.log(verification_code);
 		// axios
 		// 	.post(query_send_tac)
@@ -60,7 +60,7 @@ export default class change_email extends React.Component {
 		// 		alert(error);
 		// 	});
 
-		await fetch("http://192.168.0.132:5000/sendVerificationEmail", {
+		await fetch("http://192.168.0.131:5000/sendVerificationEmail", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -104,7 +104,7 @@ export default class change_email extends React.Component {
 		let emailExisted;
 		(async () => {
 			// used to check if there is same email saved in database
-			emailExisted = await fetch("http://192.168.0.132:5000/getExistingEmail", {
+			emailExisted = await fetch("http://192.168.0.131:5000/getExistingEmail", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -139,7 +139,7 @@ export default class change_email extends React.Component {
 	};
 
 	update_email = async () => {
-		await fetch("http://192.168.0.132:5000/update_email", {
+		await fetch("http://192.168.0.131:5000/update_email", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

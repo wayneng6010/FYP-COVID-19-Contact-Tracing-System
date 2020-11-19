@@ -34,7 +34,7 @@ export default class sign_in extends React.Component {
 	}
 
 	getAllQRCode = async () => {
-		await fetch("http://192.168.0.132:5000/get_all_premise_qrcode", {
+		await fetch("http://192.168.0.131:5000/get_all_premise_qrcode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -74,7 +74,7 @@ export default class sign_in extends React.Component {
 	saveCheckIn = async () => {
 		// alert("ok");
 		const checkInData = this.state.checkInData;
-		await fetch("http://192.168.0.132:5000/check_in_premise_dependent", {
+		await fetch("http://192.168.0.131:5000/check_in_premise_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -93,12 +93,12 @@ export default class sign_in extends React.Component {
 			})
 			.then((jsonData) => {
 				// alert(JSON.stringify(jsonData));
-				if (jsonData !== []) {
+				if (jsonData) {
 					this.setState({ returned_check_in_data: jsonData });
 					this.setModalVisible(false);
 					this.setModalVisible_1(true);
 				} else {
-					alert("Check in unsuccessful");
+					alert("Invalid check in QR code");
 				}
 			})
 			.catch((error) => {

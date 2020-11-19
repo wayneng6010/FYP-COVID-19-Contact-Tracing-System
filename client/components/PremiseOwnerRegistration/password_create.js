@@ -17,7 +17,7 @@ export default class password_create extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -40,7 +40,7 @@ export default class password_create extends React.Component {
 	}
 
 	// save_session = async () => {
-	// 	const query_save_email = `http://192.168.0.132:5000/save_email?email=${this.state.email}`;
+	// 	const query_save_email = `http://192.168.0.131:5000/save_email?email=${this.state.email}`;
 	// 	console.log(query_save_email);
 	// 	await axios
 	// 		.post(query_save_email)
@@ -53,12 +53,12 @@ export default class password_create extends React.Component {
 	// };
 
 	completeRegistration = async () => {
-		// const query_save_registration = `http://192.168.0.132:5000/save_registration?password=${this.state.password}`;
+		// const query_save_registration = `http://192.168.0.131:5000/save_registration?password=${this.state.password}`;
 		// console.log(query_save_registration);
 		// await axios
 		// 	.post(query_save_registration)
 		// alert(JSON.stringify(this.state.formDataObj));
-		await fetch("http://192.168.0.132:5000/save_registration_po", {
+		await fetch("http://192.168.0.131:5000/save_registration_po", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

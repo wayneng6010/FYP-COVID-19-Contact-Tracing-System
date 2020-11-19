@@ -17,7 +17,7 @@ export default class change_password extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -33,7 +33,7 @@ export default class change_password extends React.Component {
 	}
 
 	logout = async () => {
-		await fetch("http://192.168.0.132:5000/logout", {
+		await fetch("http://192.168.0.131:5000/logout", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -60,7 +60,7 @@ export default class change_password extends React.Component {
 	};
 
 	change_password = async () => {
-		await fetch("http://192.168.0.132:5000/change_password", {
+		await fetch("http://192.168.0.131:5000/change_password", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -109,7 +109,7 @@ export default class change_password extends React.Component {
 		(async () => {
 			// used to check if there is same email saved in database
 			current_password_correct = await fetch(
-				"http://192.168.0.132:5000/check_current_password",
+				"http://192.168.0.131:5000/check_current_password",
 				{
 					method: "POST",
 					headers: {

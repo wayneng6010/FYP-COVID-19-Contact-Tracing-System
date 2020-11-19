@@ -43,7 +43,7 @@ export default class view_dependent_qrcode extends React.Component {
 	}
 
 	getUserID = async () => {
-		await fetch("http://192.168.0.132:5000/get_user_id", {
+		await fetch("http://192.168.0.131:5000/get_user_id", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -87,13 +87,12 @@ export default class view_dependent_qrcode extends React.Component {
 	saveFile = async (file_path_updated) => {
 		if (this.state.qrcode_options === "download") {
 			try {
+				// ask permission to access camera roll
 				const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
 				alert("QR code saved to File Manager->DCIM");
 				if (status === "granted") {
+					// save QR code in DCIM folder
 					const asset = await MediaLibrary.createAssetAsync(file_path_updated);
-					// alert("QR code saved to File Manager->DCIM");
-					// await MediaLibrary.saveToLibraryAsync(fileUri);
-					// await MediaLibrary.createAlbumAsync("Download", asset, false);
 				}
 			} catch (error) {
 				console.error(error);
@@ -101,6 +100,7 @@ export default class view_dependent_qrcode extends React.Component {
 			}
 		} else if (this.state.qrcode_options === "share") {
 			try {
+				// open sharing options
 				Sharing.shareAsync(file_path_updated);
 			} catch (error) {
 				console.error(error);
@@ -111,6 +111,7 @@ export default class view_dependent_qrcode extends React.Component {
 
 	download = async (dataURL) => {
 		try {
+			// add text and customize layout of QR code
 			let file_path = await Print.printToFileAsync({
 				html:
 					'<div style = "margin-top: 10%; border: 1px solid grey; border-radius: 20px; width: 500px; height: 250px; padding: 0 25px;">' +
@@ -133,6 +134,7 @@ export default class view_dependent_qrcode extends React.Component {
 				file_path.uri.lastIndexOf("/") + 1
 			)}CheckIn-QRCode-${this.state.dependent_name}.pdf`;
 
+			// change file name
 			await FileSystem.moveAsync({
 				from: file_path.uri,
 				to: file_path_updated,
@@ -159,7 +161,7 @@ export default class view_dependent_qrcode extends React.Component {
 	};
 
 	delete_dependent = async () => {
-		await fetch("http://192.168.0.132:5000/delete_dependent", {
+		await fetch("http://192.168.0.131:5000/delete_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -175,7 +177,7 @@ export default class view_dependent_qrcode extends React.Component {
 			.then((jsonData) => {
 				// alert(JSON.stringify(jsonData));
 				if (jsonData == "success") {
-					// alert("This dependent have been deleted");
+					alert("This dependent has been deleted");
 					this.setModalVisible_delete(false);
 					this.props.navigation.pop();
 				} else {
@@ -189,7 +191,7 @@ export default class view_dependent_qrcode extends React.Component {
 	};
 
 	regenerate_dependent_qrcode = async () => {
-		await fetch("http://192.168.0.132:5000/regenerate_dependent_qrcode", {
+		await fetch("http://192.168.0.131:5000/regenerate_dependent_qrcode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -208,7 +210,7 @@ export default class view_dependent_qrcode extends React.Component {
 			.then((jsonData) => {
 				// alert(JSON.stringify(jsonData));
 				if (jsonData == "success") {
-					// alert("The QR code of this dependent have been regenerated");
+					alert("The QR code of this dependent have been regenerated");
 					this.setModalVisible_regenerate(false);
 					this.props.navigation.pop();
 				} else {

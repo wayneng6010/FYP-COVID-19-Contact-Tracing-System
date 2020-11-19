@@ -23,7 +23,7 @@ export default class ic_capture extends React.Component {
 	// set an initial state
 	// const [hasPermission, setHasPermission] = useState(null);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// constructor => () => {
 	// 	(async () => {
 	// 		const { status } = await Permissions.askAsync(Permissions.CAMERA);
@@ -123,8 +123,6 @@ export default class ic_capture extends React.Component {
 					},
 				],
 				{ compress: 0.1, format: "jpeg", base64: true }
-				// { base64: true },
-				// { compress: 0, format: ImageManipulator.SaveFormat.JPEG }
 			);
 
 			// console.log(manipResult);

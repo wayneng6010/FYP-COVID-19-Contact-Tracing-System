@@ -30,7 +30,6 @@ export default class sign_in extends React.Component {
 
 	componentDidMount = async () => {
 		const { status } = await BarCodeScanner.requestPermissionsAsync();
-		// setHasPermission(status === "granted");
 		this.setState({ hasPermission: status === "granted" });
 		if (this.state.hasPermission === null) {
 			ToastAndroid.show("Requesting for camera permission", ToastAndroid.SHORT);
@@ -61,7 +60,7 @@ export default class sign_in extends React.Component {
 					// alert("pid " + checkInData.pid);
 					// alert(checkInData.pid);
 
-					await fetch("http://192.168.0.132:5000/check_in_premise", {
+					await fetch("http://192.168.0.131:5000/check_in_premise", {
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
@@ -78,12 +77,12 @@ export default class sign_in extends React.Component {
 						})
 						.then((jsonData) => {
 							// alert(jsonData);
-							if (jsonData !== []) {
+							if (jsonData) {
 								this.setState({ check_in_data: jsonData });
 								this.setModalVisible(true);
 							} else {
-								this.setModalVisible(!modalVisible);
-								alert("Check in unsuccessful");
+								this.setModalVisible(false);
+								alert("Invalid check in QR code");
 							}
 							// if (jsonData == "success") {
 							// 	alert("Check in successful");

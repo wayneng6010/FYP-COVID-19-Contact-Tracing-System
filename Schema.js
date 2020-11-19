@@ -126,8 +126,6 @@ const checkInRecordSchema = new mongoose.Schema({
 const visitorDependentSchema = new mongoose.Schema({
 	ic_num: {
 		type: String,
-		unique: true,
-		index: true,
 		required: true,
 		maxlength: 100,
 	},

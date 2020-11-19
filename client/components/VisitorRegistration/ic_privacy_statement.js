@@ -14,7 +14,7 @@ export default class register extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -33,9 +33,11 @@ export default class register extends React.Component {
 						<Text style={styles.title}>Data collected from identity card</Text>
 						<Text style={styles.subtitle}>
 							• Identity card (IC) number {"\n"}• Full name {"\n"}• Residential
-							address (for dependent registration, address will be processed but not stored){"\n\n"}
+							address{"\n\n"}
 							Face photo on the IC will be processed for verification but will
-							not be stored.
+							not be stored. For adding dependent, the residential address on
+							dependent’s IC will be processed for verification but will not be
+							stored.
 						</Text>
 
 						<Text style={styles.title}>Purpose of data collection</Text>
@@ -77,8 +79,8 @@ export default class register extends React.Component {
 							The medical team will keep the data confidential.
 						</Text>
 
-						<Text/>
-						<Text/>
+						<Text />
+						<Text />
 					</ScrollView>
 				</View>
 			</SafeAreaView>

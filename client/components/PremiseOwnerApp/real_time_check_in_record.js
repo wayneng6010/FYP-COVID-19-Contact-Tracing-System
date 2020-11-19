@@ -19,7 +19,7 @@ export default class real_time_check_in_record extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -38,7 +38,7 @@ export default class real_time_check_in_record extends React.Component {
 	}
 
 	getVisitorInfo = async () => {
-		await fetch("http://192.168.0.132:5000/get_user_info", {
+		await fetch("http://192.168.0.131:5000/get_user_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -67,7 +67,7 @@ export default class real_time_check_in_record extends React.Component {
 	};
 
 	getDependentInfo = async () => {
-		await fetch("http://192.168.0.132:5000/get_dependent_info", {
+		await fetch("http://192.168.0.131:5000/get_dependent_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -110,7 +110,7 @@ export default class real_time_check_in_record extends React.Component {
 				.substring(0, time_from_iso.indexOf(".") - 3),
 		});
 
-		await fetch("http://192.168.0.132:5000/get_real_time_check_in_record", {
+		await fetch("http://192.168.0.131:5000/get_real_time_check_in_record", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -153,7 +153,7 @@ export default class real_time_check_in_record extends React.Component {
 	};
 
 	getAllQRCode = async () => {
-		await fetch("http://192.168.0.132:5000/get_all_premise_qrcode", {
+		await fetch("http://192.168.0.131:5000/get_all_premise_qrcode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

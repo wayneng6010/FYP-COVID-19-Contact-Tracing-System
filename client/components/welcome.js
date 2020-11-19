@@ -10,12 +10,21 @@ import {
 	View,
 } from "react-native";
 
+import * as Location from "expo-location";
+
 export default class welcome extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
+	componentDidMount = async () => {
+		// await this.searchHomeAddress();
+		let { status } = await Location.requestPermissionsAsync();
+		if (status !== "granted") {
+			setErrorMsg("Permission to access location was denied");
+		}
+	};
 
 	// const captureIC = () => {};
 	render() {

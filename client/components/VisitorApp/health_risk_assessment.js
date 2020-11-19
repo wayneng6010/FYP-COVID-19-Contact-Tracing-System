@@ -59,7 +59,7 @@ export default class health_risk_assessment extends React.Component {
 	};
 
 	getSavedRecord = async (role, dependent_id) => {
-		await fetch("http://192.168.0.132:5000/get_health_risk_assessment_record", {
+		await fetch("http://192.168.0.131:5000/get_health_risk_assessment_record", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -285,7 +285,7 @@ export default class health_risk_assessment extends React.Component {
 	save_result = async () => {
 		if (this.state.update_saved_response == false) {
 			await fetch(
-				"http://192.168.0.132:5000/save_health_risk_assessment_result",
+				"http://192.168.0.131:5000/save_health_risk_assessment_result",
 				{
 					method: "POST",
 					headers: {
@@ -323,7 +323,7 @@ export default class health_risk_assessment extends React.Component {
 				});
 		} else if (this.state.update_saved_response == true) {
 			await fetch(
-				"http://192.168.0.132:5000/update_health_risk_assessment_result",
+				"http://192.168.0.131:5000/update_health_risk_assessment_result",
 				{
 					method: "POST",
 					headers: {
@@ -457,8 +457,13 @@ export default class health_risk_assessment extends React.Component {
 				)}
 				<Text style={styles.subtitle}>
 					1. Have {dependent_fname == null ? "you" : dependent_fname} traveled
-					to (or living in) any of the COVID-19 affected areas/countries in the
-					last 14 days?
+					to <Text style={{ fontWeight: "bold" }}>(or living in)</Text> any of
+					the COVID-19 affected areas/countries in the last 14 days?
+				</Text>
+				<Text style={styles.subtitle_1}>
+					** Your answer will be yes if{" "}
+					{dependent_fname == null ? "you are" : dependent_fname + " is"} living
+					in Malaysia and if Malaysia is still having COVID-19 cases
 				</Text>
 
 				{saved_responses == null || update_saved_response == true ? (
@@ -663,6 +668,14 @@ const styles = StyleSheet.create({
 		textAlign: "left",
 		paddingHorizontal: 20,
 		marginVertical: 10,
+	},
+	subtitle_1: {
+		fontSize: 14,
+		fontStyle: "italic",
+		textAlign: "left",
+		paddingHorizontal: 20,
+		marginTop: 5,
+		marginBottom: 15,
 	},
 	subtitle_bg: {
 		marginVertical: 20,

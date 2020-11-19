@@ -38,7 +38,7 @@ export default class email_verify extends React.Component {
 		this.setState({ email_sent: email }); // move inside request
 		console.log(verification_code);
 
-		await fetch("http://192.168.0.132:5000/sendVerificationEmail", {
+		await fetch("http://192.168.0.131:5000/sendVerificationEmail", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -82,7 +82,7 @@ export default class email_verify extends React.Component {
 		(async () => {
 			// used to check if there is same email saved in database
 			emailExisted = await fetch(
-				"http://192.168.0.132:5000/getExistingEmail_PO",
+				"http://192.168.0.131:5000/getExistingEmail_PO",
 				{
 					method: "POST",
 					headers: {

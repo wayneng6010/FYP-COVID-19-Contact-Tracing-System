@@ -21,7 +21,7 @@ export default class visitor_analytics extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -79,7 +79,7 @@ export default class visitor_analytics extends React.Component {
 
 			// alert(date_from_arr);
 
-			await fetch("http://192.168.0.132:5000/get_check_in_counts", {
+			await fetch("http://192.168.0.131:5000/get_check_in_counts", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -141,7 +141,7 @@ export default class visitor_analytics extends React.Component {
 			date_from_simplified_arr.reverse();
 			this.setState({ date_from_simplified_arr: date_from_simplified_arr });
 
-			await fetch("http://192.168.0.132:5000/get_check_in_counts", {
+			await fetch("http://192.168.0.131:5000/get_check_in_counts", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -212,7 +212,7 @@ export default class visitor_analytics extends React.Component {
 			// console.log(date_to_arr);
 			this.setState({ date_from_simplified_arr: date_from_simplified_arr });
 
-			await fetch("http://192.168.0.132:5000/get_check_in_counts", {
+			await fetch("http://192.168.0.131:5000/get_check_in_counts", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -242,7 +242,7 @@ export default class visitor_analytics extends React.Component {
 	};
 
 	getDemoCounts = async () => {
-		await fetch("http://192.168.0.132:5000/get_demography_counts", {
+		await fetch("http://192.168.0.131:5000/get_demography_counts", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -275,7 +275,7 @@ export default class visitor_analytics extends React.Component {
 	};
 
 	getDemoAgeCounts = async () => {
-		await fetch("http://192.168.0.132:5000/get_demography_age_counts", {
+		await fetch("http://192.168.0.131:5000/get_demography_age_counts", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

@@ -29,8 +29,21 @@ export default class login_visitor_phoneNo extends React.Component {
 		if (this.state.login_with == "phone number") {
 			const phone_no = this.state.phone_no,
 				password = this.state.password;
+
+			if (
+				phone_no == null ||
+				phone_no == "" ||
+				password == null ||
+				password == ""
+			) {
+				ToastAndroid.show(
+					"Please fill in the login credentials",
+					ToastAndroid.SHORT
+				);
+				return;
+			}
 			// check login credentials
-			await fetch("http://192.168.0.132:5000/login_visitor_phoneNo", {
+			await fetch("http://192.168.0.131:5000/login_visitor_phoneNo", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -61,8 +74,20 @@ export default class login_visitor_phoneNo extends React.Component {
 		} else if (this.state.login_with == "email") {
 			const email = this.state.email,
 				password = this.state.password;
+			if (email == null || email == "" || password == null || password == "") {
+				ToastAndroid.show(
+					"Please fill in the login credentials",
+					ToastAndroid.SHORT
+				);
+				return;
+			} else if (
+				/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) === false
+			) {
+				alert("Invalid email address");
+				return;
+			}
 			// check login credentials
-			await fetch("http://192.168.0.132:5000/login_visitor_email", {
+			await fetch("http://192.168.0.131:5000/login_visitor_email", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

@@ -36,7 +36,7 @@ export default class change_phone_no extends React.Component {
 		this.setState({ phone_no_sent: phone_no_sent }); // move this line inside query
 
 		console.log(tac_code);
-		await fetch("http://192.168.0.132:5000/sendTacCode", {
+		await fetch("http://192.168.0.131:5000/sendTacCode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -98,7 +98,7 @@ export default class change_phone_no extends React.Component {
 		(async () => {
 			// used to check if there is same phone number saved in database
 			phoneNoExisted = await fetch(
-				"http://192.168.0.132:5000/getExistingPhoneNo_PO",
+				"http://192.168.0.131:5000/getExistingPhoneNo_PO",
 				{
 					method: "POST",
 					headers: {
@@ -135,7 +135,7 @@ export default class change_phone_no extends React.Component {
 	};
 
 	update_phone_no = async () => {
-		await fetch("http://192.168.0.132:5000/update_phone_no_po", {
+		await fetch("http://192.168.0.131:5000/update_phone_no_po", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

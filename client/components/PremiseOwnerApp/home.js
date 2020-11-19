@@ -35,7 +35,7 @@ export default class home extends React.Component {
 	}
 
 	logout = async () => {
-		await fetch("http://192.168.0.132:5000/logout", {
+		await fetch("http://192.168.0.131:5000/logout", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -74,7 +74,7 @@ export default class home extends React.Component {
 	};
 
 	componentDidMount = async () => {
-		await fetch("http://192.168.0.132:5000/get_premise_owner_info", {
+		await fetch("http://192.168.0.131:5000/get_premise_owner_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -96,7 +96,7 @@ export default class home extends React.Component {
 				alert(error);
 			});
 
-		await fetch("http://192.168.0.132:5000/get_premise_owner_hotspot", {
+		await fetch("http://192.168.0.131:5000/get_premise_owner_hotspot", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -118,7 +118,7 @@ export default class home extends React.Component {
 				alert(error);
 			});
 
-		await fetch("http://192.168.0.132:5000/get_visitor_confirmed_case_list", {
+		await fetch("http://192.168.0.131:5000/get_visitor_confirmed_case_list", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -136,6 +136,11 @@ export default class home extends React.Component {
 					// alert(JSON.stringify(jsonData[0].check_in_record.date_created));
 					// var counter = 0;
 					var jsonDataReturned = new Array();
+					
+					jsonData.sort(function compare(a, b) {
+						return new Date(b.date_created) - new Date(a.date_created);
+					});
+
 					jsonData.forEach(function (item, index, object) {
 						// console.log(
 						// 	counter +

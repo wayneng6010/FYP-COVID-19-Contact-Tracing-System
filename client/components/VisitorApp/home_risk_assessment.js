@@ -26,7 +26,7 @@ export default class home_risk_assessment extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -66,7 +66,7 @@ export default class home_risk_assessment extends React.Component {
 
 	searchHomeAddress = async (value) => {
 		// alert("asd");
-		const query_search_home_adress = `http://192.168.0.132:5000/searchHomeAddress?search_query=${value}`;
+		const query_search_home_adress = `http://192.168.0.131:5000/searchHomeAddress?search_query=${value}`;
 		console.log(query_search_home_adress);
 		await axios
 			.get(query_search_home_adress)
@@ -99,7 +99,7 @@ export default class home_risk_assessment extends React.Component {
 	getSearchLocation = async (place_id) => {
 		// alert("asd");
 
-		const query_get_home_location = `http://192.168.0.132:5000/getHomeLocation?place_id=${place_id}`;
+		const query_get_home_location = `http://192.168.0.131:5000/getHomeLocation?place_id=${place_id}`;
 		console.log(query_get_home_location);
 		await axios
 			.get(query_get_home_location)
@@ -142,7 +142,7 @@ export default class home_risk_assessment extends React.Component {
 	};
 
 	getAllHotspot = async () => {
-		await fetch("http://192.168.0.132:5000/get_all_hotspot", {
+		await fetch("http://192.168.0.131:5000/get_all_hotspot", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -218,7 +218,7 @@ export default class home_risk_assessment extends React.Component {
 	};
 
 	getUserHomeLocation = async () => {
-		await fetch("http://192.168.0.132:5000/get_saved_home_location", {
+		await fetch("http://192.168.0.131:5000/get_saved_home_location", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -264,7 +264,7 @@ export default class home_risk_assessment extends React.Component {
 	};
 
 	getHotspotNearbyName = async () => {
-		await fetch("http://192.168.0.132:5000/get_hotspot_nearby_name", {
+		await fetch("http://192.168.0.131:5000/get_hotspot_nearby_name", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -326,8 +326,8 @@ export default class home_risk_assessment extends React.Component {
 		// alert(JSON.stringify(hotspot_data));
 		var home_risk = false;
 		var hotspot_nearby = new Array();
+
 		hotspot_data.forEach(function (item) {
-			// alert(JSON.stringify(item));
 			var p2 = {
 				lat: parseFloat(item.place_lat),
 				lng: parseFloat(item.place_lng),
@@ -335,29 +335,30 @@ export default class home_risk_assessment extends React.Component {
 
 			// haversine formula
 			var R = 6378137; // earth’s mean radius in meter
-			var dLat = ((p2.lat - p1.lat) * Math.PI) / 180;
-			var dLong = ((p2.lng - p1.lng) * Math.PI) / 180;
+			// calculate difference between latitude of 2 places
+			var diff_lat = ((p2.lat - p1.lat) * Math.PI) / 180;
+			// calculate difference between longitude of 2 places 
+			var diff_lng = ((p2.lng - p1.lng) * Math.PI) / 180;
+			// calculate the straight-line distance
 			var a =
-				Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+				Math.sin(diff_lat / 2) * Math.sin(diff_lat / 2) +
 				Math.cos((p1.lat * Math.PI) / 180) *
 					Math.cos((p2.lat * Math.PI) / 180) *
-					Math.sin(dLong / 2) *
-					Math.sin(dLong / 2);
+					Math.sin(diff_lng / 2) *
+					Math.sin(diff_lng / 2);
 			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 			var d = R * c;
 
 			if (d / 1000 <= 1) {
 				home_risk = true;
-				// get place name
 				item.straight_distance = Math.round(d);
 				hotspot_nearby.push({
 					place_id: item.place_id,
 					straight_distance: item.straight_distance,
 				});
 			}
-			// var distance = this.getDistanceBetween(p1, p2);
-			// alert("distance: " + d / 1000 + " km");
 		});
+
 		if (hotspot_nearby === undefined || hotspot_nearby.length == 0) {
 			this.setState({
 				hotspot_nearby_with_name: [],
@@ -413,7 +414,7 @@ export default class home_risk_assessment extends React.Component {
 	getHotspotDetails = async (item) => {
 		var hotspot_place_id = item.place_id;
 		// alert(hotspot_place_id);
-		const query_get_hotspot_details = `http://192.168.0.132:5000/getHotspotDetails?place_id=${hotspot_place_id}`;
+		const query_get_hotspot_details = `http://192.168.0.131:5000/getHotspotDetails?place_id=${hotspot_place_id}`;
 		console.log(query_get_hotspot_details);
 		await axios
 			.get(query_get_hotspot_details)
@@ -437,7 +438,7 @@ export default class home_risk_assessment extends React.Component {
 		var photo_reference = this.state.current_hotspot_place_details
 			.photo_reference;
 		// alert(photo_reference);
-		// const query_get_photo_reference = `http://192.168.0.132:5000/getPhotoReference?photo_reference=${photo_reference}`;
+		// const query_get_photo_reference = `http://192.168.0.131:5000/getPhotoReference?photo_reference=${photo_reference}`;
 		// await axios
 		// 	.get(query_get_photo_reference)
 		// 	.then((response) => {

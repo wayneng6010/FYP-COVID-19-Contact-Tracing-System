@@ -68,8 +68,10 @@ export default class ic_extract extends React.Component {
 			var extracted_info = JSON.stringify(
 				responseJson_ocr.responses[0].textAnnotations[0].description
 			);
-
 			var extracted_info_arr = extracted_info.split("\\n");
+			extracted_info_arr[0] = extracted_info_arr[0].toString().replace(/"/g, '');
+			// console.log(extracted_info_arr[0]);
+			// console.log("asdasddddddddddddddddd");
 			var regex_ic_number = /^[0-9]{6}[-]{1}[0-9]{2}[-]{1}[0-9]{4}$/;
 			var states_arr = [
 				"KUALA LUMPUR",
@@ -89,14 +91,16 @@ export default class ic_extract extends React.Component {
 				"SELANGOR",
 				"TERENGGANU",
 			];
+
 			var ic_number = null,
 				home_address_firstline_position = null,
 				home_address_lastline_position = null,
 				full_name = "",
 				home_address = "";
+
 			for (var i = 0; i < extracted_info_arr.length; i++) {
-				// add if got sample or use only 
 				if (ic_number === null || home_address_firstline_position === null) {
+					console.log(extracted_info_arr[i]);
 					if (regex_ic_number.test(extracted_info_arr[i])) {
 						ic_number = extracted_info_arr[i];
 					} else if (/\d/.test(extracted_info_arr[i])) {
@@ -109,12 +113,6 @@ export default class ic_extract extends React.Component {
 					}
 				}
 			}
-
-			// if (ic_number === null || home_address_firstline_position === null) {
-			// 	console.log(
-			// 		"Cannot get ic number and home address first line position"
-			// 	);
-			// }
 
 			for (
 				var i = home_address_firstline_position;
@@ -138,7 +136,7 @@ export default class ic_extract extends React.Component {
 					if (item.description === ic_number) {
 						ic_number_x_position = item.boundingPoly.vertices[0].x;
 						ic_number_x_position_right = item.boundingPoly.vertices[1].x;
-						ic_number_y_position = item.boundingPoly.vertices[0].y;
+						ic_number_y_position = item.boundingPoly.vertices[3].y;
 					} else if (home_address.split(", ")[0].includes(item.description)) {
 						home_address_x_position = item.boundingPoly.vertices[0].x;
 						home_address_y_position = item.boundingPoly.vertices[0].y;
@@ -156,7 +154,6 @@ export default class ic_extract extends React.Component {
 			var ic_width = this.props.navigation.state.params.ic_width,
 				ic_height = this.props.navigation.state.params.ic_height;
 			var address_position_x_diff, fullname_position_y_diff;
-			// var full_name_checked = "";
 
 			responseJson_ocr.responses[0].textAnnotations.forEach(function (item) {
 				address_position_x_diff =
@@ -169,7 +166,6 @@ export default class ic_extract extends React.Component {
 				) {
 					full_name_x_position = item.boundingPoly.vertices[0].x;
 					full_name_y_position = item.boundingPoly.vertices[0].y;
-					// console.log("x diff: " + address_position_x_diff);
 				}
 				if (full_name_y_position != null) {
 					fullname_position_y_diff =
@@ -180,26 +176,12 @@ export default class ic_extract extends React.Component {
 						item.boundingPoly.vertices[0].y > ic_number_y_position &&
 						item.boundingPoly.vertices[0].y < home_address_y_position
 					) {
-						// console.log("y diff: " + fullname_position_y_diff);
 						full_name = full_name + " " + item.description;
 					}
 				}
 			});
 
 			full_name = full_name.trim();
-
-			// var full_name_checked = "";
-			// for (var i = 0; i < extracted_info_arr.length; i++) {
-			// 	if (
-			// 		full_name.includes(extracted_info_arr[i]) &&
-			// 		extracted_info_arr[i]
-			// 			.substring(0, 5)
-			// 			.includes(full_name.substring(0, 5))
-			// 	) {
-			// 		full_name_checked += extracted_info_arr[i] + " ";
-			// 	}
-			// }
-			// full_name_checked = full_name_checked.trim();
 
 			var position_validation = true;
 			var position_x_diff_1 =
@@ -223,18 +205,18 @@ export default class ic_extract extends React.Component {
 			return false;
 		}
 
-		// console.log(position_x_diff_1 + " " + position_x_diff_2 + " " + position_x_diff_3);
-		// console.log("text position: " + position_validation);
-
 		this.setState({
 			ic_number: ic_number,
 			full_name: full_name,
 			home_address: home_address,
 		});
 
+		console.log("\n\ntext position IC: " + ic_number_y_position);
+		console.log("text position full name: " + full_name_y_position);
+		console.log("text position address: " + home_address_y_position);
+
 		console.log("text position: " + position_validation);
 		return position_validation;
-		// console.log(JSON.stringify(responseJson_ocr.responses[0].textAnnotations[0].description));
 		// here end --------------------------------------------------------------------------------------------------
 	};
 
@@ -284,6 +266,7 @@ export default class ic_extract extends React.Component {
 					face_position = false;
 				}
 			} else {
+				console.log("face position: " + false);
 				return false;
 			}
 		} catch (error) {
@@ -322,13 +305,28 @@ export default class ic_extract extends React.Component {
 		let responseJson_label = await response_label.json();
 		// console.log(JSON.stringify(responseJson_label));
 		var label_verify = false;
-		responseJson_label.responses[0].labelAnnotations.forEach(function (item) {
-			if (item != "") {
-				if (item.description === "Identity document") {
-					label_verify = true;
-				}
+		// responseJson_label.responses[0].labelAnnotations.forEach(function (item) {
+		// 	console.log(item);
+		// 	if (item != "") {
+		// 		if (item.description === "Identity document") {
+		// 			label_verify = true;
+		// 		}
+		// 	}
+		// });
+		console.log(
+			responseJson_label.responses[0].labelAnnotations[0].description
+		);
+
+		try {
+			if (
+				responseJson_label.responses[0].labelAnnotations[0].description ===
+				"Identity document"
+			) {
+				label_verify = true;
 			}
-		});
+		} catch (error) {
+			return false;
+		}
 
 		console.log("label verify: " + label_verify);
 		return label_verify;
@@ -379,14 +377,15 @@ export default class ic_extract extends React.Component {
 		) {
 			if (
 				Math.abs(red - green) >= 100 ||
-				Math.abs(red - green) >= 100 ||
-				Math.abs(red - green) >= 100
+				Math.abs(green - blue) >= 100 ||
+				Math.abs(red - blue) >= 100
 			) {
 				// colored
 				color_verify = true;
+			} else {
+				// greyscale
+				color_verify = false;
 			}
-			// greyscale
-			color_verify = false;
 		} else {
 			// colored
 			color_verify = true;
@@ -413,7 +412,9 @@ export default class ic_extract extends React.Component {
 						this.setState({ ic_verify_progress: "100%" });
 						return true;
 					} else {
-						alert("Your IC is invalid! Please capture your original IC");
+						alert(
+							"Your IC is invalid! Please do not capture printed IC, make sure all part of IC is clearly captured"
+						);
 						return false;
 					}
 				} else {
@@ -425,13 +426,15 @@ export default class ic_extract extends React.Component {
 				return false;
 			}
 		} else {
-			alert("Your IC is invalid! Please make sure the IC is placed straight");
+			alert(
+				"Your IC is invalid! Please make sure the IC is placed straight and all the text on IC is clear"
+			);
 			return false;
 		}
 	};
 
 	save_formData = async () => {
-		// const query_save_ic_info = `http://192.168.0.132:5000/save_ic_info?ic_num=${this.state.ic_number}&ic_fname=${this.state.full_name}&ic_address=${this.state.home_address}`;
+		// const query_save_ic_info = `http://192.168.0.131:5000/save_ic_info?ic_num=${this.state.ic_number}&ic_fname=${this.state.full_name}&ic_address=${this.state.home_address}`;
 		// console.log(query_save_ic_info);
 		// await axios
 		// 	.post(query_save_ic_info)
@@ -490,7 +493,7 @@ export default class ic_extract extends React.Component {
 			(async () => {
 				// used to check if there is same phone number saved in database
 				icNumExisted = await fetch(
-					"http://192.168.0.132:5000/getExistingIcNum",
+					"http://192.168.0.131:5000/getExistingIcNum",
 					{
 						method: "POST",
 						headers: {

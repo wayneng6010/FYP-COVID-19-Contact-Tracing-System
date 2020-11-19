@@ -30,7 +30,7 @@ export default class login_premiseOwner extends React.Component {
 			const phone_no = this.state.phone_no,
 				password = this.state.password;
 			// check login credentials
-			await fetch("http://192.168.0.132:5000/login_premiseOwner_phoneNo", {
+			await fetch("http://192.168.0.131:5000/login_premiseOwner_phoneNo", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -62,7 +62,7 @@ export default class login_premiseOwner extends React.Component {
 			const email = this.state.email,
 				password = this.state.password;
 			// check login credentials
-			await fetch("http://192.168.0.132:5000/login_premiseOwner_email", {
+			await fetch("http://192.168.0.131:5000/login_premiseOwner_email", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

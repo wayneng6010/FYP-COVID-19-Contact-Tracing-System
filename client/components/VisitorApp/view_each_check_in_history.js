@@ -22,7 +22,7 @@ export default class view_each_check_in_history extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -47,7 +47,7 @@ export default class view_each_check_in_history extends React.Component {
 	}
 
 	getVisitorInfo = async () => {
-		await fetch("http://192.168.0.132:5000/get_user_info", {
+		await fetch("http://192.168.0.131:5000/get_user_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -76,7 +76,7 @@ export default class view_each_check_in_history extends React.Component {
 	};
 
 	getDependentInfo = async () => {
-		await fetch("http://192.168.0.132:5000/get_dependent_info", {
+		await fetch("http://192.168.0.131:5000/get_dependent_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -107,7 +107,7 @@ export default class view_each_check_in_history extends React.Component {
 	};
 
 	getCheckInRecordsVisitor = async () => {
-		await fetch("http://192.168.0.132:5000/get_check_in_records_visitor", {
+		await fetch("http://192.168.0.131:5000/get_check_in_records_visitor", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -144,7 +144,7 @@ export default class view_each_check_in_history extends React.Component {
 	};
 
 	getCheckInRecordsDependent = async () => {
-		await fetch("http://192.168.0.132:5000/get_check_in_records_dependent", {
+		await fetch("http://192.168.0.131:5000/get_check_in_records_dependent", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

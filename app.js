@@ -120,22 +120,21 @@ function decrypt(text) {
 	return dec;
 }
 
-app.post("/getExistingIcNum", (req, res) => {
-	userVisitor
-		.findOne({ ic_num: req.body.ic_num })
-		.then((response) => {
-			if (response) {
-				res.send(true);
-			}
-			// else {
-			// 	res.send(false);
-			// }
-		})
-		.catch((error) => {
-			res.status(400).json(error);
-		});
+app.post("/getExistingIcNum", async (req, res) => {
+	await userVisitor.findOne({ ic_num: req.body.ic_num }).then((response) => {
+		if (response) {
+			res.send(true);
+		}
+		// else {
+		// 	res.send(false);
+		// }
+	});
+	// .catch((error) => {
+	// 	res.send(false);
+	// 	// res.status(400).json(error);
+	// });
 
-	visitorDependent
+	await visitorDependent
 		.findOne({
 			$and: [{ ic_num: req.body.ic_num }, { active: true }],
 		})
@@ -149,6 +148,7 @@ app.post("/getExistingIcNum", (req, res) => {
 	// .catch((error) => {
 	// 	res.status(400).json(error);
 	// });
+	// res.send(false);
 });
 
 // app.post("/save_phone_no", (req, res) => {
@@ -451,14 +451,14 @@ app.post("/check_in_premise", async (req, res) => {
 		const existedPremiseOwner = await userPremiseOwner.findOne({
 			_id: req.body.pid,
 		});
-		if (Object.keys(existedPremiseOwner).length === 0) {
-			res.send([]);
+		if (!existedPremiseOwner) {
+			res.send(false);
 		} else {
 			const existedQRCode = await premiseQRCode.findOne({
 				$and: [{ _id: req.body.qrid }, { active: true }],
 			});
-			if (Object.keys(existedQRCode).length === 0) {
-				res.send([]);
+			if (!existedQRCode) {
+				res.send(false);
 			} else {
 				var now = new Date();
 				const check_in = new checkInRecord({
@@ -495,7 +495,7 @@ app.post("/check_in_premise", async (req, res) => {
 						// console.log(return_check_in_data);
 						res.send(return_check_in_data);
 					} else {
-						res.send([]);
+						res.send(false);
 					}
 				} catch (error) {
 					res.status(400).json(error);
@@ -503,7 +503,7 @@ app.post("/check_in_premise", async (req, res) => {
 			}
 		}
 	} else {
-		res.send([]);
+		res.send(false);
 	}
 });
 
@@ -519,11 +519,8 @@ app.post("/check_in_premise_dependent", async (req, res) => {
 		const existedVisitor = await userVisitor.findOne({
 			_id: req.body.uid,
 		});
-		if (
-			Object.keys(existedDependent).length === 0 ||
-			Object.keys(existedVisitor).length === 0
-		) {
-			res.send([]);
+		if (!existedDependent || !existedVisitor) {
+			res.send(false);
 		} else {
 			var now = new Date();
 			const check_in = new checkInRecord({
@@ -560,14 +557,14 @@ app.post("/check_in_premise_dependent", async (req, res) => {
 					};
 					res.send(return_check_in_data);
 				} else {
-					res.send([]);
+					res.send(false);
 				}
 			} catch (error) {
 				res.status(400).json(error);
 			}
 		}
 	} else {
-		res.send([]);
+		res.send(false);
 	}
 });
 
@@ -1031,6 +1028,7 @@ app.post("/check_current_password_po", async (req, res) => {
 		req.body.current_password,
 		user.password
 	);
+
 	if (!validPsw) {
 		return res.send(false);
 	}
@@ -2009,6 +2007,7 @@ app.post("/ic_ocr", async (req, res) => {
 app.get("/searchHomeAddress", (req, res) => {
 	const search_query = req.query.search_query;
 	const api_key = "tempapikey";
+
 	const querystr = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${search_query}&components=country:my&types=establishment&key=${api_key}`;
 
 	axios
@@ -2026,6 +2025,7 @@ app.get("/getHomeLocation", (req, res) => {
 	const place_id = req.query.place_id;
 	const api_key = "tempapikey";
 	// const querystr = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${home_address}&key=${api_key}`;
+
 	const querystr = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=geometry&key=${api_key}`;
 
 	axios
@@ -2112,6 +2112,7 @@ app.post("/sendTacCode", (req, res) => {
 		tac_code + " is your TAC code for COVID-19 Contact Tracing App";
 
 	const querystr = `http://192.168.0.130:8090/SendSMS?username=yuanshen&password=12341234&phone=${phone_number}&message=${message_content}`;
+
 	// const querystr = `http://192.168.0.103:8090/SendSMS?username=yuanshen&password=12341234&phone=${phone_number}&message=${message_content}`;
 
 	axios

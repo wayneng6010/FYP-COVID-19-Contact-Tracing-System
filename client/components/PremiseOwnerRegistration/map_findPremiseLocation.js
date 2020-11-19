@@ -51,7 +51,7 @@ export default class map_findPremiseLocation extends React.Component {
 
 	searchHomeAddress = async (value) => {
 		// alert("asd");
-		const query_search_home_adress = `http://192.168.0.132:5000/searchHomeAddress?search_query=${value}`;
+		const query_search_home_adress = `http://192.168.0.131:5000/searchHomeAddress?search_query=${value}`;
 		console.log(query_search_home_adress);
 		await axios
 			.get(query_search_home_adress)
@@ -84,7 +84,7 @@ export default class map_findPremiseLocation extends React.Component {
 	getHomeLocation = async (place_id) => {
 		// alert("asd");
 
-		const query_get_home_location = `http://192.168.0.132:5000/getHomeLocation?place_id=${place_id}`;
+		const query_get_home_location = `http://192.168.0.131:5000/getHomeLocation?place_id=${place_id}`;
 		console.log(query_get_home_location);
 		await axios
 			.get(query_get_home_location)
@@ -174,7 +174,7 @@ export default class map_findPremiseLocation extends React.Component {
 	};
 
 	save_formData = async () => {
-		// const query_save_location = `http://192.168.0.132:5000/save_location?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
+		// const query_save_location = `http://192.168.0.131:5000/save_location?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
 		// console.log(query_save_location);
 		// await axios
 		// 	.post(query_save_location)
@@ -230,7 +230,7 @@ export default class map_findPremiseLocation extends React.Component {
 				});
 			}
 		}
-		// const query_save_registration = `http://192.168.0.132:5000/save_registration?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
+		// const query_save_registration = `http://192.168.0.131:5000/save_registration?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
 		// console.log(query_save_registration);
 		// await axios
 		// 	.post(query_save_registration)
@@ -260,8 +260,9 @@ export default class map_findPremiseLocation extends React.Component {
 					Step 4/5: Find your Premise Location
 				</Text>
 				<Text style={styles.subtitle}>
-					We need your premise location for visitor location risk assessment. With this,
-					visitor can see if this location is marked as COVID-19 hotspot.
+					We need your premise location for visitor's home location risk
+					assessment. With this, visitor can see if your premise location is
+					marked as COVID-19 hotspot.
 				</Text>
 				<Text style={styles.title}>Find Premise Location</Text>
 				<View style={styles.search_outer}>

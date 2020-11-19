@@ -44,11 +44,12 @@ export default class home extends React.Component {
 			is_casual_contact_dependent: null,
 			reported_time: null,
 			check_in_entry_point: null,
+			all_dependent: null,
 		};
 	}
 
 	componentDidMount = async () => {
-		await fetch("http://192.168.0.132:5000/get_user_info", {
+		await fetch("http://192.168.0.131:5000/get_user_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -70,7 +71,7 @@ export default class home extends React.Component {
 				alert(error);
 			});
 
-		await fetch("http://192.168.0.132:5000/get_visitor_casual_contact_list", {
+		await fetch("http://192.168.0.131:5000/get_visitor_casual_contact_list", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -93,6 +94,10 @@ export default class home extends React.Component {
 					// 		jsonData[0].check_in_record.premise_qr_code.entry_point
 					// 	)
 					// );
+					jsonData.sort(function compare(a, b) {
+						return new Date(b.date_created) - new Date(a.date_created);
+					});
+
 					jsonData.forEach(function (item) {
 						item.check_in_record.date_created = item.check_in_record.date_created
 							.replace("T", " ")
@@ -106,7 +111,7 @@ export default class home extends React.Component {
 						item.date_created = item.date_created
 							.replace("T", " ")
 							.substring(0, item.date_created.indexOf(".") - 3);
-					});
+					});				
 
 					this.setState({
 						visitor_casual_contact_list: jsonData,
@@ -118,7 +123,36 @@ export default class home extends React.Component {
 				alert(error);
 			});
 
-		await fetch("http://192.168.0.132:5000/get_dependent_casual_contact_list", {
+		await fetch("http://192.168.0.131:5000/get_user_dependent", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({}),
+		})
+			.then((res) => {
+				// console.log(JSON.stringify(res.headers));
+				return res.json();
+			})
+			.then((jsonData) => {
+				// alert(JSON.stringify(jsonData));
+				if (jsonData === undefined || jsonData.length == 0) {
+					// alert("No record found");
+					this.setState({
+						all_dependent: "none",
+					});
+				} else {
+					this.setState({
+						all_dependent: "yes",
+					});
+				}
+				// console.log(jsonData);
+			})
+			.catch((error) => {
+				alert(error);
+			});
+
+		await fetch("http://192.168.0.131:5000/get_dependent_casual_contact_list", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -139,6 +173,10 @@ export default class home extends React.Component {
 					});
 				} else {
 					// alert(jsonData);
+					jsonData.sort(function compare(a, b) {
+						return new Date(b.date_created) - new Date(a.date_created);
+					});
+					
 					jsonData.forEach(function (item) {
 						item.check_in_record.date_created = item.check_in_record.date_created
 							.replace("T", " ")
@@ -166,7 +204,7 @@ export default class home extends React.Component {
 	};
 
 	logout = async () => {
-		await fetch("http://192.168.0.132:5000/logout", {
+		await fetch("http://192.168.0.131:5000/logout", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -253,6 +291,7 @@ export default class home extends React.Component {
 			is_casual_contact_dependent,
 			reported_time,
 			check_in_entry_point,
+			all_dependent,
 		} = this.state;
 
 		return (
@@ -495,8 +534,10 @@ export default class home extends React.Component {
 					</Text>
 				)}
 
-				{is_casual_contact_dependent == null ? (
+				{is_casual_contact_dependent == null || all_dependent == null ? (
 					<ActivityIndicator />
+				) : all_dependent == "none" ? (
+					<Text></Text>
 				) : is_casual_contact_dependent == true ? (
 					<Text style={styles.red_zone}>
 						Your dependent have had casual contact with COVID-19 infected person

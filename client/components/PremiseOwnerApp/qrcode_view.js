@@ -47,7 +47,7 @@ export default class qrcode_view extends React.Component {
 	}
 
 	// getSelectedQRCode = async () => {
-	// 	await fetch("http://192.168.0.132:5000/get_main_premise_qrcode", {
+	// 	await fetch("http://192.168.0.131:5000/get_main_premise_qrcode", {
 	// 		method: "POST",
 	// 		headers: {
 	// 			"Content-Type": "application/json",
@@ -80,7 +80,7 @@ export default class qrcode_view extends React.Component {
 	// };
 
 	getAllQRCode = async () => {
-		await fetch("http://192.168.0.132:5000/get_all_premise_qrcode", {
+		await fetch("http://192.168.0.131:5000/get_all_premise_qrcode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -113,7 +113,7 @@ export default class qrcode_view extends React.Component {
 	};
 
 	componentDidMount = async () => {
-		await fetch("http://192.168.0.132:5000/save_premise_qrcode", {
+		await fetch("http://192.168.0.131:5000/save_premise_qrcode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -137,7 +137,7 @@ export default class qrcode_view extends React.Component {
 				alert(error);
 			});
 
-		await fetch("http://192.168.0.132:5000/get_premise_info", {
+		await fetch("http://192.168.0.131:5000/get_premise_info", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -246,7 +246,7 @@ export default class qrcode_view extends React.Component {
 	};
 
 	saveNewEntryPoint = async () => {
-		await fetch("http://192.168.0.132:5000/save_new_entry_point", {
+		await fetch("http://192.168.0.131:5000/save_new_entry_point", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -293,7 +293,7 @@ export default class qrcode_view extends React.Component {
 	};
 
 	editEntryPointName = async () => {
-		await fetch("http://192.168.0.132:5000/edit_entry_point_name", {
+		await fetch("http://192.168.0.131:5000/edit_entry_point_name", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -330,7 +330,7 @@ export default class qrcode_view extends React.Component {
 	};
 
 	delete_entry_point = async () => {
-		await fetch("http://192.168.0.132:5000/delete_entry_point", {
+		await fetch("http://192.168.0.131:5000/delete_entry_point", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -361,7 +361,7 @@ export default class qrcode_view extends React.Component {
 	};
 
 	regenerate_entry_point = async () => {
-		await fetch("http://192.168.0.132:5000/regenerate_entry_point", {
+		await fetch("http://192.168.0.131:5000/regenerate_entry_point", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",

@@ -38,7 +38,7 @@ export default class phoneNo_verify extends React.Component {
 		this.setState({ tac_code_correct: tac_code });
 		this.setState({ phone_no_sent: phone_no_sent }); // move this line inside query
 
-		// const query_send_tac = `http://192.168.0.132:5000/sendTacCode?phone_no=${phone_no}&tac_code=${tac_code}`;
+		// const query_send_tac = `http://192.168.0.131:5000/sendTacCode?phone_no=${phone_no}&tac_code=${tac_code}`;
 		// console.log(query_send_tac);
 		// axios
 		// 	.get(query_send_tac)
@@ -54,7 +54,7 @@ export default class phoneNo_verify extends React.Component {
 		// 	});
 
 		console.log(tac_code);
-		await fetch("http://192.168.0.132:5000/sendTacCode", {
+		await fetch("http://192.168.0.131:5000/sendTacCode", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -115,7 +115,7 @@ export default class phoneNo_verify extends React.Component {
 		(async () => {
 			// used to check if there is same phone number saved in database
 			phoneNoExisted = await fetch(
-				"http://192.168.0.132:5000/getExistingPhoneNo_PO",
+				"http://192.168.0.131:5000/getExistingPhoneNo_PO",
 				{
 					method: "POST",
 					headers: {

@@ -22,7 +22,7 @@ export default class map_findHomeLocation extends React.Component {
 	// set an initial state
 	//const [news, setNews] = useState([]);
 
-	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.132:5000/getArtistRelatedNews?artist_name=sam
+	// Similar to componentDidMount and componentDidUpdate:http://192.168.0.131:5000/getArtistRelatedNews?artist_name=sam
 	// useEffect(() => {}, []);
 
 	// const captureIC = () => {};
@@ -60,31 +60,27 @@ export default class map_findHomeLocation extends React.Component {
 	}
 
 	searchHomeAddress = async (value) => {
-		// alert("asd");
-		const query_search_home_adress = `http://192.168.0.132:5000/searchHomeAddress?search_query=${value}`;
+		const query_search_home_adress = `http://192.168.0.131:5000/searchHomeAddress?search_query=${value}`;
 		console.log(query_search_home_adress);
 		await axios
 			.get(query_search_home_adress)
 			.then((response) => {
-				// console.log(response.data);
-				// console.log(response.data.results[0].geometry.location.lng);
 				this.setState({ search_prediction_selected: false });
 				var predicted_places = [];
 				var predictions = response.data.predictions;
-				// console.log("result: " + JSON.stringify(predictions));
+
 				predictions.forEach(function (item) {
+					// store predicted places
 					predicted_places.push({
 						place_name: item.description,
 						place_id: item.place_id,
 					});
-					// console.log(item.structured_formatting.main_text);
 				});
 
 				this.setState({
 					search_prediction: predicted_places,
 				});
-				console.log(this.state.search_prediction);
-				// this.setState({ latitude: latitude, longitude: longitude });
+				// console.log(this.state.search_prediction);
 			})
 			.catch((error) => {
 				alert(error);
@@ -92,16 +88,11 @@ export default class map_findHomeLocation extends React.Component {
 	};
 
 	getHomeLocation = async (place_id) => {
-		// alert("asd");
-
-		const query_get_home_location = `http://192.168.0.132:5000/getHomeLocation?place_id=${place_id}`;
+		const query_get_home_location = `http://192.168.0.131:5000/getHomeLocation?place_id=${place_id}`;
 		console.log(query_get_home_location);
 		await axios
 			.get(query_get_home_location)
 			.then((response) => {
-				// console.log(response.data);
-				// console.log(response.data.results[0].geometry.location.lat);
-				// console.log(response.data.results[0].geometry.location.lng);
 				var latitude_res = response.data.result.geometry.location.lat;
 				var longitude_res = response.data.result.geometry.location.lng;
 				this.setState({
@@ -115,8 +106,6 @@ export default class map_findHomeLocation extends React.Component {
 					place_lng: longitude_res,
 					place_id: place_id,
 				});
-
-				// this.setState({ latitude: latitude, longitude: longitude });
 			})
 			.catch((error) => {
 				alert(error);
@@ -127,8 +116,6 @@ export default class map_findHomeLocation extends React.Component {
 		this.setState({ search_query: value });
 		if (value.length > 10) {
 			await this.searchHomeAddress(value);
-			// alert(value);
-			// alert(this.state.search_query);
 		} else {
 			this.setState({
 				search_prediction: [],
@@ -184,7 +171,7 @@ export default class map_findHomeLocation extends React.Component {
 	};
 
 	save_formData = async () => {
-		// const query_save_location = `http://192.168.0.132:5000/save_location?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
+		// const query_save_location = `http://192.168.0.131:5000/save_location?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
 		// console.log(query_save_location);
 		// await axios
 		// 	.post(query_save_location)
@@ -233,7 +220,7 @@ export default class map_findHomeLocation extends React.Component {
 				});
 			}
 		}
-		// const query_save_registration = `http://192.168.0.132:5000/save_registration?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
+		// const query_save_registration = `http://192.168.0.131:5000/save_registration?home_lat=${this.state.place_lat}&home_lng=${this.state.place_lng}&home_id=${this.state.place_id}`;
 		// console.log(query_save_registration);
 		// await axios
 		// 	.post(query_save_registration)
@@ -315,6 +302,7 @@ export default class map_findHomeLocation extends React.Component {
 						</Text>
 					</Text>
 				)}
+
 				<MapView
 					style={styles.mapStyle}
 					region={this.state.region}
@@ -326,13 +314,6 @@ export default class map_findHomeLocation extends React.Component {
 					showsCompass={true}
 					showsPointsOfInterest={false}
 					provider="google"
-
-					// initialRegion={{
-					// 	latitude,
-					// 	longitude,
-					// 	latitudeDelta: 0.002,
-					// 	longitudeDelta: 0.002,
-					// }}
 				>
 					{this.state.place_lat == null || this.state.place_lng == null ? (
 						<Marker
@@ -343,22 +324,15 @@ export default class map_findHomeLocation extends React.Component {
 						/>
 					) : (
 						<Marker
-							// onLoad={() => this.forceUpdate()}
-							// key={1}
 							coordinate={{
 								latitude: this.state.place_lat,
 								longitude: this.state.place_lng,
 							}}
 							title={this.state.place_name}
-							// description={this.state.place_name}
 						/>
 					)}
 				</MapView>
 
-				{/* <Button
-					title="Save Home Location"
-					onPress={() => this.saveHomeLocation()}
-				></Button> */}
 				<TouchableHighlight
 					style={{
 						...styles.openButton,
